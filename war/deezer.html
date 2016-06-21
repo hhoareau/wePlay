@@ -1,0 +1,99 @@
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<meta name="viewport" content="width=320">
+<link rel="stylesheet" type="text/css" href="Leficarbar.css">
+
+<title>Music search</title>
+    <script src="Tools.js"></script>
+    <script src="Main.js"></script>
+</head>
+<body>
+
+Search:
+<input id="query" value="" autofocus="true" onClick="this.setSelectionRange(0, this.value.length)" onkeyup="refreshQuery()"><br><br>
+
+
+
+<div class="main-div" id="result"></div>
+
+<div id="dz-root"></div>
+<script src="https://e-cdns-files.dzcdn.net/js/min/dz.js"></script>
+
+<script>
+
+var myevent=getParam()["event"];
+var user=null;
+var result=document.getElementById("result");
+
+function getCode(songs){
+    var code="<table>";
+
+    songs.forEach(function(song){
+        var jsonSong=JSON.stringify({
+            id:song.id,
+            title:song.title.replace(new RegExp("'",'g')," "),
+            duration:song.duration,
+            from:getParam()["email"]+";"+getParam()["firstname"],author:song.artist.name
+                }).replace(new RegExp('"', 'g'),"'");
+
+        var name="";
+        if(song.artist!=undefined)name=song.artist.name;
+        code=code+"<tr><td>"+name+"</td><td><a href=\"javascript:add("+jsonSong+")\">"+song.title+"</a></td></tr>";
+    });
+
+    return code+"</table>";
+}
+
+function refreshQuery(){
+    var q=document.getElementById("query").value;
+    if(q.length>2){
+
+
+        DZ.api('/search/?q='+q, function(response){
+            document.getElementById("result").innerHTML=getCode(response.data);
+        });
+
+
+        //searchtorrent(q,function(songs){document.getElementById("result").innerHTML=getCode(songs.result.items);});
+    }
+}
+
+function start(){
+
+    DZ.init({
+        appId  : '182662',
+        channelUrl : 'https://leficarbar-1342.appspot.com/channel.html'
+    });
+
+    getuser(getParam()["email"],function(rep){
+        user=rep.result;
+    });
+
+    document.getElementById("query").value=getParam()["q"];
+    refreshQuery();
+}
+
+function add(song){
+    var s={};
+    s.title=song.title;
+    s.from=user.email+";"+user.firstname;
+    s.type=3;
+    s.idEvent=getParam()["event"];
+    s.text=song.id;
+    s.author=song.author;
+    s.dtPlay=null;
+    s.Id= s.idEvent+"_"+song.id;
+    s.duration=song.duration;
+
+    addsong(s.idEvent,s,function(rep){
+        if(getParam()["close"]!="false")
+            window.close();
+        else
+            location.href="photo.html?message=song+send&event="+getParam()["event"]+"&email="+getParam()["email"];
+    });
+}
+</script>
+
+</body>
+</html>

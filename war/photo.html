@@ -1,0 +1,361 @@
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<link rel="stylesheet" type="text/css" href="Leficarbar.css">
+<meta name="viewport" content="width=640">
+<title>wePlay</title>
+</head>
+
+<body>
+<link href="/apple-touch-icon.png" rel="apple-touch-icon" />
+
+<script src="Tools.js"></script>
+<script src="Main.js"></script>
+<script src="qrcode.js"></script>
+
+<div class="sections" style="background-color:#FFFF00">
+<table>
+ <tr>
+ <td style="text-align: left;vertical-align: top">
+<div id="myperso" style="text-align: left;vertical-align: top"></div>
+ </td>
+ <td style="text-align: left;vertical-align: top">
+<div id="zone_myEvent"></div>
+<div id="lblMessage"></div>
+ </td>
+     <td style="vertical-align: top;text-align: right;"><INPUT class="buttonPhoto" type="button" value="Quit" style="font-size:10px" onclick="onQuit()"></td>
+ </tr>
+ </table>
+ </div>
+ 
+ <div class="sections" style="background-color:#FFD511;"  id="section_photo">
+    <div style="display:inline-block;float:left"><h2>Photos</h2></div>
+     <div style="display:inline-block;float:right;margin-right: 10px;"><INPUT type="checkbox" id="withMessage" onclick="onRemoveMessage()">Message</div>
+     <input type="file" name="file" id="file" accept="image/*;capture=camera" onchange="onChangeFile()">
+
+     <div id="zone_message">
+         <input class="mobiletext" type="text" name="text" id="text" style="width:80%;margin:3px"
+                onfocus="document.getElementById('text').value=''">
+         <button onclick="sendMessage()">Send</button>
+     </div>
+ <INPUT type="checkbox" value="anonymous" name="anonymous" id="anonymous">Anonyme
+
+ </div>
+ 
+<div class="sections" style="background-color:#FFAA22;" id="section_musique">
+ <table><tr>
+ <td><h2>Music</h2> </td>
+ <td style="text-align: right"><a class="mobilebutton" style="margin:0px;text-size:8px" href="javascript:onSearchMusic()">+</a></td>
+ </tr></table>
+
+
+<div id="playlist"></div>
+<!-- <br><a href="playlist.html?view">Complete</a> -->
+</div>
+
+<!--
+<div class="sections" style="background-color:#FF8033;" id="section_sentiments">
+<h2>Contacts</h2>
+<div id="members"></div>
+</div>
+-->
+
+<div class="sections" style="height:130px;background-color:#f42cff;" id="section_invitation">
+    <h2>Invite</h2>
+    <div style="float:left;text-align:center;background-color:white;display: inline-block; width:100px;" id="qrcode"></div>
+    <div style="display:inline-block;float:right;margin:10px" id="share">
+        <button class="mobilebutton" onclick="sendInvite()">Invite</button>
+    </div>
+
+    <br>
+</div>
+
+<div class="sections" style="background-color:#72ff1e;" id="section_gallery">
+    <h2>Gallery</h2>
+    <div style="text-align:center;">
+        <img style="width:200px;heigh:300px" id="lastphoto"></img>
+    </div>
+    <br>
+</div>
+
+
+<div class="sections" style="background-color:#17e4ff;" id="section_chart">
+    <h2>Classement</h2>
+    <div style="text-align:center;"></div>
+    <div id="zone_chart"></div>
+</div>
+
+
+<div class="sections" style="background-color:#FF5544;" id="section_admin">
+    <h2>Admin</h2>
+    <div style="text-align:center;"></div>
+ <div id="zone_admin"></div>
+</div>
+
+
+
+
+<script>
+var myEvent=null;
+var user=null;
+var demandes="";
+var max_photo_size=600;
+
+function onRemoveMessage(){
+    var zoneText=document.getElementById("zone_message");
+    var chkMessage=document.getElementById("withMessage").checked;
+    if(chkMessage==true) {
+        zoneText.style.height = "auto";
+        zoneText.style.visibility = "visible";
+    }else{
+        zoneText.style.height="0px";
+        zoneText.style.visibility="hidden";
+        zoneText.value="";
+    }
+}
+
+function onChangeFile(){
+    if(document.getElementById("withMessage").checked==false)
+        sendMessage();
+    else
+        document.getElementById("text").focus();
+}
+
+function onQuit(){
+	quit(user.email,myEvent.Id,function(){
+        location.href="selEvent.html?email="+user.email;
+    });
+}
+
+function onSearchMusic(){
+	//var query=prompt("Requete","pixies");
+    var url="deezer.html?q=guetta&email="+user.email+"&event="+myEvent.Id+"&firstname="+user.firstname;
+	if(window.open(url)==null)location.href=url+"&close=false";
+}
+
+
+function resizeBase64Img(base64, maxsize,func) {
+
+    if(base64.length<2000000){
+        func(base64);
+        return;
+    }
+
+    var canvas = document.createElement("canvas");
+    var img=new Image();
+    img.src=base64;
+    img.onload=function(){
+        var ratio=maxsize/Math.max(this.width,this.height);
+
+        canvas.width =this.width*ratio;
+        canvas.height =this.height*ratio;
+        var context = canvas.getContext("2d");
+
+        context.drawImage(img, 0, 0,canvas.width,canvas.height);
+        func(canvas.toDataURL("image/jpeg", 1.0));
+    };
+}
+
+function sendMessage(){		
+	var form=document.getElementById("form1");
+	var data=document.getElementById("file");
+	var reader = new FileReader();
+
+    var photo={};
+    photo.anonymous=document.getElementById("anonymous").checked;
+    photo.idEvent=myEvent.Id;
+    photo.type=0;
+    photo.dtMessage=Date.parse(new Date());
+    photo.text=document.getElementById("text").value;
+    photo.from=user.email;
+
+    reader.onload = (function(theFile) {
+        resizeBase64Img(this.result,max_photo_size,function(newImg){
+            photo.photo=newImg;
+            if(photo.text=="Votre message")photo.text="";
+            sendphoto(myEvent.Id,photo,function(){
+                informe("Message sended",false);
+                document.getElementById("text").value="";
+            });
+        });
+	});
+
+	if(data.files.length==1)reader.readAsDataURL(data.files[0]);
+
+	data.value="";
+	data.files[0]=null;
+    document.getElementById("text").value="";
+}
+
+
+/**
+ * Modify the score of song by one step (increase or decrease)
+ */
+function onSetScore(step,id){
+	setscore(user.email,myEvent.Id,id,step,function(rep){
+		showPlaylist(rep.result.items);
+	});
+}
+
+function onSetScoreUser(step,user){
+	httpGet("setScoreUser?step="+step+"&cible="+URLEncode(user)+"&event="+myEvent.Id,function(rep){
+		myEvent=JSON.parse(rep);
+		showMembers(myEvent);
+	});
+}
+
+
+function showmyEvent(user,evt){
+	var div=document.getElementById("zone_myEvent");
+	div.innerHTML="<h2>"+evt.title+"</h2>";
+	div.innerHTML+=user.state;
+	div.innerHTML+="<br><a href='profile.html?event="+myEvent.Id+"&email="+user.email+"'>Modifier mon profil</a>"
+	if(evt.logo!=null && evt.logo.length>0)div.innerHTML+="<img src='"+evt.logo+"'>"+div.innerHTML;
+}
+
+
+function addDemande(typeDemande,cible){
+	var code=URLEncode("demande="+typeDemande+";to="+cible+";from="+user.Id);
+	httpPost("addMessage?text="+code+"&event="+myEvent.Id,null,function(rep){
+		informe("Demande transmise");
+	});
+}
+
+function findDemandes(id){
+	var rc=new Array(0);
+	user.demandes.forEach(function(dem){
+		if(dem.from==id)
+			rc[rc.length]=dem;
+	});
+	return rc;
+}
+
+function respons(nature,u,accept){
+	httpGet("respons?nature="+nature+"&from="+u+"&to="+user.Id+"&accept="+accept+"&event="+myEvent.Id,function(rep){
+		informe("sended");
+		if(rep.length>0){
+			user=JSON.parse(rep);
+			showMember(myEvent);
+		}
+	});
+}
+
+function showMember(evt){
+	if(evt!=null){
+		var div=document.getElementById("members");
+		var code="<table>";
+		httpGet("getClassement?event="+evt.Id,function(rep){
+			JSON.parse(rep).forEach(function(u){
+				if(user.Id!=u.Id){
+					var img_code=u.name;
+					getUser(u,function(rep){
+						code+="<tr><td><a href='javascript:onSetScoreUser(1,\""
+                            +u.Id+"\")'><img class='small-icon' src='up.png'></a>"
+						    +"<a href='javascript:onSetScoreUser(-1,\""
+                            +u.Id+"\")'><img class='small-icon' src='down.png'></a></td><td>"+rep+"</td>"
+						    +"<td><table><tr><td>lui proposer</td></tr><tr><td>";
+				
+						myEvent.typeDemandes.split("nature=").forEach(function(demande){
+							if(demande.length>0 && !demande.startsWith("//")){
+								var nature=demande.split("\r")[0];
+								code+="<a href='javascript:addDemande(\""+nature+"\",\""+u.Id+"\")'>"
+									+"<img class='medium-icon' title='"+nature+"' src='"+extract(demande,"demandIcon=","\r\n")+"'></a>";
+							}
+						},50);
+						code+="</td></tr></table></td><td>";
+						
+						findDemandes(u.Id).forEach(function(d){
+							if(d.reponse==null)
+								code+="Un "+d.nature+" ?<a href='javascript:respons(\""+d.nature+"\",\""+d.from+"\",true)'><img class='small-icon' src='up.png'></a><a href='javascript:respons(\""+d.nature+"\",\""+d.from+"\",false)'><img  class='small-icon' src='down.png'></a><br>";
+							else
+								code+="<img class='medium-icon' title='"+d.reponse+"' src='"+d.icon+"'><br>";						
+						});
+						code+="</td></tr>";
+					});
+				}
+			});
+			
+			div.innerHTML=code+"</table>";
+		});
+	}
+}
+
+
+
+/*
+ */
+function refreshPage(func){
+    getevent(user.currentEvent,function(rep){
+        myEvent=rep.result;
+        showmyEvent(user,myEvent);
+        func();
+    });
+}
+
+function start() {
+    var user_id = getParam()["email"];
+    if (user_id == null || user_id.length == 0)location.href = "login.html";
+
+    getuser(user_id, function (rep) {
+        user = rep.result;
+        getHTMLUser(user, function (rep) {
+            document.getElementById("myperso").innerHTML = rep;
+        }, 50);
+
+        //demandes=user.demandes.join(",");
+        if (user.currentEvent == null)location.href = "selEvent.html?email=" + user.Id;
+
+        refreshPage(function(){
+            if(myEvent.owner==user.email){
+                var idEvent=myEvent.Id;
+                var style="class='buttonPhoto' style='width:200px;font-size:16px'";
+                var rc="<div style='text-align:center;'><br><a class='buttonPhoto' style='width:200px;font-size:16px' href='gallery.html?photo_size=300&event="+idEvent+"'>Pele-Mele des photos</a>";
+                rc+="<br><br><a "+style+" href='deezerPlayer.html?event="+idEvent+"'>PlayList musicale</a>";
+                rc+="<br><br><a "+style+" href='slideshow.html?event="+idEvent+"'>SlideShow des photos</a>";
+                rc+="<br><br><a "+style+" href='charts.html?event="+idEvent+"'>Classement des invit�s</a>";
+                rc+="<br><br><a "+style+" href='closeEvent?event="+idEvent+"'>Terminer la soir�e</a><br><br></div>";
+                document.getElementById("zone_admin").innerHTML=rc;
+            }
+
+            shorturl(DOMAIN + "/login.html?event="+myEvent.Id,function(short){
+                myEvent.inviteUrl=short.result.id;
+                new QRCode(document.getElementById("qrcode"), {
+                    text: short.result.id,
+                    width: 100,
+                    height: 100,
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+            });
+
+            setInterval(function(){
+                getLastPhoto(myEvent.Id,function(photo){
+                    if(photo.status==200)
+                        document.getElementById("lastphoto").src=photo.result.photo;
+                });
+            },20000);
+
+            setInterval(function(){showPlaylist(myEvent);},5000);
+            setInterval(function(){showClassement(myEvent.Id,document.getElementById("zone_chart"));},10000);
+            setInterval(refreshPage(function(){}), 10000);
+
+        });
+
+
+
+
+
+
+
+        onRemoveMessage();
+    });
+}
+
+
+function sendInvite(){
+    window.open("mailto:hhoareau@gmail.com&subject="+escape(myEvent.title)+"&body="+myEvent.inviteUrl);
+}
+
+</script>
+
+</body>
+</html>

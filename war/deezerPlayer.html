@@ -1,0 +1,141 @@
+<html>
+<head>
+<meta charset="ISO-8859-1">
+
+    <script src="Tools.js"></script>
+    <script src="Main.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="Leficarbar.css">
+    <meta name="viewport" content="width=320">
+    <script src="webtorrent.min.js"></script>
+
+<title>Players</title>
+</head>
+<body onunload="onQuit()">
+
+<div id="dz-root"></div>
+
+<div id="player1" style="width:200px" align="right"></div>
+<div id="player2" style="width:200px" align="left"></div>
+
+<script src="https://cdns-files.dzcdn.net/js/min/dz.js"></script>
+
+<div id="playlist"></div>
+<a class="buttonPhoto" href="javascript:onQuit()">Change Deezer Account</a>
+
+    
+<script>
+var idEvent=getParam()["event"];
+var timer=null;
+var crossfadeTimer=null;
+var gEnd=null;
+var gStep=0;
+var currentPlayer=1;
+var gVolume=0;
+
+
+
+function crossfade(step,func) {
+    gStep = step;
+    gVolume = DZ.player.getVolume();
+    if (step < 0) {
+        gEnd = 0;
+    } else {
+        gEnd = 100;
+    }
+    if (crossfadeTimer == null) {
+        crossfadeTimer = setInterval(function () {
+            gVolume = gVolume + gStep;
+            DZ.player.setVolume(gVolume);
+            if ((step<0 && gVolume<=gEnd) || (step>0 && gVolume>=gEnd)) {
+                clearInterval(crossfadeTimer);
+                crossfadeTimer = null;
+                func();
+            }
+        }, 500);
+    }
+}
+
+function playNextSong(){
+    //var oldPlayer=currentPlayer;
+    //currentPlayer++;if(currentPlayer==2)currentPlayer=0;
+    //var newPlayer=currentPlayer;
+
+    getsongtoplay(idEvent,function(rep) {
+        if (rep.status == 204) {
+            clearTimeout(timer);
+            DZ.player.setVolume(100);
+            timer = setInterval(playNextSong, 5000);
+        }else{
+            if(timer!=null)clearInterval(timer);
+            timer=setTimeout(playNextSong,(rep.result.duration-10)*1000);
+            DZ.player.addToQueue([rep.result.text]);
+            crossfade(-10,function(){
+                DZ.player.next();
+                DZ.player.play();
+                crossfade(+10,function(){});
+            });
+        }
+
+    });
+}
+
+function onQuit(){
+    DZ.logout();
+    start();
+}
+
+function start(){
+
+    //Utiliser un torrent : WebTorrent
+    //var WebTorrent = require('webtorrent');
+    var client = new WebTorrent();
+    var magnetURI = 'magnet:?xt=urn:btih:F6B163EC5643A37E4A44D38FE9B538D261D020A9&dn=single+yo+gotti+rihanna+feat+young+thug+hip+hop+rap+single+2015+itunes+plus+m4a+aac+exclusive+june+2015+uj+rip&tr=udp%3A%2F%2Ftracker.publicbt.com%2Fannounce&tr=udp%3A%2F%2Fglotorrents.pw%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce';
+    client.add(magnetURI, function (torrent) {
+        // Got torrent metadata!
+        console.log('Client is downloading:', torrent.infoHash)
+
+        torrent.files.forEach(function (file) {
+            // Display the file by appending it to the DOM. Supports video, audio, images, and
+            // more. Specify a container element (CSS selector or reference to DOM node).
+            file.appendTo('body')
+        })
+    });
+
+
+    DZ.init({
+        appId  : '182662',
+        channelUrl : 'https://leficarbar-1342.appspot.com/channel.html',
+        player: {
+            container: 'player1',
+            width : 800,
+            height : 300,
+            onload : function(){
+
+                DZ.login(function(response) {
+                    if (response.authResponse) {
+                        console.log('Welcome!  Fetching your information.... ');
+                        DZ.api('/user/me', function(response) {
+                            console.log('Good to see you, ' + response.name + '.');
+                        });
+                    } else {
+                        console.log('User cancelled login or did not fully authorize.');
+                    }
+                }, {perms: 'basic_access'});
+
+                playNextSong();
+                DZ.Event.subscribe('track_end', function(track, evt_name){
+                    playNextSong();
+                });
+            }
+        }
+    });
+
+
+}
+
+
+</script>
+
+</body>
+</html>

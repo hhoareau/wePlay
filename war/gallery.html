@@ -1,0 +1,208 @@
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<meta name="viewport" content="width=340">
+<link href='https://fonts.googleapis.com/css?family=Indie+Flower' rel='stylesheet' type='text/css'>
+
+<title>Pele-Mele</title>
+</head>
+<body style="background-color:black">
+
+<script src="Tools.js"></script>
+<script src="Main.js"></script>
+
+<div id="zone_text"></div>
+
+<canvas id="myCanvas"></canvas>
+
+<script>
+
+var date=0;
+var dateDemande=0;
+var photo_size=getParameters()["photo_size"];
+var canvas = document.getElementById('myCanvas');
+var context = canvas.getContext('2d');
+var idEvent=getParameters()["event"];
+var zones=null;
+var x=0,y=0;
+
+addEventListener("click", function() {
+    var
+          el = document.documentElement
+        , rfs =
+               el.requestFullScreen
+            || el.webkitRequestFullScreen
+            || el.mozRequestFullScreen
+    ;
+    rfs.call(el);
+});
+
+
+
+
+function resize(maxsize,data,onEnd){
+	var imageObj = new Image();
+	imageObj.onload = function() {
+		
+		var ratio=maxsize/Math.max(imageObj.width,imageObj.height);
+			
+		var lx=imageObj.width*ratio;
+		var ly=imageObj.height*ratio;
+        
+        if(onEnd)onEnd(imageObj,lx,ly);
+      };
+      
+    if(data.startsWith("http") || data.indexOf(".png")>0)
+		imageObj.src = data;
+    else
+        if(!data.startsWith("data:"))
+    	    imageObj.src = "data:image/jpeg;base64," + data;
+        else
+            imageObj.src = data;
+}
+
+
+
+function addImage(x,y,maxsize,data,onEnd){    
+      resize(maxsize,data,function(imageObj,lx,ly){
+    	  context.drawImage(imageObj, x, y,lx,ly);
+    	  if(onEnd!=null)onEnd(imageObj.width,imageObj.height);
+      });
+}
+
+
+
+
+function addPortrait(xx,yy,author,size,onEnd){
+	addImage(xx,yy,size,author.photo,function(){
+		addImage(xx,yy,size,"cadre.png",function(){
+			if(author.photo=="personne.png")addText(context,xx,yy+size+5,"blue",10,author.name);
+			context.restore();
+			if(onEnd)onEnd();	
+		});	
+	});
+}
+
+
+function addWall(x,y,message,onEnd){
+
+	var angle=(Math.random()-0.5)*60;
+	var ech=photo_size/300;
+	
+	context.save();
+	context.translate(x/2,y/2);
+	context.rotate(angle*Math.PI/180);
+	
+		if(message.type==0){
+			var imgPapier = new Image();
+			imgPapier.onload=function(){
+				if(message.photo==null){
+					var lx=context.measureText(message.text).width+20*ech;
+					context.drawImage(imgPapier, 0, 0,70*ech+lx+5,55*ech);
+					addText(context,60,25,"black",17*ech,message.text,null,lx);
+					//addPortrait(3,3,message.author,40*ech,onEnd);
+				} else {
+					resize(photo_size*0.75,message.photo,function(imageObj,lx,ly){		
+							context.drawImage(imgPapier, 0, 0,lx+20*ech,ly+58*ech);
+							context.drawImage(imageObj, 10*ech, 10*ech,lx,ly);
+							//addPortrait(4*ech,ly+15*ech,message.author,40*ech,onEnd);
+							if( message.text != undefined){
+                                addText(context,50*ech,ly+22*ech,"black",20*ech,message.text,null,photo_size-100*ech);
+                            }
+                            onEnd();
+						});
+				}
+			};	
+			imgPapier.src="papier.png";	
+		}
+}
+
+
+function getXY(canvas,func){
+	
+	var nb_col=Math.round(canvas.width/photo_size);
+	var nb_row=Math.round(canvas.height/photo_size);
+	var p=0;
+
+    if(zones==null){
+        zones=new Array(nb_row);
+        for(k=0;k<nb_row;k++)
+            zones[k]=new Array(nb_col);
+    }
+
+
+	var min=100;
+    var i,j;
+	for(var k=0;k<nb_row;k++){
+        for(var l=0;l<nb_col;l++){
+            if(zones[k][l]==undefined)
+                zones[k][l]=0;
+
+            if(zones[k][l]<min){
+                min=zones[k][l];
+                i=k;
+                j=l;
+            }
+        }
+	}
+
+	zones[i][j]++;
+    func((j+0.5)*photo_size,(i+0.5)*photo_size);
+}
+
+
+function start(){
+    startFullScreen();
+    window.canvas.width=window.innerWidth-100;
+    window.canvas.height=window.innerHeight-50;
+    //httpGet("startSession",function(){});
+
+    setInterval(function(){
+        var zone_text=document.getElementById("zone_text");
+
+        /*
+         httpGet("getDemandes?event="+idEvent+"&date="+dateDemande,function(rep){
+         demandes=JSON.parse(rep);
+         demandes.forEach(function(demande){
+
+         if(demande.dtDemande>dateDemande)dateDemande=demande.dtDemande;
+
+         var icon=demande.demandIcon;
+         if(demande.reponse!=null)icon=demande.responsIcon;
+         getXY(canvas);
+         httpGet("getUsers?users="+demande.from+","+demande.to,function(rep){
+         var users=JSON.parse(rep);
+         addPortrait(x,y,users[0],40);
+         addPortrait(x+50,y+50,users[1],40);
+         addImage(x,y,100,icon);
+         });
+         });
+         });
+         */
+
+        getMessage(getParam()["event"],date,function(rep){
+            if(rep.status!=204){
+                photos=rep.result.items;
+                var i=0;
+                date=Date.parse(new Date());
+
+                function show(index){
+                    if(photos[index].dtMessage>date)date=photos[index].dtMessage
+                    getXY(canvas,function(x,y){
+                        addWall(x,y,photos[index],function() {
+                            if(index+1<photos.length)
+                                show(index + 1);
+                        });
+                    });
+                }
+
+                show(0);
+            }
+        });
+    },5000);
+}
+
+</script>
+
+</body>
+</html>

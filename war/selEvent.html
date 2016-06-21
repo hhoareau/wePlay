@@ -1,0 +1,114 @@
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<meta name="viewport" content="width=320">
+<link rel="stylesheet" type="text/css" href="Leficarbar.css">
+<title>Choisir un évenement</title>
+</head>
+<body>
+
+<div id="lblMessage"></div>
+<script src="Main.js"></script>
+<script src="Tools.js"></script>
+
+<div class="main-div">
+
+<br>
+<div align="center">
+<table>
+<tr>
+<td><div id="myperso"></div></td>
+<td><a href="login.html?nologin">Changer d'utilisateur</a><br><a href="delUser">Effacer mon compte</a></td>
+</tr>
+</table>
+</div>
+
+<h1>Les soirées proches</h1>
+<div id="zone_events" style="text-align:center;"></div>
+
+<h1>Mes soirées</h1>
+    <div id="zone_events_from" style="text-align:center;"></div>
+
+
+    <br><br>
+<a class="mobilebutton" href="javascript:add()">Créer un evenement</a><br>
+
+</div>
+
+<script>
+
+
+var pos=null;
+var user=null;
+
+function add(){
+    location.href="addEvent.html?email="+getParam()["email"];
+}
+
+function setEvent(id,bPass){
+	var password="";
+	if(bPass)password=prompt("mot de passe");
+    join(id,getParam()["email"],password,function(rep){
+        if(rep.result.currentEvent.length>0)
+            location.href="photo.html?event="+id+"&email="+user.email;
+        else
+            informe("impossible de ce joindre à cet évenement");
+    });
+}
+
+
+function showEvents(events,user_pos){
+	var code="";
+	if(events==undefined || events==null || events.length==0)
+		code="<p>Aucun evenement disponible</p>";
+	else
+		for(var i=0;i<events.length;i++){
+			var evt=events[i];
+            var d="";
+            if(user_pos!=null)
+                d=" ("+distance(user_pos.latitude,user_pos.longitude,evt.lat,evt.lng).toFixed(1)+"Km)";
+
+            code+="<a href='javascript:setEvent(\""+events[i].Id+"\",false)'>"+evt.title+d+"<br><img style='max-width:300px;' src='"+evt.flyer+"'></a><br>";
+			if((user.currentEvent==events[i].Id  && getParameters()["nologin"]==undefined) || getParameters()["event"]==events[i].Id)setEvent(events[i].Id,false);
+		}		
+	
+	return code;
+}
+
+function refreshEvent(){
+    informe("loading",true,"zone_events");
+    informe("loading",true,"zone_events_from");
+
+    geteventsfrom(getParam()["email"],function(evts){
+        document.getElementById("zone_events_from").innerHTML=showEvents(evts,null);
+    });
+
+    if (navigator.geolocation){
+        navigator.geolocation.getCurrentPosition(function(position){
+            pos=position.coords;
+
+            geteventsaround(position.coords,function(evts){
+                document.getElementById("zone_events").innerHTML=showEvents(evts,position.coords);
+            });
+        },function(){
+            informe("Geoloc failed, retry page loading",false);
+        });
+    }
+}
+
+function start(){
+    informe("loading",true,"myperso");
+    getuser(getParam()["email"],function(rep) {
+        user= rep.result;
+        getHTMLUser(user, function (code) {
+            document.getElementById("myperso").innerHTML = code;
+        }, 60)
+    });
+
+	refreshEvent();
+    setInterval(refreshEvent,10000);
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,30 @@
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<meta name="viewport" content="width=340">
+
+    <script src="Tools.js"></script>
+    <script src="Main.js"></script>
+
+    <title>Classement</title>
+</head>
+<body>
+
+
+<div id="zone"></div>
+
+<script>
+var idEvent=getParameters()["event"];
+var users=null;
+
+
+
+function start(){
+	 showClassement(document.getElementById("zone"));
+        setInterval(function(){showClassement();},20000);
+}
+
+</script>
+
+</body>
+</html>
