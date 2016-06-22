@@ -2,24 +2,23 @@
 <head>
 <meta charset="ISO-8859-1">
 <meta name="viewport" content="width=340">
-<title>Classement</title>
+
     <script src="Tools.js"></script>
     <script src="Main.js"></script>
 
+    <title>Classement</title>
 
 
 </head>
 <body>
-
-
-
 <h2>Console admin</h2>
 
-
+<div id="console" style="visibility: hidden">
 <a href="/_ah/admin">Admin local</a><br>
 <a href="https://console.cloud.google.com/appengine/quotadetails?project=leficarbar-1342&moduleId=default">Admin distant</a><br>
 <a href="/">Connexion</a><br>
 <a href="javascript:raz(function(){window.open('/');})">Raz</a>
+</div>
 
 <p>
 Pour envoyer des messages, des photos, des titres<br>
@@ -42,8 +41,12 @@ function onChangeEvent(idEvent){
 	document.getElementById("zone_link").innerHTML=rc;	
 }
 
+informe("chargement de la console",true);
+
 function start(){
-	
+	informe();
+    document.getElementById("console").style.visibility="visible";
+
 	var idEvent=getParameters()["event"];
 	if(idEvent)
 		onChangeEvent(idEvent);

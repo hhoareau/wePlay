@@ -114,6 +114,8 @@ function URLEncode(url) {
 	}
 
 
+
+
 function showClassement(idEvent,zone){
     getClassement(idEvent,function(rep){
         if(rep.result.items.length>0){
@@ -176,7 +178,8 @@ function informe(s,waiting,zone){
 		pctWaiting.style.visibility="hidden";
 		idTimeout=window.setTimeout(function(){lblMessage.innerHTML="<br>";},4000);
 	}		
-	
+
+    if(s==undefined)s="";
 	lblMessage.innerHTML+=""+s+"";	
 }
 
@@ -507,6 +510,29 @@ function resize_image(i,maxlen,angle){
 	//return ctx.getImageData(0,0,maxlen,maxlen);
 	
 	return canvas.toDataURL("image/png");
+}
+
+
+
+function showEvents(events,user_pos){
+    var code="";
+    if(events==undefined || events==null || events.length==0)
+        code="<p>Aucun evenement disponible</p>";
+    else
+        for(var i=0;i<events.length;i++){
+            var evt=events[i];
+            var d="";
+            if(user_pos!=null)
+                d=" ("+distance(user_pos.latitude,user_pos.longitude,evt.lat,evt.lng).toFixed(1)+"Km)";
+
+            code+="<a href='javascript:setEvent(\""+events[i].Id+"\",false)'>"+evt.title+d+"<br>";
+            if(evt.flyer.length>0)code+="<img style='max-width:300px;' src='"+evt.flyer+"'>";
+            code+="</a><br>";
+
+            if((user.currentEvent==events[i].Id  && getParameters()["nologin"]==undefined) || getParameters()["event"]==events[i].Id)setEvent(events[i].Id,false);
+        }
+
+    return code;
 }
 
 

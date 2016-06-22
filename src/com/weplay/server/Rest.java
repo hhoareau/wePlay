@@ -109,9 +109,16 @@ public class Rest {
                 }
             }
             */
+    }
 
-
-
+    @ApiMethod(name = "addscore", httpMethod = ApiMethod.HttpMethod.GET, path = "addscore")
+    public User addscore(@Named("email") String email,@Named("score") Integer score) {
+        User u=dao.findUser(email);
+        if(u!=null){
+            u.score+=score;
+            dao.save(u);
+        }
+        return u;
     }
 
 
@@ -124,7 +131,7 @@ public class Rest {
 
 
     @ApiMethod(name = "join", httpMethod = ApiMethod.HttpMethod.GET, path = "join")
-    public User join(@Named("event") String id,@Named("email") String email,@Nullable @Named("password") String password) {
+    public User join(@Named("event") String id,@Named("email") String email,@Nullable @Named("from") String from,@Nullable @Named("password") String password) {
         Event e=dao.findEvent(id);
         User u=dao.findUser(email);
 
@@ -133,6 +140,13 @@ public class Rest {
                 return null;
             }
             if (e.addPresents(u)) {
+                u.score=e.scoreStart;
+                if(from!=null){
+                    User f=dao.findUser(from);
+                    f.score+=e.scoreInvite;
+                    dao.save(f);
+                }
+
                 dao.save(e);
                 dao.save(u);
             }
@@ -143,7 +157,16 @@ public class Rest {
 
     @ApiMethod(name = "getsongtoplay", httpMethod = ApiMethod.HttpMethod.GET, path = "getsongtoplay")
     public Song getsongtoplay(@Named("event") String event) {
+        Event e=dao.findEvent(event);
+        if(e==null)return null;
+
         Song s=dao.getSongToPlay(event);
+        User u=dao.findUser(s.from.split(";")[0]);
+        if(u!=null){
+            u.score+=e.scorePlaySong;
+            dao.save(u);
+        }
+
         if(s==null)return null;
         s.dtPlay=System.currentTimeMillis();
         dao.save(s);
@@ -154,14 +177,23 @@ public class Rest {
     @ApiMethod(name = "setscore", httpMethod = ApiMethod.HttpMethod.GET, path = "setscore")
     public Song setScore(@Named("song") String idsong, @Named("event") String event, @Named("user") String email,@Named("step") Integer step){
         Song s=dao.getSong(idsong);
-        if(s!=null){
-            if(s.votants.contains(email)){
-                return null;
-            } else{
-                s.score+=step;
-                s.votants.add(email);
-                dao.save(s);
-                return s;
+        Event e=dao.findEvent(event);
+
+        if(s!=null && e!=null){
+            User prop=dao.findUser(s.from.split(";")[0]);
+            if(!prop.email.equals(email)){
+                prop.score+=e.getScoreLikeSong()*step;
+                dao.save(prop);
+
+                if(s.votants.contains(email)){
+                    return null;
+                } else{
+                    s.score+=step;
+                    s.votants.add(email);
+
+                    dao.save(s);
+                    return s;
+                }
             }
         }
         return null;
@@ -242,9 +274,17 @@ public class Rest {
     @ApiMethod(name = "addsong", httpMethod = ApiMethod.HttpMethod.POST, path = "addsong")
     public Event addsong(@Named("event") String id,Song g) {
         Event e=dao.findEvent(id);
-        dao.save(g);
+        User from=dao.findUser(g.from.split(";")[0]);
+
+        if(from.score<e.minScore)return(e);
+
+        from.score+=e.scorePostSong;
+
         e.lastSave=System.currentTimeMillis();
+
         dao.save(e);
+        dao.save(from);
+        dao.save(g);
 
         return(e);
     }

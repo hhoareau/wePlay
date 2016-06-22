@@ -2,11 +2,12 @@
 <head>
 <meta charset="ISO-8859-1">
 <link rel="stylesheet" type="text/css" href="Leficarbar.css">
-<meta name="viewport" content="width=640">
+<meta name="viewport" content="width=320">
 <title>wePlay</title>
 </head>
 
 <body>
+<div style="display:block; float:right;width:70px;"><img src="beta.png"/></div>
 <link href="/apple-touch-icon.png" rel="apple-touch-icon" />
 
 <script src="Tools.js"></script>
@@ -26,31 +27,35 @@
      <td style="vertical-align: top;text-align: right;"><INPUT class="buttonPhoto" type="button" value="Quit" style="font-size:10px" onclick="onQuit()"></td>
  </tr>
  </table>
+    <INPUT type="checkbox" value="anonymous" name="anonymous" id="anonymous">Anonyme
  </div>
  
  <div class="sections" style="background-color:#FFD511;"  id="section_photo">
-    <div style="display:inline-block;float:left"><h2>Photos</h2></div>
-     <div style="display:inline-block;float:right;margin-right: 10px;"><INPUT type="checkbox" id="withMessage" onclick="onRemoveMessage()">Message</div>
-     <input type="file" name="file" id="file" accept="image/*;capture=camera" onchange="onChangeFile()">
+        <table style="width:100%;"><tr style="vertical-align: top;"><td><h2>Photo</h2></td>
+            <td><INPUT type="checkbox" id="withMessage">Message</td>
+            <td style="text-align: right;">
+                <div class="image-upload">
+                    <label for="file">
+                        <img src="camera.png"/>
+                    </label>
+                    <input type="file" id="file" accept="image/*;capture=camera" onchange="sendMessage()">
+                </div>
+            </td>
+            </tr>
+        </table>
 
-     <div id="zone_message">
-         <input class="mobiletext" type="text" name="text" id="text" style="width:80%;margin:3px"
-                onfocus="document.getElementById('text').value=''">
-         <button onclick="sendMessage()">Send</button>
+     <div style="text-align:center;">
+         <img style="width:200px;heigh:300px" id="lastphoto"></img>
+         <br>
      </div>
- <INPUT type="checkbox" value="anonymous" name="anonymous" id="anonymous">Anonyme
 
  </div>
  
 <div class="sections" style="background-color:#FFAA22;" id="section_musique">
- <table><tr>
- <td><h2>Music</h2> </td>
- <td style="text-align: right"><a class="mobilebutton" style="margin:0px;text-size:8px" href="javascript:onSearchMusic()">+</a></td>
- </tr></table>
-
-
-<div id="playlist"></div>
-<!-- <br><a href="playlist.html?view">Complete</a> -->
+    <table style="width:100%;"><tr style="vertical-align: top;"><td><h2>Music</h2></td>
+        <td style="text-align: right"><img src="add.png" style="width: 45px;" onclick= "javascript:onSearchMusic()"></td></tr>
+    </table>
+    <div id="playlist"></div>
 </div>
 
 <!--
@@ -61,20 +66,13 @@
 -->
 
 <div class="sections" style="height:130px;background-color:#f42cff;" id="section_invitation">
-    <h2>Invite</h2>
+    <table style="width:100%;"><tr style="vertical-align: top;"><td><h2>Invite</h2></td>
+        <td style="text-align: right"><img src="share.png" style="width:45px" onclick="sendInvite()"></td></tr>
+    </table>
+
+
     <div style="float:left;text-align:center;background-color:white;display: inline-block; width:100px;" id="qrcode"></div>
-    <div style="display:inline-block;float:right;margin:10px" id="share">
-        <button class="mobilebutton" onclick="sendInvite()">Invite</button>
-    </div>
 
-    <br>
-</div>
-
-<div class="sections" style="background-color:#72ff1e;" id="section_gallery">
-    <h2>Gallery</h2>
-    <div style="text-align:center;">
-        <img style="width:200px;heigh:300px" id="lastphoto"></img>
-    </div>
     <br>
 </div>
 
@@ -97,29 +95,11 @@
 
 <script>
 var myEvent=null;
+var inviteUrl=null;
 var user=null;
 var demandes="";
 var max_photo_size=600;
 
-function onRemoveMessage(){
-    var zoneText=document.getElementById("zone_message");
-    var chkMessage=document.getElementById("withMessage").checked;
-    if(chkMessage==true) {
-        zoneText.style.height = "auto";
-        zoneText.style.visibility = "visible";
-    }else{
-        zoneText.style.height="0px";
-        zoneText.style.visibility="hidden";
-        zoneText.value="";
-    }
-}
-
-function onChangeFile(){
-    if(document.getElementById("withMessage").checked==false)
-        sendMessage();
-    else
-        document.getElementById("text").focus();
-}
 
 function onQuit(){
 	quit(user.email,myEvent.Id,function(){
@@ -162,11 +142,15 @@ function sendMessage(){
 	var reader = new FileReader();
 
     var photo={};
+    if(document.getElementById("withMessage").checked==true)
+        photo.text=prompt("Message","Votre message");
+    else
+        photo.text="";
+
     photo.anonymous=document.getElementById("anonymous").checked;
     photo.idEvent=myEvent.Id;
     photo.type=0;
     photo.dtMessage=Date.parse(new Date());
-    photo.text=document.getElementById("text").value;
     photo.from=user.email;
 
     reader.onload = (function(theFile) {
@@ -184,7 +168,6 @@ function sendMessage(){
 
 	data.value="";
 	data.files[0]=null;
-    document.getElementById("text").value="";
 }
 
 
@@ -274,13 +257,10 @@ function showMember(evt){
 					});
 				}
 			});
-			
 			div.innerHTML=code+"</table>";
 		});
 	}
 }
-
-
 
 /*
  */
@@ -317,14 +297,16 @@ function start() {
                 document.getElementById("zone_admin").innerHTML=rc;
             }
 
-            shorturl(DOMAIN + "/login.html?event="+myEvent.Id,function(short){
-                myEvent.inviteUrl=short.result.id;
+            inviteUrl=DOMAIN+"/login.html?from="+user.email+"&event="+myEvent.Id;
+            shorturl(inviteUrl,function(short){
+                inviteUrl=short.result.id;
                 new QRCode(document.getElementById("qrcode"), {
                     text: short.result.id,
                     width: 100,
                     height: 100,
                     correctLevel : QRCode.CorrectLevel.H
                 });
+                document.getElementById("qrcode").addEventListener("click",function(){open.window(short.result.id);});
             });
 
             setInterval(function(){
@@ -339,23 +321,27 @@ function start() {
             setInterval(refreshPage(function(){}), 10000);
 
         });
-
-
-
-
-
-
-
-        onRemoveMessage();
     });
 }
 
 
 function sendInvite(){
-    window.open("mailto:hhoareau@gmail.com&subject="+escape(myEvent.title)+"&body="+myEvent.inviteUrl);
+    window.open("mailto:&subject="+escape(myEvent.title)+"&body="+escape(inviteUrl));
 }
 
 </script>
+
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-79765109-1', 'auto');
+    ga('send', 'pageview');
+
+</script>
+
 
 </body>
 </html>

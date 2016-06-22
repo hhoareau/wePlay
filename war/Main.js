@@ -54,8 +54,12 @@ function getsongtoplay(evt,func){
     gapi.client.ficarbar.getsongtoplay({event:evt}).then(func);
 }
 
-function join(event,email,password,func){
-    gapi.client.ficarbar.join({event:event,email:email,password:password}).then(func);
+function addScore(user,score,func){
+    gapi.client.ficarbar.addscore({email:user,score:score}).then(func);
+}
+
+function join(event,email,password,from,func){
+    gapi.client.ficarbar.join({event:event,email:email,password:password,from:from}).then(func);
 }
 
 function querymusic(query,func){

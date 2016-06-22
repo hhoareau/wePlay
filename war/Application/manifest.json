@@ -1,0 +1,18 @@
+{
+  "manifest_version": 2,
+  "name": "WePlay : Social DJing",
+  "description": "Social DJing",
+  "version": "1.1",
+  "icons": {
+    "128": "logo.png"
+  },
+  "app": {
+    "urls": [
+      "https://weplaywebsite.appspot.com/"
+    ],
+    "launch": {
+      "web_url": "https://weplaywebsite.appspot.com/"
+    }
+  },
+  "permissions": []
+}

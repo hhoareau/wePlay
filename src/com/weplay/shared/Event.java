@@ -66,6 +66,15 @@ public class Event implements Comparable<Event>,Serializable {
     public Double lat=0.0;
     public Double lng=0.0;
 
+    public Integer scoreInvite=5;
+    public Integer scoreLikeSong=1;
+    public Integer scorePostSong=-2;
+    public Integer scoreStart=10;
+    public Integer minScore=-20;
+    public Integer scorePlaySong=2;
+
+
+
     //@NotSaved public List<User> classement;
 	
 	public Event(){}
@@ -333,8 +342,53 @@ public class Event implements Comparable<Event>,Serializable {
         this.lng = lng;
     }
 
+    public Integer getScoreInvite() {
+        return scoreInvite;
+    }
 
+    public void setScoreInvite(Integer scoreInvite) {
+        this.scoreInvite = scoreInvite;
+    }
 
+    public Integer getScoreLikeSong() {
+        return scoreLikeSong;
+    }
+
+    public void setScoreLikeSong(Integer scoreLikeSong) {
+        this.scoreLikeSong = scoreLikeSong;
+    }
+
+    public Integer getScorePostSong() {
+        return scorePostSong;
+    }
+
+    public void setScorePostSong(Integer scorePostSong) {
+        this.scorePostSong = scorePostSong;
+    }
+
+    public Integer getScoreStart() {
+        return scoreStart;
+    }
+
+    public void setScoreStart(Integer scoreStart) {
+        this.scoreStart = scoreStart;
+    }
+
+    public Integer getMinScore() {
+        return minScore;
+    }
+
+    public void setMinScore(Integer minScore) {
+        this.minScore = minScore;
+    }
+
+    public Integer getScorePlaySong() {
+        return scorePlaySong;
+    }
+
+    public void setScorePlaySong(Integer scorePlaySong) {
+        this.scorePlaySong = scorePlaySong;
+    }
 }
 
 

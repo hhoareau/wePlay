@@ -14,7 +14,7 @@ h1 {
 
 
 h2 {
-  font-size: 20px;
+  font-size: 25px;
   font-weight: bold;
   color: black;
   text-transform: uppercase;
@@ -208,4 +208,13 @@ h2 {
 	top:1px;
 }
 
+.image-upload img
+{
+    width: 50px;
+    cursor: pointer;
+}
 
+.image-upload > input
+{
+    display: none;
+}
