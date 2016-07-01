@@ -30,7 +30,7 @@ public class Rest {
 
     @ApiMethod(name = "geteventsaround", httpMethod = ApiMethod.HttpMethod.GET, path = "geteventsaround")
     public List<Event> geteventsaround(@Named("lat") Double lat,@Named("lng") Double lng) {
-        return dao.findEvents(System.currentTimeMillis(),lat,lng,2.0);
+        return dao.findEvents(System.currentTimeMillis(),lat,lng);
     }
 
     @ApiMethod(name = "geteventsfrom", httpMethod = ApiMethod.HttpMethod.GET, path = "geteventsfrom")
@@ -79,7 +79,6 @@ public class Rest {
         if(u==null)return;
         dao.save(e);
 
-
         //Lieu nl = new Lieu(position);
         //List<Lieu> l=dao.findLieuByName(nl.name);
 
@@ -121,14 +120,11 @@ public class Rest {
         return u;
     }
 
-
-
     @ApiMethod(name = "getuser", httpMethod = ApiMethod.HttpMethod.GET, path = "getuser")
     public User getuser(@Named("email") String email) {
         User u=dao.findUser(email);
         return u;
     }
-
 
     @ApiMethod(name = "join", httpMethod = ApiMethod.HttpMethod.GET, path = "join")
     public User join(@Named("event") String id,@Named("email") String email,@Nullable @Named("from") String from,@Nullable @Named("password") String password) {
@@ -155,12 +151,65 @@ public class Rest {
         return null;
     }
 
+
+    @ApiMethod(name = "gettopsongs", httpMethod = ApiMethod.HttpMethod.GET, path = "gettopsongs")
+    public List<Song> gettopsongs(@Named("event") String event,@Named("nombre") Integer nombre) {
+        Event e=dao.findEvent(event);
+        if(e==null)return null;
+        return dao.getSongToPlay(event,nombre);
+    }
+
+
+    @ApiMethod(name = "razlocalfile", httpMethod = ApiMethod.HttpMethod.GET, path = "razlocalfile")
+    public void razlocalfile(@Named("event") String event) {
+        Event e=dao.findEvent(event);
+        if(e==null)return;
+        dao.razlocalfile(event);
+    }
+
+    @ApiMethod(name = "uploadfiles", httpMethod = ApiMethod.HttpMethod.POST, path = "uploadfiles")
+    public void uploadfiles(LocalFile lf) {
+        Event e=dao.findEvent(lf.getEvent());
+        if(e!=null){
+            lf.setText(lf.getText().toLowerCase());
+            dao.save(lf);
+        }
+    }
+
+
+    @ApiMethod(name = "getmagnets", httpMethod = ApiMethod.HttpMethod.GET, path = "getmagnets")
+    public List<String> getmagnets(@Named("torrents") String torrents) {
+        for(String torrent:torrents.split(";")){
+            RestCall r=new RestCall<String>("https://torrentproject.se/"+torrent,null,null) {
+                @Override
+                public void onSuccess(String rep) {
+                    int start=rep.indexOf("magnet:");
+                    int end=rep.indexOf("'",start);
+                    String magnet=rep.substring(start, end);
+                    rc.add(magnet);
+                }
+
+                @Override
+                public List<String> getSongs() {
+                    return rc;
+                }
+            };
+            return r.getSongs();
+        }
+        return null;
+    }
+
+
+
+
     @ApiMethod(name = "getsongtoplay", httpMethod = ApiMethod.HttpMethod.GET, path = "getsongtoplay")
     public Song getsongtoplay(@Named("event") String event) {
         Event e=dao.findEvent(event);
         if(e==null)return null;
+        List<Song> ls=dao.getSongToPlay(event,1);
+        if(ls.size()==0)return null;
+        Song s=ls.get(0);
 
-        Song s=dao.getSongToPlay(event);
         User u=dao.findUser(s.from.split(";")[0]);
         if(u!=null){
             u.score+=e.scorePlaySong;
@@ -315,14 +364,13 @@ public class Rest {
 
     @ApiMethod(name = "slideshow", httpMethod = ApiMethod.HttpMethod.GET, path = "slideshow")
     public List<Photo> slideshow(@Nullable @Named("delay") Long delay,@Named("event") String idEvent){
-        List<Photo> lPhoto=null;
+        List<Photo> lPhoto=new ArrayList<>();
 
         if(delay!=null){
             lPhoto=dao.getPhoto(idEvent, System.currentTimeMillis() - delay * 1000 * 60, System.currentTimeMillis());
         } else {
             lPhoto=dao.getPhoto(idEvent,0L, System.currentTimeMillis());
         }
-
 
         Collections.sort(lPhoto); //Les derniers messages en premier dans la liste
 
@@ -335,26 +383,38 @@ public class Rest {
     }
 
 
-    @ApiMethod(name = "senduser", httpMethod = ApiMethod.HttpMethod.PUT, path = "senduser")
-    public void senduser(User u) {
-        if(dao.findUser(u.email)!=null)
-            dao.save(u);
+
+    @ApiMethod(name = "senduser", httpMethod = ApiMethod.HttpMethod.POST, path = "senduser")
+    public User senduser(@Named("update") String update, User u) {
+        User toUpdate=dao.findUser(u.email);
+        if(toUpdate!=null && update!=null){
+            if(update.indexOf("anonymous")>-1)toUpdate.anonymous=u.anonymous;
+            dao.save(toUpdate);
+        }
+        return(toUpdate);
+    }
+
+
+    @ApiMethod(name = "searchlocal", httpMethod = ApiMethod.HttpMethod.GET, path = "searchlocal")
+    public List<LocalFile> searchlocal(@Named("query") String q,@Named("event") String event) {
+        return dao.findLocal(q.toLowerCase(),event);
     }
 
 
     @ApiMethod(name = "searchtorrent", httpMethod = ApiMethod.HttpMethod.GET, path = "searchtorrent")
     public List<Song> searchtorrent(@Named("query") String q) {
-        RestCall r= new RestCall("https://torrentproject.se?filter=1102&orderby=best&num=40&safe=on&s=" + q + "&out=json", null, null) {
+        RestCall r= new RestCall<Song>("https://torrentproject.se?filter=1102&orderby=best&num=40&safe=on&s=" + q + "&out=json", null, null) {
             @Override
             public void onSuccess(String rep) {
-                this.songs=new ArrayList<>();
+                this.rc=new ArrayList<>();
                 try {
                     JSONObject j=new JSONObject(rep);
                     for(int i=1;i<=20;i++){
                         JSONObject obj=j.getJSONObject(String.valueOf(i));
                         String sTitle=obj.getString("title");
                         String sTorrent=j.getJSONObject(String.valueOf(i)).getString("torrent_hash");
-                        this.songs.add(new Song(sTitle,sTorrent,0));
+                        //String magnet="magnet:?xt=urn:btih:"+sTorrent+"&dn=Daft Punk Discovery&tr=http://109.121.134.121:1337/announce&tr=http://thetracker.org:80/announce&tr=http://tracker.kicks-ass.net:80/announce&tr=udp://109.121.134.121:1337/announce&tr=udp://178.33.73.26:2710/announce&tr=udp://explodie.org:6969/announce&tr=udp://p4p.arenabg.com:1337/announce&tr=udp://thetracker.org./announce&tr=udp://thetracker.org.:80/announce&tr=udp://tracker.bittorrent.am:80/announce&tr=udp://tracker.coppersurfer.tk:6969/announce&tr=udp://tracker.kicks-ass.net:80/announce&tr=udp://tracker.mg64.net:2710/announce&tr=udp://tracker.sktorrent.net:6969/announce&tr=udp://zer0day.ch:1337/announce";
+                        this.rc.add(new Song(sTitle,sTorrent,0));
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -363,7 +423,7 @@ public class Rest {
 
             @Override
             public List<Song> getSongs(){
-                return songs;
+                return rc;
             }
         };
 
@@ -381,6 +441,13 @@ public class Rest {
         List<User> lu = dao.getUsers(e.Presents);
         Collections.sort(lu);
         return (lu);
+    }
+
+    @ApiMethod(name = "closeevent", httpMethod = ApiMethod.HttpMethod.GET, path = "closeevent")
+    public void closeevent(@Named("event") String event,@Named("email") String email) {
+        Event e=dao.findEvent(event);
+        e.dtEnd=System.currentTimeMillis();
+        dao.save(e);
     }
 
 
@@ -416,9 +483,7 @@ public class Rest {
 
 
 
-    @ApiMethod(name = "closeevent", httpMethod = ApiMethod.HttpMethod.GET, path = "closeevent")
-    public void closeevent(@Named("event") String id,@Named("user") String email) {
-    }
+
 
 
 
