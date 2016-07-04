@@ -30,8 +30,8 @@ public class Tools {
 
 	private static final String ADMIN_EMAIL = "mailsellerserver@gmail.com";
 		
-	public static String sep_champs=",";
-	public static String sep_enreg="sepenreg";
+	private static String sep_champs=",";
+	private static String sep_enreg="sepenreg";
 	public static String char_perso="_";
 
     public static double distance(double lat_a, double lon_a, double lat_b, double lon_b) {
@@ -52,7 +52,7 @@ public class Tools {
         return (rad_dist * 3437.74677 * 1.1508) * 1609.3470878864446;
     }
 
-	public static long defaultValidityDelay=200*24*3600*1000; //200 jours de validity pour les parser
+	public static long defaultValidityDelay=200L*24L*3600L*1000L; //200 jours de validity pour les parser
 	
 	public static String convertStreamToString(InputStream is) {
 	    java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
@@ -157,9 +157,9 @@ public class Tools {
 				}
 				
 				rc.add(s);
-			};
-			
-			if(o instanceof InputStream){
+			}
+
+            if(o instanceof InputStream){
 				s=new Scanner((InputStream) o,"Cp1252").useDelimiter("\\A").next();
 			}
 			
@@ -315,11 +315,10 @@ public class Tools {
 
 	 * @return diff�rence entre deux date en heure
 	 */
-	public static Long dateDiff(Long d1, Long d2) {
+	private static Long dateDiff(Long d1, Long d2) {
 		if(d1==null)d1=0L;
 		if(d2==null)d2=0L;
-		Long delay=Math.abs(d1-d2)/(3600*1000);
-		return delay;
+        return Math.abs(d1-d2)/(3600*1000);
 	}
 
 	public static String traduit(String s,String lang){

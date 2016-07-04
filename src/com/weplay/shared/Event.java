@@ -18,6 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 package com.weplay.shared;
 
+import com.googlecode.objectify.annotation.Cache;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
@@ -36,26 +37,29 @@ import java.util.logging.Logger;
  *
  */
 @Entity
+@Cache
 public class Event implements Comparable<Event>,Serializable {
 	protected static final Logger log = Logger.getLogger(Event.class.getName());
 	
 	@Id public String Id="event"+System.currentTimeMillis(); 													//Id interne des messages
-	@Index public Long dtStart;
+	@Index
+    private Long dtStart;
 	@Index public Long dtEnd;
 
     public boolean opened=true;		//Indique si l'evt est ouvert au non invit�
-	public String title="";
-	public String logo="";
+	private String title="";
+	private String logo="";
 	public String ipAdresse=null;
-	public String facebook_event;
+	private String facebook_event;
 	public String idLieu=null;		//Description de l'endroit
 	public String password=null;
-	@Index public String owner=null;
-	public Integer maxOnline=50;
-	public String typeDemandes;
-	public String flyer="";
+	@Index
+    private String owner=null;
+	private Integer maxOnline=50;
+	private String typeDemandes;
+	private String flyer="";
 		
-	public List<Song> playlist=new ArrayList<Song>();
+	private List<Song> playlist=new ArrayList<Song>();
 	public List<String> Invites=new ArrayList<String>();				
 	public List<String> Presents=new ArrayList<String>();
 
@@ -67,12 +71,13 @@ public class Event implements Comparable<Event>,Serializable {
     public Double lng=0.0;
 
     public Integer scoreInvite=5;
-    public Integer scoreLikeSong=1;
+    private Integer scoreLikeSong=1;
     public Integer scorePostSong=-2;
     public Integer scoreStart=10;
     public Integer minScore=-20;
     public Integer scorePlaySong=2;
-
+    private Integer playlistLimits=20;
+    public Integer minDistance=1000;
 
 
     //@NotSaved public List<User> classement;
@@ -142,11 +147,10 @@ public class Event implements Comparable<Event>,Serializable {
 	public boolean addPresents(User u) {
 		if(!this.Presents.contains(u.email)){
 			this.Presents.add(u.email);
-			u.currentEvent=this.Id;
-			return true;
 		}
-		
-		return false;
+
+        u.currentEvent=this.Id;
+		return true;
 	}
 
 	public boolean delPresents(User u) {
@@ -162,9 +166,8 @@ public class Event implements Comparable<Event>,Serializable {
 	public String[] getDemande(int pos){
 		String[] s=this.typeDemandes.split("nature=");
 		if(pos>s.length)return null;
-		
-		String[] rc=("nature="+s[pos]).split("\n");
-		return rc;
+
+        return ("nature="+s[pos]).split("\n");
 	}
 	
 	public String getDemande(String nature){
@@ -174,7 +177,6 @@ public class Event implements Comparable<Event>,Serializable {
 			}	
 		}
 		return null;
-		
 	}
 
 
@@ -388,6 +390,22 @@ public class Event implements Comparable<Event>,Serializable {
 
     public void setScorePlaySong(Integer scorePlaySong) {
         this.scorePlaySong = scorePlaySong;
+    }
+
+    public Integer getPlaylistLimits() {
+        return playlistLimits;
+    }
+
+    public void setPlaylistLimits(Integer playlistLimits) {
+        this.playlistLimits = playlistLimits;
+    }
+
+    public Integer getMinDistance() {
+        return minDistance;
+    }
+
+    public void setMinDistance(Integer minDistance) {
+        this.minDistance = minDistance;
     }
 }
 

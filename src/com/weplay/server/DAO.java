@@ -40,7 +40,7 @@ import static com.googlecode.objectify.ObjectifyService.ofy;
  */
 public class DAO  {
 	private static final Logger log = Logger.getLogger(DAO.class.getName());
-    public static DAO dao=null;
+    private static DAO dao=null;
 
 	static 	{			
 			ObjectifyService.register(User.class);
@@ -48,7 +48,8 @@ public class DAO  {
 			ObjectifyService.register(Event.class);
 			ObjectifyService.register(Lieu.class);
             ObjectifyService.register(Photo.class);
-			}
+            ObjectifyService.register(LocalFile.class);
+    }
 
     public static synchronized DAO getInstance() {
         if (null == dao) {
@@ -62,8 +63,7 @@ public class DAO  {
 	
 	public List<Message> getPlayList(){
 		Long dtStart=System.currentTimeMillis()-10*3600*1000; //10 derniere heures
-		List<Message> lm=getMessages(dtStart,System.currentTimeMillis());
-		return lm;
+        return getMessages(dtStart,System.currentTimeMillis());
 	}
 	
 	public Key<User> save(User c) {
@@ -84,6 +84,7 @@ public class DAO  {
         ofy().delete().keys(ofy().load().type(Vote.class).keys().list());
         ofy().delete().keys(ofy().load().type(Lieu.class).keys().list());
         ofy().delete().keys(ofy().load().type(Event.class).keys().list());
+        ofy().delete().keys(ofy().load().type(LocalFile.class).keys().list());
 	}
 	
 
@@ -94,12 +95,6 @@ public class DAO  {
 			return ofy().load().type(Message.class).filter("idUser", user.email).list();
 	}
 
-	
-	public void delUser(User c){
-		//ofy().delete(this.findMessages(c));
-		//ofy().delete(c);
-	}
-	
 
 	public User findUser(User u) {
 		try{
@@ -150,7 +145,7 @@ public class DAO  {
 	
 
 
-	public List<Message> getMessages(long dtStart, long dtEnd) {
+	List<Message> getMessages(long dtStart, long dtEnd) {
 		return ofy().load().type(Message.class)
 					.filter("dtMesure >", dtStart)
 					.filter("dtMesure <", dtEnd).list();
@@ -223,13 +218,12 @@ public class DAO  {
 	 * @param dt
 	 * @return event actif at dt date
 	 */
-	public List<Event> findEvents(Long dt,Double lat,Double lng,Double distance) {
+	public List<Event> findEvents(Long dt,Double lat,Double lng) {
 		List<Event> le=new ArrayList<Event>();
 		if(lng==null || lat==null)return le;
         for(Event e:ofy().load().type(Event.class).filter("dtStart <=", dt)	.list()){
-            Double d=Tools.distance(lat,lng,e.lat,e.lng,'K');
-            if(e.dtEnd>dt && d<distance)
-                le.add(e);
+            Double d=Tools.distance(lat,lng,e.lat,e.lng,'K')*1000;
+            if(e.dtEnd>dt && d<e.minDistance)le.add(e);
         }
 		return le;
 	}
@@ -258,11 +252,14 @@ public class DAO  {
 	}
 
 	/**
-	 * Retourne les evenemnts actuellement actifs 
+	 * Retourne les evenemnts actuellement actifs
 	 * @return All actif events
 	 */
-	public List<Event> getActifEvents() {
-        return this.findEvents(System.currentTimeMillis(),0.0,0.0,100000.0);
+    List<Event> getActifEvents() {
+        return ofy().load().type(Event.class)
+                .filter("dtStart <=", System.currentTimeMillis())
+                .filter("dtEnd >", System.currentTimeMillis())
+                .list();
 	}
 
 	public void save(Vote vote) {
@@ -277,25 +274,13 @@ public class DAO  {
         return rc;
 	}
 
-	public List<Demande> getDemandeSince(Event e, Long date) {
-		List<Demande> rc=new ArrayList<Demande>();
-		if(e==null)return null;
-		for(User u:this.getUsers(e.Presents))
-			for(Demande d:u.demandes){
-				if(d.dtDemande>date){
-					d.to=u.email;
-					rc.add(d);
-				}
-			}
-		return rc;
-	}
 
 	/**
 	 * 
 	 * @param Id
 	 * @return
 	 */
-	public Lieu findLieu(String Id) {
+    Lieu findLieu(String Id) {
 		if(Id==null)return null;
 		return ofy().load().type(Lieu.class).id(Id).now();
 	}
@@ -315,6 +300,11 @@ public class DAO  {
 		ofy().save().entities(l);
 	}
 
+
+    public void save(LocalFile l){
+        ofy().save().entity(l);
+    }
+
 	public Lieu findLieu(String number, String street, String cp) {
 		for(Lieu l:ofy().load().type(Lieu.class).filter("CP", cp).list())
 			if(l.number.equals(number) && l.street.equals(street))return l;
@@ -333,11 +323,12 @@ public class DAO  {
         return ofy().load().type(Song.class).id(idsong).now();
     }
 
-    public Song getSongToPlay(String event) {
+    public List<Song> getSongToPlay(String event,Integer nbr) {
         List<Song> playlist=ofy().load().type(Song.class).filter("idEvent", event).filter("dtPlay",null).list();
-        if(playlist.size()==0)return null;
+        if(playlist.size()==0)return new ArrayList<Song>();
         Collections.sort(playlist);
-        return playlist.get(0);
+        if(nbr>playlist.size())nbr=playlist.size();
+        return playlist.subList(0,nbr);
     }
 
     public List<Photo> getPhoto(String event, long dtStart, long dtEnd) {
@@ -356,7 +347,23 @@ public class DAO  {
     }
 
     public List<Event> findActifEventsFrom(User u) {
-        List<Event> rc=ofy().load().type(Event.class).filter("owner",u.email).filter("dtEnd >",System.currentTimeMillis()).list();
+        return ofy().load().type(Event.class).filter("owner",u.email).filter("dtEnd >",System.currentTimeMillis()).list();
+    }
+
+    public void save(List<LocalFile> lf) {
+        ofy().save().entities(lf);
+    }
+
+    public List<LocalFile> findLocal(String q,String event) {
+        List<LocalFile> rc=new ArrayList<>();
+        for(LocalFile lf:ofy().load().type(LocalFile.class).filter("event",event).list())
+            if(lf.getText().indexOf(q)>=0)
+                rc.add(lf);
         return rc;
+    }
+
+    public void razlocalfile(String event) {
+        List<LocalFile> rc=ofy().load().type(LocalFile.class).filter("event", event).list();
+        ofy().delete().entities(rc);
     }
 }

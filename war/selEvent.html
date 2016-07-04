@@ -3,110 +3,154 @@
 <meta charset="ISO-8859-1">
 <meta name="viewport" content="width=320">
 <link rel="stylesheet" type="text/css" href="Leficarbar.css">
+    <style type="text/css">
+        html, body { height: 100%; margin: 0; padding: 0; }
+        #map { height: 100% }
+    </style>
 <title>Choisir un évenement</title>
 </head>
 <body>
 
-<div id="lblMessage"></div>
-<script src="Main.js"></script>
-<script src="Tools.js"></script>
+
 
 <div class="main-div">
 
+    <div id="lblMessage"></div>
+
+    <br>
+    <a class="mobilebutton" href="javascript:add()">New Event</a><br>
+
+    <div id="myperso"></div>
+
 <br>
-<div align="center">
-<table>
-<tr>
-<td><div id="myperso"></div></td>
-<td><a href="login.html?nologin">Changer d'utilisateur</a><br><a href="delUser">Effacer mon compte</a></td>
-</tr>
-</table>
+    <!--
+        <div align="center">
+
+        <table>
+    <tr>
+    <td></td>
+    <td><a href="login.html?nologin">Changer d'utilisateur</a><br><a href="delUser">Effacer mon compte</a></td>
+    </tr>
+    </table>
+    </div>
+
+    <div id="zone_events" style="text-align:center;">
+        <div style="display:inline-block;width:500px;height:300px" id="map"></div>
+    </div>
+
+-->
+<div style="display:inline;" class="main-div">
+    <h1>Nearest event</h1>
+    <div style="display:inline-block;width:500px;height:300px" id="map"></div><br>
+    <br>
+    <div class="main-div" style="display: inline;width:300px;" id="preview"></div>
 </div>
 
-<h1>Les soirées proches</h1>
-<div id="zone_events" style="text-align:center;"></div>
 
-<h1>Mes soirées</h1>
-    <div id="zone_events_from" style="text-align:center;"></div>
-
-
-    <br><br>
-<a class="mobilebutton" href="javascript:add()">Créer un evenement</a><br>
-
-</div>
-
-<script>
+    <h1>My events</h1>
+        <div id="zone_events_from" style="text-align:center;"></div>
+        <br><br>
 
 
-var pos=null;
-var user=null;
-var event=null;
 
-function add(){
-    location.href="addEvent.html?email="+getParam()["email"];
-}
+    </div>
 
-function setEvent(id,bPass){
-	var password="";
-	if(bPass)password=prompt("mot de passe");
-    join(id,getParam()["email"],password,getParam()["from"],function(rep){
-        if(rep.result.currentEvent.length>0)
-            location.href="photo.html?event="+id+"&email="+user.email;
-        else
-            informe("impossible de ce joindre à cet évenement");
-    });
-}
+    <script>
 
 
-function refreshEvent(){
-    informe("loading",true,"zone_events");
-    informe("loading",true,"zone_events_from");
+    var pos={lat:48,lng:2};
+    var user=null;
+    var zoom=12;
+    var event=null;
+    var map=null;
 
-    geteventsfrom(getParam()["email"],function(evts){
-        document.getElementById("zone_events_from").innerHTML=showEvents(evts,null);
-    });
 
-    if (navigator.geolocation){
-        navigator.geolocation.getCurrentPosition(function(position){
-            pos=position.coords;
+    function add(){
+        location.href="addEvent.html?email="+getParam()["email"];
+    }
 
-            geteventsaround(position.coords,function(evts){
-                document.getElementById("zone_events").innerHTML=showEvents(evts,position.coords);
-            });
-        },function(){
-            informe("Geoloc failed, retry page loading",false);
+    function setEvent(id,bPass){
+        var password="";
+        if(bPass)password=prompt("mot de passe");
+
+        join(id,getParam()["email"],password,getParam()["from"],function(rep){
+            if(rep.result.currentEvent.length>0)
+                location.href="photo.html?event="+id+"&email="+user.email;
+            else
+                informe("impossible de ce joindre à cet évenement");
         });
     }
-}
 
-function start(){
-        informe("loading",true,"myperso");
-        getuser(getParam()["email"],function(rep) {
-            user= rep.result;
 
-            if(getParam()['event']!=null)
-                setEvent(getParam()['event'],false);
-            else
-                getHTMLUser(user, function (code) {
-                    document.getElementById("myperso").innerHTML = code;
-                }, 60)
+    function showMaps(){
+        if(map==null){
+            map = new google.maps.Map($("map"), {
+                center: pos,
+                zoom: zoom
+            });
+            map.addListener("center_changed",function(){showEventsOnMap(map,user,$("preview"),300);});
+        }
+
+        showEventsOnMap(map,user,$("preview"));
+    }
+
+    function start() {
+        informe("loading",true,"map");
+        informe("loading",true,"zone_events_from");
+        getuser(getParam()["email"], function (rep) {
+            user = rep.result;
+            loadScript("https://maps.googleapis.com/maps/api/js?key=AIzaSyC9lw5AL7IdrjuJXbHkQ6Gjs8nqtS31AB8",function() {
+                if (getParam()['event'] != null)
+                    setEvent(getParam()['event'], false);
+                else
+                    getHTMLUser(user, function (code) {document.getElementById("myperso").innerHTML = code;}, 60);
+
+                geteventsfrom(getParam()["email"],function(evts){
+
+                    $("zone_events_from").innerHTML="";
+                    if(evts==undefined || evts==null || evts.length==0)
+                        $("zone_events_from").innerHTML="<p>Aucun evenement disponible</p>";
+                    else
+                        for(var i=0;i<evts.length;i++) {
+                            var evt = evts[i];
+                            if((user.currentEvent==evt.Id  && getParam()["nologin"]==undefined) || getParam()["event"]==evt.Id)
+                                setEvent(evt.Id,false);
+                            else
+                                $("zone_events_from").innerHTML += showEventIn(evt, null,150)+"<br><br>";
+                        }
+                });
+
+                if (navigator.geolocation){
+                    navigator.geolocation.getCurrentPosition(function(position){
+                        pos={lat:position.coords.latitude,lng:position.coords.longitude};
+                        zoom=15;
+                        showMaps();
+                    },function(){
+                        informe("%danger Geoloc required ... refresh in 30 sec ...",false,"zone_events");
+                        showMaps();
+                    });
+                }
+                setInterval(showMaps, 30000);
+
+            });
         });
+    }
 
-        refreshEvent();
-        setInterval(refreshEvent,10000);
-}
-</script>
+    </script>
 
-<script>
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+    <script>
+        (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+            (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+                m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+        })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
 
-    ga('create', 'UA-79765109-1', 'auto');
-    ga('send', 'pageview');
+        ga('create', 'UA-79765109-1', 'auto');
+        ga('send', 'pageview');
+    </script>
 
-</script>
+<script src="Tools.js"></script>
+<script src="Main.js"></script>
 
-</body>
-</html>
+
+    </body>
+    </html>

@@ -1,0 +1,114 @@
+<html>
+<head>
+<meta charset="ISO-8859-1">
+
+    <script src="Tools.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="Leficarbar.css">
+    <meta name="viewport" content="width=320">
+    <script src="webtorrent.min.js"></script>
+
+<title>Deezer Players</title>
+</head>
+<body onload="start()">
+
+<div id="player_zone" style="width:100%">
+    <audio id="player" controls="controls">
+        <source src="" type="audio/mp3" />
+        Votre navigateur n'est pas compatible
+    </audio>
+</div>
+
+<div id="playlist"></div>
+
+<script>
+
+var timer=null;
+var crossfadeTimer=null;
+var gEnd=null;
+var gStep=0;
+var player=document.getElementById("player");
+var gVolume=0;
+var path=getParam()["path"];
+var ready=false;
+
+function setVolume(vol){
+    if(vol<=100 && vol>=0)
+        player.volume=vol/100;
+}
+
+function fade(step,func){
+    step=step/100;
+    clearInterval(crossfadeTimer);
+    crossfadeTimer = setInterval(function () {
+        if(player.volume+step>0 && player.volume+step<1)
+            player.volume+=step;
+        else {
+            if (step < 0){
+                player.volume = 0;
+                player.pause();
+            }
+            else
+                player.volume = 1;
+            if(func!=undefined)func(player.volume);
+        }
+    }, 500);
+}
+
+function getVolume(){
+    return player.volume*100;
+}
+
+function isReady(){
+    return player.readyState;
+}
+
+
+function findFile(name){
+    var files=parent.document.getElementById("fileselector").files;
+    for(var i=0;i<files.length;i++){
+        if(files[i].name.toLowerCase()===name.toLowerCase())
+            return files[i];
+    }
+    return null;
+}
+
+
+function load(name,func){
+    var f=findFile(name);
+    var url;
+    if(window.createObjectURL){
+        url = window.createObjectURL(f)
+    }else if(window.createBlobURL){
+        url = window.createBlobURL(f)
+    }else if(window.URL && window.URL.createObjectURL){
+        url = window.URL.createObjectURL(f)
+    }else if(window.webkitURL && window.webkitURL.createObjectURL){
+        url = window.webkitURL.createObjectURL(f)
+    }
+
+    player.oncanplay=func;
+    player.src = url;
+}
+
+
+function isPlaying(){
+    return(player.paused==false);
+}
+
+function play(song,delay,func) {
+    if (song == null || song == undefined)return;
+    if (delay == undefined)delay = 0;
+
+    load(song, function () {
+        player.play();
+        func(player.duration);
+    });
+}
+
+function start(){
+
+}
+</script>
+</body>
+</html>

@@ -1,5 +1,6 @@
 package com.weplay.shared;
 
+import com.googlecode.objectify.annotation.Cache;
 import com.googlecode.objectify.annotation.Index;
 import com.googlecode.objectify.annotation.Subclass;
 
@@ -7,18 +8,25 @@ import java.io.Serializable;
 import java.util.ArrayList;
 
 @Subclass(index=true)
+@Cache
 public class Song extends Message implements Serializable,Comparable<Song> {
-	private static final long serialVersionUID = 1L;
+	public static final long serialVersionUID = 1L;
+    private static final Integer TORRENT = 0;
+    public static final Integer DEEZER = 1;
+    public static final Integer SPOTIFY = 2;
+    public static final Integer LOCAL= 3;
+
 
     @Index
 	public Long dtPlay=null;		//Date � laquel la musique est pass�
-    public Integer duration=0;
-    public String firstname="";
+    private Integer duration=0;
+    private String firstname="";
 
     public ArrayList<String> votants=new ArrayList<String>();
 	public Integer score=0;
+    private Integer origin=TORRENT;
 	
-	public Song(){};
+	public Song(){}
 
     public Song(String title, String htag,Integer duration) {
         super();
@@ -100,4 +108,11 @@ public class Song extends Message implements Serializable,Comparable<Song> {
     }
 
 
+    public Integer getOrigin() {
+        return origin;
+    }
+
+    public void setOrigin(Integer origin) {
+        this.origin = origin;
+    }
 }

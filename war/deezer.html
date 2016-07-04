@@ -5,15 +5,18 @@
 <link rel="stylesheet" type="text/css" href="Leficarbar.css">
 
 <title>Music search</title>
-    <script src="Tools.js"></script>
-    <script src="Main.js"></script>
+<script src="Tools.js"></script>
+<script src="Main.js"></script>
+
 </head>
 <body>
-
-Search:
-<input id="query" value="" autofocus="true" onClick="this.setSelectionRange(0, this.value.length)" onkeyup="refreshQuery()"><br><br>
-
-
+<div id="lblMessage"></div>
+<table><tr>
+    <td>Search</td>
+    <td><input id="query" value="" autofocus="true" onfocus="this.setSelectionRange(0, this.value.length);" onkeyup="refreshQuery()"></td><td>
+    <img class="small-icon" src="help.png" onclick="javascript:window.open('http://www.uk-charts.top-source.info/2000-to-2009.shtml');"></td>
+</tr></table>
+<br><br>
 
 <div class="main-div" id="result"></div>
 
@@ -26,73 +29,127 @@ var myevent=getParam()["event"];
 var user=null;
 var result=document.getElementById("result");
 
+
+
 function getCode(songs){
     var code="<table>";
+    var libOrigin=["torrent","deezer","spotify","local"];
 
     songs.forEach(function(song){
+        var artist="";
+        if(song.artist!=undefined) {
+            if (song.artist.name != undefined)
+                artist = song.artist.name;
+            else
+                artist = song.artist;
+        }
+
+        if(song.text==undefined)song.text=song.id;
+        var title=song.title.replace(new RegExp("'",'g')," ");
         var jsonSong=JSON.stringify({
             id:song.id,
-            title:song.title.replace(new RegExp("'",'g')," "),
+            title:title,
+            origin:song.origin,
+            text:song.text,
             duration:song.duration,
-            from:getParam()["email"]+";"+getParam()["firstname"],author:song.artist.name
-                }).replace(new RegExp('"', 'g'),"'");
+            from:getParam()["email"]+";"+getParam()["firstname"],
+            author:artist
+        }).replace(new RegExp('"', 'g'),"'");
 
-        var name="";
-        if(song.artist!=undefined)name=song.artist.name;
-        code=code+"<tr><td>"+name+"</td><td><a href=\"javascript:add("+jsonSong+")\">"+song.title+"</a></td></tr>";
+        var charts="http://www.officialcharts.com/search/singles/"+title.replace(new RegExp(" ",'g'),"%20");
+
+        code=code+"<tr><td>"+artist+"</td><td><a href=\"javascript:add("+jsonSong+")\">";
+        code=code+song.title+"</a></td><td>"+libOrigin[song.origin].substr(0,1).toUpperCase()+"</td>";
+        code=code+"<td><a href='"+charts+"'>charts</a></td></tr>";
     });
 
     return code+"</table>";
 }
 
+
 function refreshQuery(){
     var q=document.getElementById("query").value;
     if(q.length>2){
 
+        setCookie("last_search",q);
+        var code="";
 
-        DZ.api('/search/?q='+q, function(response){
-            document.getElementById("result").innerHTML=getCode(response.data);
+        searchlocal(q,getParam()["event"],function(resp){
+            songs=resp.result.items;
+            if(songs!=undefined)
+                code=code+getCode(songs);
+
+            DZ.api('/search/?q='+q, function(response){
+                for(var i=0;i<response.data.length;i++)response.data[i].origin=1;
+                code=code+getCode(response.data);
+                /*
+                searchtorrent(q,function(songs){
+                    code=code+getCode(songs.result.items);
+                });
+                */
+                $("result").innerHTML=code;
+                informe("");
+            });
         });
 
 
-        //searchtorrent(q,function(songs){document.getElementById("result").innerHTML=getCode(songs.result.items);});
+
     }
-}
-
-function start(){
-
-    DZ.init({
-        appId  : '182662',
-        channelUrl : 'https://leficarbar-1342.appspot.com/channel.html'
-    });
-
-    getuser(getParam()["email"],function(rep){
-        user=rep.result;
-    });
-
-    document.getElementById("query").value=getParam()["q"];
-    refreshQuery();
 }
 
 function add(song){
     var s={};
+
     s.title=song.title;
-    s.from=user.email+";"+user.firstname;
+    s.from=user.email+";"+user.firstname+";"+user.anonymous;
     s.type=3;
     s.idEvent=getParam()["event"];
-    s.text=song.id;
+    s.origin=song.origin;
+    s.text=song.text;
     s.author=song.author;
     s.dtPlay=null;
-    s.Id= s.idEvent+"_"+song.id;
+    s.Id=s.idEvent+"_"+song.id;
     s.duration=song.duration;
 
-    addsong(s.idEvent,s,function(rep){
-        if(getParam()["close"]!="false")
-            window.close();
-        else
-            location.href="photo.html?message=song+send&event="+getParam()["event"]+"&email="+getParam()["email"];
-    });
+    informe(s.title+" inserting",true);
+    setInterval(function(){
+        addsong(s.idEvent,s,function(rep){
+            informe("Song added");
+            if(getParam()["close"]!="false")
+                window.close();
+            else
+                location.href="photo.html?message=song+send&event="+getParam()["event"]+"&email="+getParam()["email"];
+        },function(err){
+            informe("Song not added : "+err);
+        });
+    },500);
 }
+
+
+
+
+function start(){
+    informe("PLaylist loading ...",true);
+    getuser(getParam()["email"],function(rep){
+        user=rep.result;
+        DZ.init({appId  : '182662',channelUrl : 'https://weplaywebsite.appspot.com/channel.html'});
+
+        var elt=document.getElementById("query");
+
+        if(getCookie("last_search")==null)
+            elt.value=getParam()["q"];
+        else
+            elt.value=getCookie("last_search");
+
+        elt.setSelectionRange(0, elt.value.length);
+
+        refreshQuery();
+    });
+
+}
+
+    informe("loading ...",true);
+
 </script>
 
 </body>

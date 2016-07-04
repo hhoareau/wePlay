@@ -27,7 +27,7 @@ package com.weplay.server;
  * 
  */
 @SuppressWarnings("serial")
-public class respons  {
+class respons  {
 	//TODO passer en m�thode post pour la s�curit�
 	/*
     public void doGet(HttpServletRequest req, final HttpServletResponse resp) throws IOException {

@@ -19,15 +19,11 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 package com.weplay.shared;
 
 
-import com.weplay.server.Rest;
-import com.google.appengine.api.images.Composite;
-import com.google.appengine.api.images.Composite.Anchor;
-import com.google.appengine.api.images.Image;
-import com.google.appengine.api.images.ImagesServiceFactory;
-import com.google.appengine.api.urlfetch.URLFetchServiceFactory;
+import com.googlecode.objectify.annotation.Cache;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
+import com.weplay.server.Rest;
 
 import javax.mail.BodyPart;
 import javax.mail.MessagingException;
@@ -38,8 +34,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Serializable;
 import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
 
 
 /**
@@ -52,22 +46,23 @@ import java.util.ArrayList;
  *
  */
 @Entity
+@Cache
 public class Message implements Serializable {
 
-	public String text="";											//corps du mail
+	String text="";											//corps du mail
 	public String from="";								//Expediteur de l'email
-	public String title="";
+	String title="";
 
     @Index
     public Long dtMessage=null;				//Date de fabrication du mail
 	@Index
-    public Long type= Rest.TYPE_DEMANDE;
+    Long type= Rest.TYPE_DEMANDE;
     @Index
     public String idEvent="";
 
-    public Boolean anonymous=false;
+    private Boolean anonymous=false;
 
-    public String author="";
+    private String author="";
     public Long dtCreate=System.currentTimeMillis();
 
     @Id
@@ -202,8 +197,8 @@ public class Message implements Serializable {
 	 * @param d
 	 * @throws IOException 
 	 * @throws MalformedURLException 
-	 */
-	public Message(Demande d,User from,User to) throws MalformedURLException, IOException {
+
+	public Message(Demande d,User from,User to) throws IOException {
 		this.from=d.from;
 		
 		if(d.reponse==null)
@@ -238,7 +233,7 @@ public class Message implements Serializable {
 			//this.photo= Base64.encode(c.getImageData());
 		}
 	}
-	
+	*/
 
 	public String getText(){
 		return this.text;

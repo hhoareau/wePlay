@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Facebook Login JavaScript Example</title>
+    <meta name="viewport" content="width=320">
+    <title>Facebook Login</title>
     <meta charset="UTF-8">
-    <script src="Main.js"></script>
+
 </head>
 <body>
 <script>
@@ -59,14 +60,17 @@
         FB.api('/me', {fields: 'last_name,first_name,email'}, function(response) {
             adduser(response,function(user){
                 var event=getParam()["event"];
+
+                var from="&from="+getParam()["from"];
+                if(getParam()["from"]==null || getParam()["from"]==undefined)from="";
+
                 if(event!=null)
-                    document.location.href="selEvent.html?email="+user.result.email+"&event="+event+"&from="+getParam()["from"];
+                    document.location.href="selEvent.html?email="+user.result.email+"&event="+event+from;
                 else
                     document.location.href="selEvent.html?email="+user.result.email;
             });
         });
     }
-
 
     function start(){
         FB.init({
@@ -80,11 +84,12 @@
     }
 </script>
 
+<div id="status"></div>
 
+<div style="text-align: center">
+    <img src="logo440.png"><br>
+    <fb:login-button style="width=200px;fontsize:18;" scope="public_profile,email,user_events,user_friends" onlogin="checkLoginState();">Se connecter</fb:login-button>
 
-<fb:login-button scope="public_profile,email" onlogin="checkLoginState();"></fb:login-button>
-
-<div id="status">
 </div>
 
 <script>
@@ -97,6 +102,10 @@
     ga('send', 'pageview');
 
 </script>
+
+<script src="Tools.js"></script>
+<script src="Main.js"></script>
+
 
 </body>
 </html>

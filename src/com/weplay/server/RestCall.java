@@ -1,6 +1,5 @@
 package com.weplay.server;
 
-import com.weplay.shared.Song;
 import com.weplay.shared.Tools;
 
 import java.io.*;
@@ -12,11 +11,11 @@ import java.util.List;
 import java.util.logging.Logger;
 
 //Classe utiliser pour effectuer les appels REST en mode GET ou POST aux API SFR 
-public abstract class RestCall  {
-	String id=null;
+abstract class RestCall<T>  {
+	private String id=null;
 	private static final Logger log = Logger.getLogger(RestCall.class.getName());
 
-    List<Song> songs=new ArrayList<>();
+    List<T> rc=new ArrayList<>();
 
 	//Constructeur
 	public RestCall(String urlServer,String params,String id) {
@@ -87,8 +86,7 @@ public abstract class RestCall  {
 	abstract public void onSuccess(String rep);
 	
 	//Idem que onSuccess pour les cas d'�chec
-	public void onFailure(int reponseCode) {}
+    void onFailure(int reponseCode) {}
 
-
-    abstract public List<Song> getSongs();
+    abstract public List<T> getSongs();
 }

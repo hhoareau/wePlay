@@ -4,10 +4,8 @@
 <meta name="viewport" content="width=340">
 
     <script src="Tools.js"></script>
-    <script src="Main.js"></script>
 
-    <title>Classement</title>
-
+    <title>Admin console</title>
 
 </head>
 <body>
@@ -15,7 +13,7 @@
 
 <div id="console" style="visibility: hidden">
 <a href="/_ah/admin">Admin local</a><br>
-<a href="https://console.cloud.google.com/appengine/quotadetails?project=leficarbar-1342&moduleId=default">Admin distant</a><br>
+<a href="https://console.cloud.google.com/appengine/quotadetails?project=weplaywebsite&moduleId=default">Admin distant</a><br>
 <a href="/">Connexion</a><br>
 <a href="javascript:raz(function(){window.open('/');})">Raz</a>
 </div>
@@ -35,7 +33,7 @@ Selectionner une soirée
 
 function onChangeEvent(idEvent){
 	var rc="<br><a href='gallery.html?photo_size=300&event="+idEvent+"'>Pele-Mele des photos</a>";
-	rc+="<br><a href='playlist.html?event="+idEvent+"'>PlayList musicale</a>";
+	rc+="<br><a href='playlist_old.html?event="+idEvent+"'>PlayList musicale</a>";
 	rc+="<br><a href='slideshow.html?event="+idEvent+"'>SlideShow des photos</a>";
 	rc+="<br><a href='charts.html?event="+idEvent+"'>Classement des invités</a>";
 	document.getElementById("zone_link").innerHTML=rc;	
@@ -47,7 +45,7 @@ function start(){
 	informe();
     document.getElementById("console").style.visibility="visible";
 
-	var idEvent=getParameters()["event"];
+	var idEvent=getParam()["event"];
 	if(idEvent)
 		onChangeEvent(idEvent);
 	else {
@@ -57,12 +55,7 @@ function start(){
             navigator.geolocation.getCurrentPosition(function (position) {
                 pos = position.coords;
                 geteventsaround({lat: pos.latitude, lng: pos.longitude}, function (rep) {
-                    if (rep == "No event") {
-                        window.location.href = "addEvent.html";
-                        return;
-                    }
-                    if (rep.indexOf("[") != 0)rep = "[" + rep + "]";
-                    JSON.parse(rep).forEach(function (event) {
+                    rep.forEach(function (event) {
                         lst.options[lst.options.length] = new Option(event.title, event.Id, true, true);
                         idEvent = event.Id;
                     });
@@ -83,6 +76,9 @@ Cliquer sur le flash code <br>pour ouvrir l'interface utilisateur<br>
 
 
 <br><br><a href='init'>Repartir de zéro (efface la base de donnees)</a>
+
+<script src="Main.js"></script>
+
 
 </body>
 </html>

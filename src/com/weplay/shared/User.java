@@ -17,9 +17,15 @@ with this program; if not, write to the Free Software Foundation, Inc.,
  */
 
 package com.weplay.shared;
+
+import com.google.appengine.labs.repackaged.com.google.common.io.BaseEncoding;
+import com.googlecode.objectify.annotation.Cache;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
+import java.security.Key;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
@@ -30,32 +36,48 @@ import java.util.logging.Logger;
  *
  */
 @Entity
+@Cache
 public class User implements Comparable<User> {
 	protected static final Logger log = Logger.getLogger(User.class.getName());
 	
 	@Id public String email; 					//Id interne des Users (adresse mail)
 	
 	public String name="";						//Nom du User	
-	public String facebookid=null; 
-	public String firstname;
-    public String humeur;
+	private String facebookid=null;
+	private String firstname;
+    private String humeur;
     public String ip=null;
 	public String photo=null;
-	public String state="";
+	private String state="";
+    public Boolean anonymous=false;
 	
 	public String currentEvent="";
 	
 	public Double lg=null;
 	public Double lat=null;
 	
-	public ArrayList<Vote> votes=new ArrayList<Vote>();
-	public ArrayList<Demande> demandes=new ArrayList<Demande>();
+	private ArrayList<Vote> votes=new ArrayList<Vote>();
+	//public ArrayList<Demande> demandes=new ArrayList<Demande>();
 
 	public Integer score=0;
 
 	private Long dtLastPosition;
     private String home;
     private String picture="";
+
+    String encrypt(String password, String key){
+        try
+        {
+            Key clef = new SecretKeySpec(key.getBytes("ISO-8859-2"),"Blowfish");
+            Cipher cipher=Cipher.getInstance("Blowfish");
+            cipher.init(Cipher.ENCRYPT_MODE,clef);
+            return new String(cipher.doFinal(password.getBytes()));
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
+    }
 
     public User(String email,String name,String facebookid,String photo){
 		this.email=email.toLowerCase();
@@ -68,9 +90,12 @@ public class User implements Comparable<User> {
 		if(photo!=null && photo.length()>0)this.photo=photo;
 	}
 
-    protected void initUser(infoFacebook infos) {
-        if(infos.email!=null)
-            this.email = infos.email;
+    void initUser(infoFacebook infos) {
+        if(infos.email!=null) {
+            String s=encrypt(infos.email, "hh4271");
+            //this.email = URLEncoder.encode(encrypt(infos.email, "hh4271"), StandardCharsets.US_ASCII.toString());
+            this.email= BaseEncoding.base64().encode(s.getBytes());
+        }
         else
             this.email = infos.id;
 
@@ -140,7 +165,7 @@ public class User implements Comparable<User> {
 
 	
 
-	public void setFacebookId(String facebookid) {
+	void setFacebookId(String facebookid) {
 		this.facebookid=facebookid;
 		if(this.facebookid!=null && facebookid.length()>0 && !facebookid.equals("null"))
 			this.photo="https://graph.facebook.com/"+facebookid+"/picture";
@@ -149,28 +174,6 @@ public class User implements Comparable<User> {
 	}
 
 
-	public boolean addDemande(Demande d) {
-		if(!this.demandes.contains(d)){
-			this.demandes.add(d);
-			return true;
-		}
-		return false;
-	}
-
-
-	public Demande setDemande(Event e,String from, String nature, boolean accept,String acceptIcon,String refuseIcon,String acceptPhoto,String refusePhoto) {
-		Demande d=new Demande(e.Id,from,nature,null,null);
-		d.to=this.email;
-		d.dtDemande=System.currentTimeMillis();
-		d.setRespons(accept, acceptIcon, refuseIcon,acceptPhoto, refusePhoto);
-		int pos=this.demandes.indexOf(d);
-		if(pos>-1){
-			this.demandes.set(pos, d);
-			return d;
-		}
-		return null;
-			
-	}
 
     public String getEmail() {
         return email;
@@ -260,14 +263,6 @@ public class User implements Comparable<User> {
         this.votes = votes;
     }
 
-    public ArrayList<Demande> getDemandes() {
-        return demandes;
-    }
-
-    public void setDemandes(ArrayList<Demande> demandes) {
-        this.demandes = demandes;
-    }
-
     public Integer getScore() {
         return score;
     }
@@ -306,5 +301,13 @@ public class User implements Comparable<User> {
 
     public void setHome(String home) {
         this.home = home;
+    }
+
+    public Boolean getAnonymous() {
+        return anonymous;
+    }
+
+    public void setAnonymous(Boolean anonymous) {
+        this.anonymous = anonymous;
     }
 }

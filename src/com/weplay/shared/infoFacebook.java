@@ -9,8 +9,8 @@ public class infoFacebook {
     String id="";
     String link="";
     String first_name="";
-    String last_name="";
-    String locale="";
+    private String last_name="";
+    private String locale="";
     String picture="";
 
     public infoFacebook(String s) {

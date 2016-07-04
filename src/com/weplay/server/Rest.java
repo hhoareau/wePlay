@@ -1,6 +1,5 @@
 package com.weplay.server;
 
-import com.weplay.shared.*;
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.Named;
@@ -8,6 +7,7 @@ import com.google.api.server.spi.config.Nullable;
 import com.google.appengine.labs.repackaged.org.json.JSONException;
 import com.google.appengine.labs.repackaged.org.json.JSONObject;
 import com.google.appengine.repackaged.com.google.gson.Gson;
+import com.weplay.shared.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,7 +25,7 @@ public class Rest {
     public static final Long TYPE_SONG = 3L;
     public static final Long TYPE_DEMANDE = 4L;
 
-    public static DAO dao = DAO.getInstance();
+    private static DAO dao = DAO.getInstance();
     public static Logger log = Logger.getLogger(String.valueOf(Rest.class));
 
     @ApiMethod(name = "geteventsaround", httpMethod = ApiMethod.HttpMethod.GET, path = "geteventsaround")
@@ -47,8 +47,7 @@ public class Rest {
 
     @ApiMethod(name = "getevent", httpMethod = ApiMethod.HttpMethod.GET, path = "getevent")
     public Event getevent(@Named("event") String id) {
-        Event rc=dao.findEvent(id);
-        return rc;
+        return dao.findEvent(id);
     }
 
 
@@ -122,8 +121,7 @@ public class Rest {
 
     @ApiMethod(name = "getuser", httpMethod = ApiMethod.HttpMethod.GET, path = "getuser")
     public User getuser(@Named("email") String email) {
-        User u=dao.findUser(email);
-        return u;
+        return dao.findUser(email);
     }
 
     @ApiMethod(name = "join", httpMethod = ApiMethod.HttpMethod.GET, path = "join")
@@ -168,10 +166,14 @@ public class Rest {
     }
 
     @ApiMethod(name = "uploadfiles", httpMethod = ApiMethod.HttpMethod.POST, path = "uploadfiles")
-    public void uploadfiles(LocalFile lf) {
-        Event e=dao.findEvent(lf.getEvent());
+    public void uploadfiles(localFiles j) {
+        List<LocalFile> lf=j.getFiles();
+        if(lf.size()==0)return;
+
+        Event e=dao.findEvent(lf.get(0).getEvent());
         if(e!=null){
-            lf.setText(lf.getText().toLowerCase());
+            //for(LocalFile f:lf){f.setText(f.getText().toLowerCase());}
+            //for(LocalFile f:lf)dao.save(f);
             dao.save(lf);
         }
     }
@@ -397,6 +399,7 @@ public class Rest {
 
     @ApiMethod(name = "searchlocal", httpMethod = ApiMethod.HttpMethod.GET, path = "searchlocal")
     public List<LocalFile> searchlocal(@Named("query") String q,@Named("event") String event) {
+        q=q.replace(" ","+");
         return dao.findLocal(q.toLowerCase(),event);
     }
 

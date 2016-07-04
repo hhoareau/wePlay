@@ -12,6 +12,8 @@ function copyToClipboard(obj) {
 	window.prompt('Press CTRL+C, then ENTER',obj);
 }
 
+
+
 function startFullScreen(){
 	//Fullscreen mode
 	var docElm = document.documentElement;
@@ -88,7 +90,7 @@ function getArrayFromString(s){
 function toDate(s){
 	var rc=new Date(s);
 	if(rc==null)
-		return s
+		return s;
 	else
 		return rc.toUTCString();
 }
@@ -114,29 +116,48 @@ function URLEncode(url) {
 	}
 
 
+function showLastPhoto(eventid,elt,func){
+    getLastPhoto(myEvent.Id,function(photo){
+        if(photo.status==200){
+            elt.style.visibility="visible";
+            elt.src=photo.result.photo;
+        }
+        if(func!=undefined)func(photo);
+    });
+}
 
-
-function showClassement(idEvent,zone){
+function showClassement(idEvent,zone,bPts){
     getClassement(idEvent,function(rep){
         if(rep.result.items.length>0){
-            var rc="";
-            rep.result.items.forEach(function(user){
-                if(user.photo==undefined || user.photo.length==0)
-                    rc+=user.firstname+" : "+user.score+" pts";
-                else
-                    rc+="<img width='200px' src='"+user.photo+"'> : "+user.score+" points";
-                rc+="<br>";
+            var rc="<table style='width:100%'>";
+            rep.result.items.forEach(function(user) {
+                if (user.photo == undefined || user.photo.length == 0) {
+                    var profil=user.firstname;
+                    if(!user.anonymous)profil="<a href='https://www.facebook.com/"+user.facebookid+"'>"+profil+"</a>";
+                    rc += "<tr><td>" + profil + "</td>";
+                    if (bPts)rc += "<td>" + user.score + " pts</td>";
+                    rc += "</tr>";
+                } else {
+                    rc += "<tr><td><img width='200px' src='" + user.photo + "'></td>";
+                    if (bPts)rc += "<td>" + user.score + " pts</td>";
+                    rc += "</tr>";
+                }
             });
-            zone.innerHTML=rc;
+            zone.innerHTML=rc+"</table>";
         }
     });
 }
 
 
-function getParameters() {
-	var t = location.search.substring(1);
-	var rc=getArrayFromString(t);
-	return rc;
+function getParam(param) {
+    var vars = {};
+    window.location.href.replace( location.hash, '' ).replace(
+        /[?&]+([^=&]+)=?([^&]*)?/gi, // regexp
+        function( m, key, value ) { // callback
+            vars[key] = value !== undefined ? value : '';
+        }
+    );
+    return vars;
 }
 
 
@@ -153,11 +174,13 @@ function addElement(lstId,eltLib,eltValue){
 var idTimeout;
 
 function informe(s,waiting,zone){
-	
+
+    if(document.body==null)return;
+
 	zone=zone || "lblMessage";
 	
 	if(s==null || s==undefined){
-		s=getParameters()["message"];
+		s=getParam()["message"];
 		if(s!=undefined)
 			while(s.indexOf("%20")!=-1)s=s.replace("%20"," ");
 	}
@@ -168,7 +191,7 @@ function informe(s,waiting,zone){
 		lblMessage=document.getElementById(zone);
 	}
 	
-	lblMessage.innerHTML="<img id='pctWaiting' src='./wait.gif'></img>";
+	lblMessage.innerHTML="<img id='pctWaiting' src='./wait.gif'>";
 	var pctWaiting=document.getElementById("pctWaiting");
 	
 	if(waiting){
@@ -180,8 +203,14 @@ function informe(s,waiting,zone){
 	}		
 
     if(s==undefined)s="";
-	lblMessage.innerHTML+=""+s+"";	
+    s=s.replace("%danger","<img class='small-icon' src='danger.gif'>");
+    lblMessage.innerHTML+=s;
 }
+
+function $(id){
+    return document.getElementById(id);
+}
+
 
 function sendForm(url,formid,onEnd){
 	var frm=document.getElementById(formid);
@@ -318,7 +347,7 @@ function findElt(arr,obj) {
 
 Array.prototype.clear = function() {
     this.splice(0, this.length);
-}
+};
 
 
 
@@ -372,7 +401,7 @@ function StringToDate(date) {
 
 function mkDate(lg,format){
 	if(lg==null)lg=Date.now();
-	var date=new Date(lg)
+	var date=new Date(lg);
 	if (format==null)
 		return date.getDate()+"/"+(date.getMonth()+1)+"/"+date.getFullYear();
 	else{
@@ -466,20 +495,29 @@ function showPlaylist(evt){
 
         getplaylist(evt.id,function(resp){
             var playlist=resp.result.items;
-            playlist.forEach(function(song){
-                var firstname= song.from.split(";")[1];
-                var email=song.from.split(";")[0];
-                var link="<a href=\"javascript:seluser('"+email+"')\">"+firstname+"</a>";
-                if(song.dtPlay==null){
-                    //getuser(song.from,function(resp){document.getElementById("zone_"+song.title).innerHTML=resp.url;});
-                    code+="<tr><td style='width:450px'>"+song.author+" - "+song.title+" ("+link+")</td><td><div id='zone_"+song.title
-                    +"'></div></td><td style='width:20%'><a href='javascript:onSetScore(1,\""+song.Id
-                    +"\")'><img style='width:23px;margin:1px' src='arrow_up.png'></a><a href='javascript:onSetScore(-1,\""
-                    +song.Id+"\")'><img style='width:23px;margin:1px' src='arrow_down.png'></a></td><td style='align-text:right,width:5%'>"+song.score+"</td></tr>";
-                }
-            });
-            code+="</table>";
-            div.innerHTML=code;
+            if(playlist!=undefined) {
+                playlist.forEach(function (song) {
+                    var firstname = song.from.split(";")[1];
+                    var email = song.from.split(";")[0];
+                    var link = "(<a href=\"javascript:seluser('" + email + "')\">" + firstname + "</a>)";
+                    if (song.from.split(";")[2] == "true") {
+                        email = "?";
+                        link = "";
+                        firstname = "?";
+                    }
+
+
+                    if (song.dtPlay == null) {
+                        //getuser(song.from,function(resp){document.getElementById("zone_"+song.title).innerHTML=resp.url;});
+                        code += "<tr><td><img src='disc.png' class='small-icon'></td><td style='width:450px'>" + song.author + " - " + song.title + link + "</td><td><div id='zone_" + song.title
+                        + "'></div></td><td style='width:20%'><a href='javascript:onSetScore(1,\"" + song.Id
+                        + "\")'><img style='width:23px;margin:1px' src='arrow_up.png'></a><a href='javascript:onSetScore(-1,\""
+                        + song.Id + "\")'><img style='width:23px;margin:1px' src='arrow_down.png'></a></td><td style='align-text:right,width:5%'>" + song.score + "</td></tr>";
+                    }
+                });
+                code += "</table>";
+                div.innerHTML = code;
+            }
         });
 
 
@@ -514,37 +552,27 @@ function resize_image(i,maxlen,angle){
 
 
 
-function showEvents(events,user_pos){
-    var code="";
-    if(events==undefined || events==null || events.length==0)
-        code="<p>Aucun evenement disponible</p>";
-    else
-        for(var i=0;i<events.length;i++){
-            var evt=events[i];
-            var d="";
-            if(user_pos!=null)
-                d=" ("+distance(user_pos.latitude,user_pos.longitude,evt.lat,evt.lng).toFixed(1)+"Km)";
 
-            code+="<a href='javascript:setEvent(\""+events[i].Id+"\",false)'>"+evt.title+d+"<br>";
-            if(evt.flyer.length>0)code+="<img style='max-width:300px;' src='"+evt.flyer+"'>";
-            code+="</a><br>";
 
-            if((user.currentEvent==events[i].Id  && getParameters()["nologin"]==undefined) || getParameters()["event"]==events[i].Id)setEvent(events[i].Id,false);
+function iOS() {
+
+    var iDevices = [
+        'iPad Simulator',
+        'iPhone Simulator',
+        'iPod Simulator',
+        'iPad',
+        'iPhone',
+        'iPod'
+    ];
+
+    if (!!navigator.platform) {
+        while (iDevices.length) {
+            if (navigator.platform === iDevices.pop()){ return true; }
         }
+    }
 
-    return code;
+    return false;
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -572,7 +600,7 @@ function lanczosCreate(lobes){
       return 0;
     x *= Math.PI;
     if (Math.abs(x) < 1e-16) 
-      return 1
+      return 1;
     var xx = x / lobes;
     return Math.sin(x) * Math.sin(xx) / x / xx;
   }
@@ -661,7 +689,7 @@ thumbnailer.prototype.process2 = function(self){
     }
     self.ctx.putImageData(self.src, 0, 0);
     self.canvas.style.display = "block";
-}
+};
 
 function deg2rad(deg) {
     return deg * (Math.PI/180)
@@ -677,6 +705,7 @@ function distance(lat1,lon1,lat2,lon2) {
             Math.sin(dLon/2) * Math.sin(dLon/2)
         ;
     var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    //noinspection UnnecessaryLocalVariableJS
     var d = R * c; // Distance in km
     return d;
 }

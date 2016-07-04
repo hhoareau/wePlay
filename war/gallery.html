@@ -6,7 +6,7 @@
 
 <title>Pele-Mele</title>
 </head>
-<body style="background-color:black">
+<body style="background-color:black;border-color: black;">
 
 <script src="Tools.js"></script>
 <script src="Main.js"></script>
@@ -19,10 +19,10 @@
 
 var date=0;
 var dateDemande=0;
-var photo_size=getParameters()["photo_size"];
+var photo_size=getParam()["photo_size"];
 var canvas = document.getElementById('myCanvas');
 var context = canvas.getContext('2d');
-var idEvent=getParameters()["event"];
+var idEvent=getParam()["event"];
 var zones=null;
 var x=0,y=0;
 
@@ -85,14 +85,12 @@ function addPortrait(xx,yy,author,size,onEnd){
 
 
 function addWall(x,y,message,onEnd){
-
-	var angle=(Math.random()-0.5)*60;
+	var angle=(Math.random()-0.5)*20;
 	var ech=photo_size/300;
 	
 	context.save();
-	context.translate(x/2,y/2);
 	context.rotate(angle*Math.PI/180);
-	
+
 		if(message.type==0){
 			var imgPapier = new Image();
 			imgPapier.onload=function(){
@@ -103,51 +101,61 @@ function addWall(x,y,message,onEnd){
 					//addPortrait(3,3,message.author,40*ech,onEnd);
 				} else {
 					resize(photo_size*0.75,message.photo,function(imageObj,lx,ly){		
-							context.drawImage(imgPapier, 0, 0,lx+20*ech,ly+58*ech);
-							context.drawImage(imageObj, 10*ech, 10*ech,lx,ly);
+							context.drawImage(imgPapier, x, y,lx+20*ech,ly+58*ech);
+							context.drawImage(imageObj, x+10*ech, y+10*ech,lx,ly);
 							//addPortrait(4*ech,ly+15*ech,message.author,40*ech,onEnd);
 							if( message.text != undefined){
-                                addText(context,50*ech,ly+22*ech,"black",20*ech,message.text,null,photo_size-100*ech);
+                                addText(context,x+15*ech,y+ly+22*ech,"black",20*ech,message.text,null,photo_size-100*ech);
                             }
+                            context.rotate(-angle*Math.PI/180);
                             onEnd();
 						});
 				}
+
 			};	
 			imgPapier.src="papier.png";	
 		}
 }
 
+function getMin(zn){
+    var rc=1000;
+    for(var i=0;i<zn.length;i++)
+        for(var j=0;j<zn[i].length;j++)
+            if(zn[i][j]<rc)rc=zn[i][j];
+
+    return rc;
+}
+
 
 function getXY(canvas,func){
-	
-	var nb_col=Math.round(canvas.width/photo_size);
-	var nb_row=Math.round(canvas.height/photo_size);
+    var nb_col=Math.trunc(canvas.width/photo_size)-1;
+    var nb_row=Math.trunc(canvas.height/photo_size)-1;
+    if(nb_col==0)nb_col=1;
+    if(nb_row==0)nb_row=1;
+
 	var p=0;
 
     if(zones==null){
         zones=new Array(nb_row);
-        for(k=0;k<nb_row;k++)
+        for(k=0;k<nb_row;k++){
             zones[k]=new Array(nb_col);
+            for(var i=0;i<zones[k].length;i++)
+                zones[k][i]=0;
+        }
+
     }
 
+    var min=getMin(zones);
+    var yy=0;
+    var xx=0;
+    do{
+        yy=Math.trunc(Math.random()*nb_row);
+        xx=Math.trunc(Math.random()*nb_col);
+    } while (zones[yy][xx]!=min);
 
-	var min=100;
-    var i,j;
-	for(var k=0;k<nb_row;k++){
-        for(var l=0;l<nb_col;l++){
-            if(zones[k][l]==undefined)
-                zones[k][l]=0;
-
-            if(zones[k][l]<min){
-                min=zones[k][l];
-                i=k;
-                j=l;
-            }
-        }
-	}
-
-	zones[i][j]++;
-    func((j+0.5)*photo_size,(i+0.5)*photo_size);
+	zones[yy][xx]++;
+    offset=Math.trunc(Math.random()*photo_size/3)+60;
+    func(xx*photo_size+offset,yy*photo_size+offset);
 }
 
 
@@ -187,7 +195,7 @@ function start(){
                 date=Date.parse(new Date());
 
                 function show(index){
-                    if(photos[index].dtMessage>date)date=photos[index].dtMessage
+                    if(photos[index].dtMessage>date)date=photos[index].dtMessage;
                     getXY(canvas,function(x,y){
                         addWall(x,y,photos[index],function() {
                             if(index+1<photos.length)

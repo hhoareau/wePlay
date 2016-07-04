@@ -9,19 +9,28 @@
     </style>
     <script src="Tools.js"></script>
     <script src="Main.js"></script>
-    <title>Event Maker Form</title>
+    <title>Make an Event</title>
 </head>
 <body>
 
 
 <div id="form" class="main-div">
-<h1>Créer un évenement</h1>
 
-    <a href="javascript:sendEvent()" class="mobilebutton">Enregistrer</a>
+    Titre<br>
+    <input  style="text-align:center;font-size:20px;" type="text" name="title" id="title" size="20" value=""  autofocus onchange="onChangePicture();">
+    <br><br>
+
+
+    <a href="javascript:sendEvent()" class="mobilebutton">Save</a>
     <br>
     <br>
- <div style="display:inline-block;width:500px;height:300px" id="map"></div>
-<!--
+
+    <div id="facebookevents_zone"></div>
+    <!-- <button class="mobilebutton" onclick="javascript:importFacebookEvents()">Import </button> -->
+
+    <div style="display:inline-block;width:500px;height:300px" id="map"></div>
+
+    <!--
 
  <input  style="text-align:center" type="text" name="lieu" id="lieu" size="20" value="" autofocus onchange="findLieu();onChangeTitre();">
 
@@ -36,23 +45,25 @@
 
 
  <br>Début<br>
- <input  style="text-align:center" type="date" name="dtStart" id="dtStart" size="10" value="" onchange="onChangePicture();">
- <input  style="text-align:center" type="time" name="dtTime" id="dtTime" size="5" value="" onchange="onChangePicture();">
+ <input style="text-align:center" type="date" name="dtStart" id="dtStart" size="10" value="" onchange="onChangePicture();">
+ <input style="text-align:center" type="time" name="dtTime" id="dtTime" size="5" value="" onchange="onChangePicture();">
  
  <br><br>
- Duree <input  style="text-align:center;width:50px;" type="number" name="duration" id="duration" value="24"> heures<br>
+ Duree <input  style="text-align:center;width:50px;" type="number" name="duration" id="duration" value="48"> heures<br>
  
  <br>
-Titre de l'évenement<br>
- <input  style="text-align:center" type="text" name="title" id="title" size="20" value=""  onchange="onChangePicture();">
- <br><br>
- 
- Mot de passe pour entrer (optionnel)<br>
+
+    Distance minimum y accéder<br>
+    <input  style="text-align:center" type="number" max="300000" value="500" id="minDistance">
+
+
+    Mot de passe pour entrer (optionnel)<br>
  <input  style="text-align:center" type="password" name="password" id="password" size="20" value="">
  
  Online
  <input  style="text-align:center;width:50px;" type="number" name="maxonline" id="maxonline" size="5" value="50"> personnes
- 
+
+
  
 <br><br>
  
@@ -69,6 +80,7 @@ Titre de l'évenement<br>
  Invités (Un Email par ligne)<br>
  <textarea rows="5" cols="30" name="invites" id="invites"></textarea>
 
+    <br><a href="javascript:sendEvent()" class="mobilebutton">Save</a>
 
 </div>
 
@@ -76,10 +88,15 @@ Titre de l'évenement<br>
 
     function sendEvent(){
         var event={};
-        if(target==null){
+        if(target==null || target.position==null){
+            if(pos==null){
+                informe("%dangerLocalisation event required",false);
+                return;
+            }
             event.lat=pos.lat;
             event.lng=pos.lng;
         } else{
+
             event.lat=target.position.lat();
             event.lng=target.position.lng();
         }
@@ -97,29 +114,19 @@ Titre de l'évenement<br>
         event.dtEnd=event.dtStart+document.getElementById("duration").value*1000*3600;
         event.maxOnline=document.getElementById("maxonline").value;
         event.owner=getParam()["email"];
+        event.minDistance=document.getElementById("minDistance").value;
         event.password=document.getElementById("password").value;
-        event.flyer=canvas.toDataURL("image/jpeg");
+        if(canvas!=null)
+            event.flyer=canvas.toDataURL("image/jpeg");
+        else
+            event.flyer="";
+
         addevent(getParam()["email"],event,function(){
             document.location.href="selEvent.html?email="+getParam()["email"];
         });
     }
 
-    /*
-    function findLieu(){
-	
-	var txtAdresse=document.getElementById("adresse");
-	httpGet("findPlace?name="+document.getElementById("lieu").value,function(rep){
-		var adresses=JSON.parse(rep);
-		if(adresses.length==0){
-			informe("Nouveau lieu, indiquer l'adresse");
-			txtAdresse.value="";
-		} else {
-			txtAdresse.value=adresses[0].number+" "+adresses[0].street+" "+adresses[0].CP;
-		}
-	});
-    }*/
-
-    var canvas = document.createElement("canvas");
+    var canvas = null;
     var target=null;
     var map=null;
     var user=null;
@@ -128,7 +135,7 @@ Titre de l'évenement<br>
 
     function initMap(pos){
         setCookie("position",JSON.stringify(pos));
-        map = new google.maps.Map(document.getElementById("map"), {
+        map = new google.maps.Map($("map"), {
             center: pos,
             zoom: 15
         });
@@ -144,15 +151,14 @@ Titre de l'évenement<br>
 function start(){
     informe("Map loading",true,"map");
     loadScript("https://maps.googleapis.com/maps/api/js?key=AIzaSyC9lw5AL7IdrjuJXbHkQ6Gjs8nqtS31AB8",function() {
-
         var now=new Date();
-
         getuser(getParam()["email"],function(rep){
             user=rep.result;
             document.getElementById("title").value=user.firstname+"'s night";
         });
 
-        document.getElementById("dtStart").valueAsNumber=Date.parse(new Date());
+        document.getElementById("dtStart").valueAsNumber=new Date();
+
         var timestr=now.toLocaleTimeString();
         document.getElementById("dtTime").value=timestr.slice(0,5);
 
@@ -163,10 +169,8 @@ function start(){
                     clearInterval(hTimer);
                 },function(){
                     pos=JSON.parse(getCookie("position"));
-                    if(pos!=null)
-                        initMap(pos);
-                    else
-                        informe("Geoloc failed");
+                    if(pos!=null)pos={lng:48,lat:2};
+                    initMap(pos);
                 });
             }
         },10000);
@@ -183,6 +187,7 @@ function onChangePicture(){
         i.onload=function(){
             informe("",false,"preview");
             var ratio= i.width/ i.height;
+            canvas=document.createElement("canvas");
             var ctx=canvas.getContext('2d');
 
             canvas.width=300;

@@ -1,9 +1,13 @@
 <html>
 <head>
 <meta charset="ISO-8859-1">
-<link href='http://fonts.googleapis.com/css?family=Indie+Flower' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Indie+Flower' rel='stylesheet' type='text/css'>
 <link rel="stylesheet" type="text/css" href="Leficarbar.css">
-<style type="text/css">
+    <script src="Tools.js"></script>
+    <script src="swipe.js"></script>
+    <script src="qrcode.js"></script>
+
+    <style type="text/css">
 h1 {
 	color:white;
 	font-family:"Indie Flower" cursive;
@@ -12,14 +16,18 @@ h1 {
 <title>SlideShow</title>
     <script src="Main.js"></script>
 </head>
-<body onload="onStart()" style="background-color:black">
 
-<script src="Tools.js"></script>
-<script src="swipe.js"></script>
+<body style="background-color:black">
+
  <br>
 <br>
- <div id='slider' class='swipe'>
-  <div id="slides" class='swipe-wrap'">
+ <div id="promo" style="width:100%;text-align: center;">
+     <h1> Flasher ce code pour choisir votre musique et poster vos photos</h1>
+ <div id="qrcode" style="width:400px;height:400px;border: double white;display: inline-block; "></div>
+ </div>
+
+     <div id='slider' class='swipe'>
+  <div id="slides" class='swipe-wrap'>
   </div>
 </div>
  
@@ -40,34 +48,47 @@ addEventListener("click", function() {
 
 
 function RefreshSlideshow(){
-	
 	var div = document.getElementById("slides");
 	div.innerHTML="";
     if(delay==null)delay=10;
     slideshow(delay,idEvent,function(rep){
-        rep.result.items.forEach(function(message){
-			var newLI = document.createElement("div");
-			var code="<img style='height:90%;width=auto;' src='"+message.photo+"'/>";
-			if(message.text!=null)code+="<h1>"+message.text+"</h1>";
-			newLI.innerHTML=code;
-			
-			newLI.style.width=window.innerWidth-10;
-			newLI.style.height=window.innerHeight-30;
-			newLI.align="center";
-			newLI.verticalAlign="middle";
-			div.appendChild(newLI);
-		});
-		
-		window.mySwipe = new Swipe(document.getElementById('slider'), {
-				  startSlide: 0,
-				  speed: 400,
-				  auto: 3000,
-				  continuous: true,
-				  disableScroll: true,
-				  stopPropagation: false,
-				  callback: function(index, elem) {},
-				  transitionEnd: function(index, elem) {}
-				});
+        if(rep.result.items==undefined || rep.result.items.length==0){
+            shorturl(DOMAIN+"/login.html?event="+idEvent,function(short){
+                new QRCode(document.getElementById("qrcode"), {
+                    text: short.result.id,
+                    width: 400,
+                    height: 400,
+                    correctLevel : QRCode.CorrectLevel.H
+                });
+            });
+            setTimeout(function(){location.reload();},10000);
+        }else{
+            document.body.removeChild(document.getElementById("promo"));
+            rep.result.items.forEach(function(message){
+                var newLI = document.createElement("div");
+                var code="<img style='height:90%;width=auto;border-style:solid;border-color:white;' src='"+message.photo+"'/>";
+                if(message.text!=null)code+="<h3>"+message.text+"</h3>";
+                newLI.innerHTML=code;
+
+                newLI.style.width=window.innerWidth-10;
+                newLI.style.height=window.innerHeight-30;
+
+                newLI.align="center";
+                newLI.verticalAlign="middle";
+                div.appendChild(newLI);
+            });
+
+            window.mySwipe = new Swipe(document.getElementById('slider'), {
+                startSlide: 0,
+                speed: 400,
+                auto: 3000,
+                continuous: true,
+                disableScroll: true,
+                stopPropagation: false,
+                callback: function(index, elem) {},
+                transitionEnd: function(index, elem) {}
+            });
+        }
 	});
 }
 
@@ -81,7 +102,6 @@ function start(){
 	},40000);
 	
  startFullScreen();
-
 }
 </script>
 

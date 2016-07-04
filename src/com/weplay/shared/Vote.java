@@ -35,8 +35,8 @@ public class Vote implements Serializable {
 	
 	//@Id public String Id; 					//Id interne des Users (adresse mail)
 	
-	public String votant;						//Nom du User
-	public String caracteristique; 
+	private String votant;						//Nom du User
+	private String caracteristique;
 	public Integer score;
 	public Long dtVote=System.currentTimeMillis();
 
@@ -88,8 +88,7 @@ public class Vote implements Serializable {
 	 * Format destin� au debugeur
 	 */
 	public String toString(){
-		String rc=this.caracteristique+":"+this.score;		
-		return rc;
+        return this.caracteristique+":"+ this.score;
 	}
 
 

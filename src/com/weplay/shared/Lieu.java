@@ -43,11 +43,12 @@ public class Lieu  {
 	@Id public String Id; 													//Id interne des messages	
 
 	@Index
-    public String name;
+    private String name;
 	public String number;
 	public String street;
-	public String city="";
-	@Index public String CP;
+	private String city="";
+	@Index
+    private String CP;
 	public String logo;
 	
 	public Double lng=null;

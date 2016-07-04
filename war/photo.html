@@ -7,15 +7,18 @@
 </head>
 
 <body>
-<div style="display:block; float:right;width:70px;"><img src="beta.png"/></div>
+<!--
+<div style="position: absolute;display: block ;left:290px;"><img style="width:40px;margin:0px;" src="beta.png""></div>
+-->
+
 <link href="/apple-touch-icon.png" rel="apple-touch-icon" />
 
 <script src="Tools.js"></script>
 <script src="Main.js"></script>
 <script src="qrcode.js"></script>
 
-<div class="sections" style="background-color:#FFFF00">
-<table>
+<div class="sections" style="background-color:#fffd64">
+<table style="width:100%">
  <tr>
  <td style="text-align: left;vertical-align: top">
 <div id="myperso" style="text-align: left;vertical-align: top"></div>
@@ -24,38 +27,41 @@
 <div id="zone_myEvent"></div>
 <div id="lblMessage"></div>
  </td>
-     <td style="vertical-align: top;text-align: right;"><INPUT class="buttonPhoto" type="button" value="Quit" style="font-size:10px" onclick="onQuit()"></td>
+     <td style="vertical-align: top;text-align: right;">
+         <img class="imgbutton" src="quit.png" onclick="javascript:onQuit()">
+     </td>
  </tr>
  </table>
-    <INPUT type="checkbox" value="anonymous" name="anonymous" id="anonymous">Anonyme
+    <INPUT type="checkbox" value="anonymous" id="anonymous" onchange="javascript:setAnonymous(this);">Anonyme
  </div>
- 
- <div class="sections" style="background-color:#FFD511;"  id="section_photo">
-        <table style="width:100%;"><tr style="vertical-align: top;"><td><h2>Photo</h2></td>
-            <td><INPUT type="checkbox" id="withMessage">Message</td>
-            <td style="text-align: right;">
-                <div class="image-upload">
-                    <label for="file">
-                        <img src="camera.png"/>
-                    </label>
-                    <input type="file" id="file" accept="image/*;capture=camera" onchange="sendMessage()">
-                </div>
-            </td>
-            </tr>
-        </table>
 
-     <div style="text-align:center;">
-         <img style="width:200px;heigh:300px" id="lastphoto"></img>
-         <br>
-     </div>
-
- </div>
  
 <div class="sections" style="background-color:#FFAA22;" id="section_musique">
     <table style="width:100%;"><tr style="vertical-align: top;"><td><h2>Music</h2></td>
-        <td style="text-align: right"><img src="add.png" style="width: 45px;" onclick= "javascript:onSearchMusic()"></td></tr>
+        <td><img src="next.png" onclick="javascript:nextSong()" style="witdh:30px;visibility: hidden"></td>
+        <td style="text-align: right"><img src="add.png" class="imgbutton" onclick= "javascript:onSearchMusic()"></td></tr>
     </table>
     <div id="playlist"></div>
+</div>
+
+
+<div class="sections" style="background-color:#acff44;"  id="section_photo">
+    <table style="width:100%;"><tr style="vertical-align:middle;">
+        <td><h2>Photo</h2></td>
+        <td><INPUT type="checkbox" id="withMessage">with message</td>
+        <td style="text-align: right;">
+            <div class="image-upload">
+                <label for="file"><img src="camera.png"/></label>
+                <input type="file" id="file" accept="image/*;capture=camera" onchange="sendMessage()">
+            </div>
+        </td>
+    </tr>
+    </table>
+
+    <div style="text-align:center;">
+        <img style="max-width:150px;margin:5px;border: solid #ffffff;visibility: hidden;" id="lastphoto">
+    </div>
+
 </div>
 
 <!--
@@ -65,32 +71,29 @@
 </div>
 -->
 
-<div class="sections" style="height:130px;background-color:#f42cff;" id="section_invitation">
-    <table style="width:100%;"><tr style="vertical-align: top;"><td><h2>Invite</h2></td>
-        <td style="text-align: right"><img src="share.png" style="width:45px" onclick="sendInvite()"></td></tr>
+<div class="sections" style="background-color:#ee96ff;height:140px;" id="section_invitation">
+    <table style="width:100%;"><tr style="vertical-align: top;"><td><h2>Invite</h2>
+        <div style="float:left;text-align:center;background-color:white;display: inline; height:100px;width:100px;" id="qrcode"></div>
+    </td>
+        <td style="text-align: right"><img src="share.png" class="imgbutton" onclick="sendInvite()"></td></tr>
     </table>
-
-
-    <div style="float:left;text-align:center;background-color:white;display: inline-block; width:100px;" id="qrcode"></div>
 
     <br>
 </div>
 
 
 <div class="sections" style="background-color:#17e4ff;" id="section_chart">
-    <h2>Classement</h2>
+    <h2>Online</h2>
     <div style="text-align:center;"></div>
     <div id="zone_chart"></div>
 </div>
 
 
-<div class="sections" style="background-color:#FF5544;" id="section_admin">
+<div class="sections" style="background-color:#ff836b;" id="section_admin">
     <h2>Admin</h2>
     <div style="text-align:center;"></div>
  <div id="zone_admin"></div>
 </div>
-
-
 
 
 <script>
@@ -109,13 +112,13 @@ function onQuit(){
 
 function onSearchMusic(){
 	//var query=prompt("Requete","pixies");
-    var url="deezer.html?q=guetta&email="+user.email+"&event="+myEvent.Id+"&firstname="+user.firstname;
-	if(window.open(url)==null)location.href=url+"&close=false";
+    var url="deezer.html?q=daft&email="+user.email+"&event="+myEvent.Id+"&firstname="+user.firstname;
+	if(window.open(url)==null)
+        location.href=url+"&close=false";
 }
 
 
 function resizeBase64Img(base64, maxsize,func) {
-
     if(base64.length<2000000){
         func(base64);
         return;
@@ -136,6 +139,13 @@ function resizeBase64Img(base64, maxsize,func) {
     };
 }
 
+function setAnonymous(elt){
+    user.anonymous=elt.checked;
+    senduser(user,"anonymous",function(u){
+        user=u;
+    });
+}
+
 function sendMessage(){		
 	var form=document.getElementById("form1");
 	var data=document.getElementById("file");
@@ -143,7 +153,7 @@ function sendMessage(){
 
     var photo={};
     if(document.getElementById("withMessage").checked==true)
-        photo.text=prompt("Message","Votre message");
+        photo.text=prompt("Votre message","");
     else
         photo.text="";
 
@@ -156,11 +166,15 @@ function sendMessage(){
     reader.onload = (function(theFile) {
         resizeBase64Img(this.result,max_photo_size,function(newImg){
             photo.photo=newImg;
-            if(photo.text=="Votre message")photo.text="";
-            sendphoto(myEvent.Id,photo,function(){
-                informe("Message sended",false);
-                document.getElementById("text").value="";
-            });
+            informe("Photo sending ...",true);
+            sendphoto(myEvent.Id,photo,
+                    function(){
+                        informe("Photo sended",false);
+                    },
+                    function(){
+                        informe("Photo not sended",false);
+                    }
+            );
         });
 	});
 
@@ -192,7 +206,7 @@ function showmyEvent(user,evt){
 	var div=document.getElementById("zone_myEvent");
 	div.innerHTML="<h2>"+evt.title+"</h2>";
 	div.innerHTML+=user.state;
-	div.innerHTML+="<br><a href='profile.html?event="+myEvent.Id+"&email="+user.email+"'>Modifier mon profil</a>"
+	//div.innerHTML+="<br><a href='profile.html?event="+myEvent.Id+"&email="+user.email+"'>Modifier mon profil</a>"
 	if(evt.logo!=null && evt.logo.length>0)div.innerHTML+="<img src='"+evt.logo+"'>"+div.innerHTML;
 }
 
@@ -276,8 +290,11 @@ function start() {
     var user_id = getParam()["email"];
     if (user_id == null || user_id.length == 0)location.href = "login.html";
 
+    //document.getElementsByClassName("section").forEach(function(sec){sec.style.backgroundColor=colors[sec.id];});
+
     getuser(user_id, function (rep) {
         user = rep.result;
+        document.getElementById("anonymous").checked=user.anonymous;
         getHTMLUser(user, function (rep) {
             document.getElementById("myperso").innerHTML = rep;
         }, 50);
@@ -289,11 +306,12 @@ function start() {
             if(myEvent.owner==user.email){
                 var idEvent=myEvent.Id;
                 var style="class='buttonPhoto' style='width:200px;font-size:16px'";
-                var rc="<div style='text-align:center;'><br><a class='buttonPhoto' style='width:200px;font-size:16px' href='gallery.html?photo_size=300&event="+idEvent+"'>Pele-Mele des photos</a>";
-                rc+="<br><br><a "+style+" href='deezerPlayer.html?event="+idEvent+"'>PlayList musicale</a>";
-                rc+="<br><br><a "+style+" href='slideshow.html?event="+idEvent+"'>SlideShow des photos</a>";
-                rc+="<br><br><a "+style+" href='charts.html?event="+idEvent+"'>Classement des invit�s</a>";
-                rc+="<br><br><a "+style+" href='closeEvent?event="+idEvent+"'>Terminer la soir�e</a><br><br></div>";
+                var rc="<div style='text-align:center;'><br><a class='buttonPhoto' style='width:200px;font-size:16px' href='gallery.html?photo_size=300&event="+idEvent+"'>Photos</a>";
+                rc+="<br><br><a "+style+" href='MusicPlayer.html?event="+idEvent+"'>Player</a>";
+                rc+="<br><br><a "+style+" href='slideshow.html?event="+idEvent+"'>SlideShow</a>";
+                rc+="<br><br><a "+style+" href='promo.html?event="+idEvent+"'>Promotion</a>";
+                rc+="<br><br><a "+style+" href='charts.html?event="+idEvent+"'>Charts</a>";
+                rc+="<br><br><a "+style+" href='javascript:closeEvent()'>End</a><br><br></div>";
                 document.getElementById("zone_admin").innerHTML=rc;
             }
 
@@ -309,24 +327,27 @@ function start() {
                 document.getElementById("qrcode").addEventListener("click",function(){open.window(short.result.id);});
             });
 
-            setInterval(function(){
-                getLastPhoto(myEvent.Id,function(photo){
-                    if(photo.status==200)
-                        document.getElementById("lastphoto").src=photo.result.photo;
-                });
-            },20000);
+            showPlaylist(myEvent);
+            showClassement(myEvent.Id,document.getElementById("zone_chart"),true);
+            showLastPhoto(myEvent.Id,document.getElementById("lastphoto"));
 
-            setInterval(function(){showPlaylist(myEvent);},5000);
-            setInterval(function(){showClassement(myEvent.Id,document.getElementById("zone_chart"));},10000);
+            setInterval(function(){showLastPhoto(myEvent.Id,document.getElementById("lastphoto"));},20000);
+            setInterval(function(){showPlaylist(myEvent,user.anonymous);},5000);
+            setInterval(function(){showClassement(myEvent.Id,document.getElementById("zone_chart"),true);},10000);
             setInterval(refreshPage(function(){}), 10000);
 
         });
     });
 }
 
+function closeEvent(){
+    closeevent(myEvent.id,user.email,function(){
+        location.href="/login.html";
+    });
+}
 
 function sendInvite(){
-    window.open("mailto:&subject="+escape(myEvent.title)+"&body="+escape(inviteUrl));
+    window.open("mailto:destinataire&subject="+escape("You are invited to "+myEvent.title)+"&body="+escape(" Open this : "+inviteUrl+" to enter !"));
 }
 
 </script>

@@ -1,0 +1,61 @@
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<link href='https://fonts.googleapis.com/css?family=Indie+Flower' rel='stylesheet' type='text/css'>
+<script src="Tools.js"></script>
+<script src="swipe.js"></script>
+<script src="qrcode.js"></script>
+
+    <style type="text/css">
+h1 {
+	color:white;
+	font-family:"Indie Flower" cursive;
+}
+
+h2 {
+    color:white;
+    font-family: Arial;
+    font-style: normal;
+    font-variant-caps: normal;
+}
+
+    </style>
+<title>SlideShow</title>
+    <script src="Main.js"></script>
+</head>
+
+<body style="background-color:black">
+
+<br>
+ <div id="promo" style="width:100%;text-align: center;">
+     <h1>Poussez votre musique, Montrez vos photos.</h1>
+     <div id="qrcode" style="width:400px;height:400px;border: double white;display: inline-block; "></div>
+     <div id="url"></div>
+     <div id="invites" style="display: inline-block;width:100px;font-color:white;font:normal; color:#ffffff;/*noinspection CssOverwrittenProperties*/font-style: normal;font-family: Arial;"></div>
+ </div>
+
+<script>
+var idEvent=getParam()["event"];
+
+/**
+ * 
+ */
+function start(){
+    shorturl(DOMAIN+"/login.html?event="+idEvent,function(short){
+        new QRCode(document.getElementById("qrcode"), {
+            text: short.result.id,
+            width: 400,
+            height: 400,
+            correctLevel : QRCode.CorrectLevel.H
+        });
+        document.getElementById("url").innerHTML="<h2>"+short.result.id+"</h2>";
+    });
+
+    setInterval(function(){showClassement(idEvent,document.getElementById("invites"),false);},4000);
+
+    startFullScreen();
+}
+</script>
+
+</body>
+</html>
