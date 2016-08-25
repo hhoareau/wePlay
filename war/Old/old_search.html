@@ -1,26 +1,20 @@
-<html>
-<head>
-<meta charset="ISO-8859-1">
-<meta name="viewport" content="width=320">
-<link rel="stylesheet" type="text/css" href="Leficarbar.css">
+<ion-view view-title="Search Music">
+    <ion-content>
+        <div id="lblMessage"></div>
+        <table><tr>
+            <td>Search</td>
+            <td><input id="query" value="" autofocus="true" onfocus="this.setSelectionRange(0, this.value.length);" onkeyup="refreshQuery()"></td><td>
+            <img class="small-icon" src="../img/help.png" onclick="javascript:window.open('http://www.uk-charts.top-source.info/2000-to-2009.shtml');"></td>
+        </tr></table>
+        <br><br>
 
-<title>Music search</title>
-<script src="Tools.js"></script>
-<script src="Main.js"></script>
+        <div class="main-div" id="result"></div>
 
-</head>
-<body>
-<div id="lblMessage"></div>
-<table><tr>
-    <td>Search</td>
-    <td><input id="query" value="" autofocus="true" onfocus="this.setSelectionRange(0, this.value.length);" onkeyup="refreshQuery()"></td><td>
-    <img class="small-icon" src="help.png" onclick="javascript:window.open('http://www.uk-charts.top-source.info/2000-to-2009.shtml');"></td>
-</tr></table>
-<br><br>
+        <div id="dz-root"></div>
+    </ion-content>
+</ion-view>
 
-<div class="main-div" id="result"></div>
 
-<div id="dz-root"></div>
 <script src="https://e-cdns-files.dzcdn.net/js/min/dz.js"></script>
 
 <script>
@@ -36,13 +30,7 @@ function getCode(songs){
     var libOrigin=["torrent","deezer","spotify","local"];
 
     songs.forEach(function(song){
-        var artist="";
-        if(song.artist!=undefined) {
-            if (song.artist.name != undefined)
-                artist = song.artist.name;
-            else
-                artist = song.artist;
-        }
+        var artist=song.author || song.artist.name;
 
         if(song.text==undefined)song.text=song.id;
         var title=song.title.replace(new RegExp("'",'g')," ");

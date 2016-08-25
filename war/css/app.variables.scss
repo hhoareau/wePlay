@@ -1,0 +1,24 @@
+$colors: (
+  primary: #26be3d,
+  secondary:  #32db64,
+  danger: #c02929,
+  light: #9df189,
+  dark: #146f0c,
+);
+
+.item-text-center
+{
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: -moz-box;
+  display: -ms-flexbox;
+  display: flex;
+  -webkit-box-align: center;
+  -ms-flex-align: center;
+  -webkit-align-items: center;
+  -moz-align-items: center;
+  align-items: center;
+  position: absolute;
+  top: 0;
+  height: 100%;
+}

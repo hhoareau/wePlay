@@ -1,0 +1,35 @@
+<div id="dz-root"></div>
+<ion-view view-title="Search">
+    <ion-nav-title align-title="right" side="right">
+        Search your song
+    </ion-nav-title>
+    <ion-nav-back-button class="button-clear">
+        <i class="ion-arrow-left-c"></i> Back
+    </ion-nav-back-button>
+
+   <ion-content ng-controller="SearchCtrl">
+
+       <button class="btn btnprimary btn-xs pull-right"
+               ng-click="$window.open('http://www.uk-charts.top-source.info/2000-to-2009.shtml');">Charts</button>
+
+       <div class="list">
+           <div class="item item-input-inset" focus-me>
+           <label class="item-input-wrapper">
+               <input type="search" ng-model="query.value" placeholder="Search artist, song title"
+                      ng-change="clearSearch()" focus-me my-enter="search()">
+           </label>
+
+           <button ng-show="query.value.length>0"
+                   class="button icon-left ion-search button-positive"
+                   ng-click="search()">Search</button>
+       </div>
+
+           <div class="item" ng-repeat="song in songs | orderBy: order" ng-click="add({{song}})">
+               <img width="16" src="img/deazer.jpg" ng-show="song.origin==1">
+               <img width="16" src="img/youtube.png" ng-show="song.origin==4">
+               <img width="16" src="img/local.svg" ng-show="song.origin==3">
+               {{song.title}} - {{song.author}} |
+           </div>
+       </div>
+    </ion-content>
+</ion-view>

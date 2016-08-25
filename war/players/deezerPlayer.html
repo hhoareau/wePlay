@@ -1,0 +1,135 @@
+<html>
+<head>
+<meta charset="ISO-8859-1">
+
+    <script src="../js/Tools.js"></script>
+    <link rel="stylesheet" type="text/css" href="../Leficarbar.css">
+    <meta name="viewport" content="width=320">
+
+<title>Deezer Players</title>
+</head>
+<body onload="start()">
+
+<img src="/img/player.png" id="imgplayer">
+
+<div id="dz-root"></div>
+
+<div id="player" style="width:100%"></div>
+
+<div id="playlist"></div>
+
+
+
+<script>
+    (function() {
+        var e = document.createElement('script');
+        e.src = 'https://e-cdns-files.dzcdn.net/js/min/dz.js';
+        e.async = true;
+        document.getElementById('dz-root').appendChild(e);
+    }());
+
+    var timer=null;
+    var crossfadeTimer=null;
+    var gEnd=null;
+    var gStep=0;
+    var currentPlayer=1;
+    var gVolume=0;
+    var ready=false;
+
+    function isReady(){
+        return ready;
+    }
+
+    function setVolume(vol){
+        DZ.player.setVolume(vol);
+    }
+
+    function getVolume(){
+        return DZ.player.getVolume();
+    }
+
+    function Quit(){
+        DZ.logout();
+    }
+
+    function pause(){
+        setVolume(0);
+        DZ.player.pause();
+    }
+
+    function fade(step,func){
+        clearInterval(crossfadeTimer);
+        crossfadeTimer = setInterval(function () {
+            if(getVolume()+step>0 && getVolume()+step<100)
+                setVolume(getVolume()+step);
+            else {
+                if (step < 0){
+                    pause();
+                }
+                else
+                    setVolume(100);
+                if(func!=undefined)func(getVolume());
+            }
+        }, 500);
+    }
+
+
+    function play(song,delay,func){
+        if(delay==undefined)delay=0;
+
+        setTimeout(function(){
+            if(DZ.player.isPlaying()) {
+                fade(-10,function () {
+                    DZ.player.playTracks([song]);
+                    DZ.player.play();
+                    fade(+10,func(0));
+                });
+            }else{
+                DZ.player.playTracks([song]);
+                DZ.player.play();
+                fade(+10,func(0));
+            }
+
+        },delay*1000);
+    }
+
+    function isPlaying(){
+        return DZ.player.isPlaying();
+    }
+
+    window.dzAsyncInit = function() {
+        appid=getParam()["appid"];
+        DZ.init({
+            appId  : appid,
+            channelUrl : 'https://weplaywebsite.appspot.com/channel.html',
+            player: {
+                container: 'player',
+                width : 800,
+                height : 300,
+                onload : function(){
+
+                    DZ.login(function(response) {
+                        if (response.authResponse) {
+                            console.log('Welcome!  Fetching your information.... ');
+                            DZ.api('/user/me', function(response) {
+                                console.log('Good to see you, ' + response.name + '.');
+                                //ready=true;
+                            });
+                        } else {
+                            console.log('User cancelled login or did not fully authorize.');
+                        }
+                    }, {perms: 'basic_access'});
+                }
+
+            }
+        })
+    };
+
+    function start(){
+        DZ.ready(function(sdk_options){
+            ready=true;
+        });
+    }
+</script>
+</body>
+</html>

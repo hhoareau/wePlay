@@ -4,6 +4,7 @@ import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.Named;
 import com.google.api.server.spi.config.Nullable;
+import com.google.appengine.labs.repackaged.com.google.common.io.BaseEncoding;
 import com.google.appengine.labs.repackaged.org.json.JSONException;
 import com.google.appengine.labs.repackaged.org.json.JSONObject;
 import com.google.appengine.repackaged.com.google.gson.Gson;
@@ -24,6 +25,7 @@ public class Rest {
     public static final Long TYPE_VIDEO = 2L;
     public static final Long TYPE_SONG = 3L;
     public static final Long TYPE_DEMANDE = 4L;
+    private static final int MAX_QUOTA = 1000000;
 
     private static DAO dao = DAO.getInstance();
     public static Logger log = Logger.getLogger(String.valueOf(Rest.class));
@@ -39,6 +41,21 @@ public class Rest {
         return dao.findActifEventsFrom(u);
     }
 
+    @ApiMethod(name = "init", httpMethod = ApiMethod.HttpMethod.GET, path = "init")
+    public Event init(@Named("scenario") Integer i){
+        Event e=null;
+        if(i==1){
+            User u1=new User("hhoareau@gmail.com");
+            User u2=new User("paul.dudule@gmail.com");
+            e=new Event("Event1",u1);
+            e.addSong(new Song("Get Lucky",30));
+            e.addSong(new Song("Da Funk",60));
+            e.addSong(new Song("Boy's don't cry",25));
+            e.addSong(new Song("Clock",180));
+            e.addInvited(u2);
+        }
+        return e;
+    }
 
     @ApiMethod(name = "raz", httpMethod = ApiMethod.HttpMethod.GET, path = "raz")
     public void raz() {
@@ -60,7 +77,8 @@ public class Rest {
         else
             infos = new infoFacebook(s.replace("\"", ""));
 
-        User u = dao.findUser(infos.email);
+        String id=Tools.encrypt(infos.email, "hh4271");
+        User u = dao.findUser(BaseEncoding.base64().encode(id.getBytes()).replace("+","_"));
         if (u == null) {
             u = new User(infos);
             dao.save(u);
@@ -68,45 +86,33 @@ public class Rest {
         return u;
     }
 
-
-
-
-        @ApiMethod(name = "addevent", httpMethod = ApiMethod.HttpMethod.POST, path = "addevent")
-    public void addEvent(@Named("email") String email,Event e) {
-
+    @ApiMethod(name = "addevent", httpMethod = ApiMethod.HttpMethod.POST, path = "addevent")
+    public Event addEvent(@Named("email") String email,@Named("nsongs") Integer nsongs,Event e) {
         User u = dao.findUser(email);
-        if(u==null)return;
+        if(u==null)return null;
+
+        List<Song> songs=new ArrayList<>();
+        for(Song s:dao.getPreferSongs(email,nsongs))
+            if(!s.isIn(songs))songs.add(s);
+
+        if(songs.size()<nsongs){
+            for(Event old_e:dao.getLastEvents(10))
+                for(Song s:dao.getBestSongs(old_e, 5))
+                    if(!s.isIn(songs))songs.add(s);
+        }
+
+        if(songs.size()>nsongs)songs=songs.subList(0,nsongs-1);
+
+        for(Song s:songs){
+            Song ns=new Song(s);
+            ns.score=-5;
+            ns.razuse();
+            if(ns.getOrigin()!=Song.LOCAL && e.addSong(ns))dao.save(ns);
+        }
+
+        e.addOrder("playlist");
         dao.save(e);
-
-        //Lieu nl = new Lieu(position);
-        //List<Lieu> l=dao.findLieuByName(nl.name);
-
-        /*
-        if(u!=null){
-            if(l.size()>0)
-                nl=l.get(0);
-            else {
-                if(nl.CP!=null && nl.CP.length()>0 && nl.street.length()>0){
-                    if(ici.equals("true")){
-                        nl.setPosition(position);
-                        dao.save(nl);
-                    }else{
-                        dao.save(nl);
-                        new RestCall("https://maps.google.com/maps/api/geocode/json?address="+nl.getAddress()+"&sensor=false",null,nl.Id){
-                            @Override public void onSuccess(String rep){
-                                if(rep.contains("lat") && rep.contains("lng")){
-                                    String lat=Tools.extract(rep, "\"lat\" : ",",",false);
-                                    String lg=Tools.extract(rep, "\"lng\" : ","}",false).trim();
-                                    Lieu l=dao.findLieu(this.id);
-                                    l.setPosition(lat+","+lg);
-                                    dao.save(l);
-                                }
-                            }
-                        };
-                    }
-                }
-            }
-            */
+        return(e);
     }
 
     @ApiMethod(name = "addscore", httpMethod = ApiMethod.HttpMethod.GET, path = "addscore")
@@ -121,7 +127,8 @@ public class Rest {
 
     @ApiMethod(name = "getuser", httpMethod = ApiMethod.HttpMethod.GET, path = "getuser")
     public User getuser(@Named("email") String email) {
-        return dao.findUser(email);
+        User u=dao.findUser(email);
+        return u;
     }
 
     @ApiMethod(name = "join", httpMethod = ApiMethod.HttpMethod.GET, path = "join")
@@ -135,12 +142,13 @@ public class Rest {
             }
             if (e.addPresents(u)) {
                 u.score=e.scoreStart;
-                if(from!=null){
-                    User f=dao.findUser(from);
+                User f=dao.findUser(from);
+                if(f!=null){
                     f.score+=e.scoreInvite;
                     dao.save(f);
+                    e.addOrder("updateuser");
                 }
-
+                e.addOrder("join");
                 dao.save(e);
                 dao.save(u);
             }
@@ -154,7 +162,9 @@ public class Rest {
     public List<Song> gettopsongs(@Named("event") String event,@Named("nombre") Integer nombre) {
         Event e=dao.findEvent(event);
         if(e==null)return null;
-        return dao.getSongToPlay(event,nombre);
+        e.addOrder("playlist");
+        dao.save(e);
+        return dao.getSongToPlay(e.getId(),nombre);
     }
 
 
@@ -174,8 +184,33 @@ public class Rest {
         if(e!=null){
             //for(LocalFile f:lf){f.setText(f.getText().toLowerCase());}
             //for(LocalFile f:lf)dao.save(f);
-            dao.save(lf);
+            dao.saveFiles(lf);
         }
+    }
+
+
+    @ApiMethod(name = "addsong", httpMethod = ApiMethod.HttpMethod.POST, path = "addsong")
+    public Song addsong(@Named("event") String id,Song g) {
+        Event e=dao.findEvent(id);
+        if(e==null)return null;
+
+        g.setShortTitle();
+        if(e.addSong(g)){
+            User from=dao.findUser(g.from.split(";")[0]);
+            if(from==null)return null;
+
+            if(from.score<e.minScore)return(null);
+
+            from.score+=e.scorePostSong;
+
+
+
+            dao.save(e);
+            dao.save(from);
+            dao.save(g);
+            return(g);
+        }
+        else return null;
     }
 
 
@@ -203,24 +238,56 @@ public class Rest {
 
 
 
+    @ApiMethod(name = "getcurrentsong", httpMethod = ApiMethod.HttpMethod.GET, path = "getcurrentsong")
+    public Song getcurrentsong(@Named("event") String event) {
+        Event e=dao.findEvent(event);
+        if(e==null)return null;
+        return e.currentSong;
+    }
+
+    @ApiMethod(name = "stopcurrentsong", httpMethod = ApiMethod.HttpMethod.GET, path = "stopcurrentsong")
+    public void stopcurrentsong(@Named("event") String event) {
+        Event e=dao.findEvent(event);
+        if(e!=null){
+            e.currentSong=null;
+            dao.save(e);
+        }
+    }
+
+    @ApiMethod(name = "setorder", httpMethod = ApiMethod.HttpMethod.GET, path = "setorder")
+    public void setorder(@Named("event") String event,@Named("order") String order) {
+        Event e=dao.findEvent(event);
+        if(e!=null){
+            e.setOrder(order);
+            dao.save(e);
+        }
+    }
+
+
 
     @ApiMethod(name = "getsongtoplay", httpMethod = ApiMethod.HttpMethod.GET, path = "getsongtoplay")
     public Song getsongtoplay(@Named("event") String event) {
         Event e=dao.findEvent(event);
         if(e==null)return null;
         List<Song> ls=dao.getSongToPlay(event,1);
-        if(ls.size()==0)return null;
-        Song s=ls.get(0);
+        Song s=null;
+        if(ls.size()>0){
+            s=ls.get(0);
 
-        User u=dao.findUser(s.from.split(";")[0]);
-        if(u!=null){
-            u.score+=e.scorePlaySong;
-            dao.save(u);
+            User u=dao.findUser(s.from.split(";")[0]);
+            if(u!=null){
+                u.score+=e.scorePlaySong;
+                dao.save(u);
+            }
+
+            s.dtPlay=System.currentTimeMillis();
+            dao.save(s);
         }
 
-        if(s==null)return null;
-        s.dtPlay=System.currentTimeMillis();
-        dao.save(s);
+        e.currentSong=s;
+        e.addOrder("playlist");
+        dao.save(e);
+
         return s;
     }
 
@@ -232,17 +299,15 @@ public class Rest {
 
         if(s!=null && e!=null){
             User prop=dao.findUser(s.from.split(";")[0]);
-            if(!prop.email.equals(email)){
-                prop.score+=e.getScoreLikeSong()*step;
-                dao.save(prop);
-
-                if(s.votants.contains(email)){
+            if(!prop.email.equals(email)){ //On ne vote pas pour ses propres titres
+                if(!s.addVote(email,step))
                     return null;
-                } else{
-                    s.score+=step;
-                    s.votants.add(email);
-
+                else{
+                    prop.score+=e.getScoreLikeSong()*step;
+                    dao.save(prop);
                     dao.save(s);
+                    e.addOrder("playlist");
+                    dao.save(e);
                     return s;
                 }
             }
@@ -264,91 +329,42 @@ public class Rest {
                     rc.add(m);
                 }
             }
-
             //Collection<Message>.sort(rc);
-
             return (rc);
         }
         return null;
     }
 
+
     @ApiMethod(name = "sendphoto", httpMethod = ApiMethod.HttpMethod.POST, path = "sendphoto")
     public Event sendphoto(@Named("event") String id,Photo p) {
         Event e=dao.findEvent(id);
-        dao.save(p);
-        e.lastSave=System.currentTimeMillis();
-        dao.save(e);
+        if(e==null)return null;
 
-        /*
-        if(m.type==Message.TYPE_VIDEO){
-            new RestCall("http://gdata.youtube.com/feeds/api/videos/"+new Song(m).getYouTubeID()+"?v=2",null,m.Id){
-                @Override public void onSuccess(String rep){
-                    Message m=dao.findMessage(this.id);
-                    Song sg=new Song(m);
-                    sg.setTitle(Tools.extract(rep, "<title>", "</title>", false));
-                    e.addSong(sg);
-                }
+        int size_photo=p.photo.length();
 
-                @Override public void onFailure(int rc){
-                    Message m=dao.findMessage(this.id);
-                    Song sg=new Song(m);
-                    sg.setTitle(m.title);
-                    e.addSong(sg);
-                }
-            };
-        }*/
-
-        /*
-        if(m.type==Message.TYPE_DEMANDE){
-            Demande d=new Demande(m);
-            d.icon=Tools.extract(e.getDemande(d.nature), "demandIcon=", "\r", false);
-            d.photo=Tools.extract(e.getDemande(d.nature), "demandPhoto=", "\r", false);
-            User dest=dao.findUser(d.to);
-            if(dest!=null)
-                if(dest.addDemande(d)){
-                    dao.save(dest);
-                    Message dd=new Message(d,u,dest);
-                    if(dd.photo==null || dd.photo.length()<10){
-                        String str=this.loadFile(d.photo);
-                        if(str!=null)dd.photo= Base64.encode(str.getBytes());
-                    }
-                    dao.save(dd);
-                }
+        if(size_photo>MAX_QUOTA){
+            List<Blob> lb=p.split(size_photo/MAX_QUOTA+1);
+            dao.saveList(lb);
         }
-        dao.save(e);
-        */
+        dao.save(p);
 
+        e.addOrder("addphoto");
+        dao.save(e);
         return(e);
     }
-
-
-    @ApiMethod(name = "addsong", httpMethod = ApiMethod.HttpMethod.POST, path = "addsong")
-    public Event addsong(@Named("event") String id,Song g) {
-        Event e=dao.findEvent(id);
-        User from=dao.findUser(g.from.split(";")[0]);
-
-        if(from.score<e.minScore)return(e);
-
-        from.score+=e.scorePostSong;
-
-        e.lastSave=System.currentTimeMillis();
-
-        dao.save(e);
-        dao.save(from);
-        dao.save(g);
-
-        return(e);
-    }
-
 
     @ApiMethod(name = "getplaylist", httpMethod = ApiMethod.HttpMethod.GET, path = "getplaylist")
     public List<Song> getplaylist(@Named("event") String id) {
         Event e=dao.findEvent(id);
+        if(e==null)return null;
         List<Song> rc=dao.getSongs(e);
         Collections.sort(rc);
+
+        rc.add(e.currentSong);
+
         return rc;
     }
-
 
     @ApiMethod(name = "quit", httpMethod = ApiMethod.HttpMethod.GET, path = "quit")
     public void quit(@Named("event") String id,@Named("email") String email) {
@@ -357,6 +373,7 @@ public class Rest {
 
         if(u!=null && e!=null) {
             if(e.delPresents(u)){
+                u.currentEvent=null;
                 dao.save(e);
                 dao.save(u);
             }
@@ -384,8 +401,6 @@ public class Rest {
         return dao.getLastPhoto(id);
     }
 
-
-
     @ApiMethod(name = "senduser", httpMethod = ApiMethod.HttpMethod.POST, path = "senduser")
     public User senduser(@Named("update") String update, User u) {
         User toUpdate=dao.findUser(u.email);
@@ -396,13 +411,14 @@ public class Rest {
         return(toUpdate);
     }
 
-
     @ApiMethod(name = "searchlocal", httpMethod = ApiMethod.HttpMethod.GET, path = "searchlocal")
-    public List<LocalFile> searchlocal(@Named("query") String q,@Named("event") String event) {
+    public List<Song> searchlocal(@Named("query") String q,@Named("event") String event) {
         q=q.replace(" ","+");
-        return dao.findLocal(q.toLowerCase(),event);
+        List<Song> rc=new ArrayList<>();
+        for(LocalFile f:dao.findLocal(q.toLowerCase(),event))
+            rc.add(new Song(f));
+        return rc;
     }
-
 
     @ApiMethod(name = "searchtorrent", httpMethod = ApiMethod.HttpMethod.GET, path = "searchtorrent")
     public List<Song> searchtorrent(@Named("query") String q) {
@@ -429,15 +445,19 @@ public class Rest {
                 return rc;
             }
         };
-
         return r.getSongs();
     }
 
-
-
+    @ApiMethod(name = "sendinvite", httpMethod = ApiMethod.HttpMethod.GET, path = "sendinvite")
+    public void sendinvite(@Named("event") String id,@Named("dests") String dests,@Named("from") String from) {
+        Event e = dao.findEvent(id);
+        if (e != null) {
+            e.sendInvite(dests, from);
+        }
+    }
 
     @ApiMethod(name = "getclassement", httpMethod = ApiMethod.HttpMethod.GET, path = "getclassement")
-    public List<User> getclassement(@Named("event") String id) {
+      public List<User> getclassement(@Named("event") String id) {
         Event e = dao.findEvent(id);
         if (e == null) return null;
 
@@ -452,60 +472,4 @@ public class Rest {
         e.dtEnd=System.currentTimeMillis();
         dao.save(e);
     }
-
-
-    /*
-    @ApiMethod(name = "deluser", httpMethod = ApiMethod.HttpMethod.GET, path = "deluser")
-    public void delUser(@Named("user") String email) {
-        User u=dao.findUser(email);
-        if(u!=null)
-            dao.delete(u);
-    }
-
-
-
-
-    @ApiMethod(name = "setdtplay", httpMethod = ApiMethod.HttpMethod.GET, path = "setdtplay")
-    public Event setDtPlay(@Named("event") String event, @Named("user") String email, @Named("song") String id){
-        User u=dao.findUser(email);
-        Event e=dao.findEvent(event);
-
-        Song s=e.getSong(id);
-        if(s!=null){
-            s.dtPlay=Tools.StringToDate("now");
-            e.addSong(s);
-            dao.save(e);
-            return e;
-        }
-        return null;
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    @ApiMethod(name = "findplace", httpMethod = ApiMethod.HttpMethod.GET, path = "findplace")
-    public List<Lieu> findplace(@Named("name") String name) {
-        return dao.findLieuByName(name);
-    }
-
-
-
-
-    */
-
 }

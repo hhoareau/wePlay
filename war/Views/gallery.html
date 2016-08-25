@@ -1,15 +1,15 @@
 <html>
 <head>
 <meta charset="ISO-8859-1">
-<meta name="viewport" content="width=340">
-<link href='https://fonts.googleapis.com/css?family=Indie+Flower' rel='stylesheet' type='text/css'>
 
+    <link href="https://fonts.googleapis.com/css?family=Architects+Daughter" rel="stylesheet">
 <title>Pele-Mele</title>
 </head>
 <body style="background-color:black;border-color: black;">
 
-<script src="Tools.js"></script>
-<script src="Main.js"></script>
+<script src="../js/Tools.js"></script>
+<script src="../js/Main.js"></script>
+<script src="https://apis.google.com/js/client.js?onload=init"></script>
 
 <div id="zone_text"></div>
 
@@ -26,14 +26,9 @@ var idEvent=getParam()["event"];
 var zones=null;
 var x=0,y=0;
 
-addEventListener("click", function() {
-    var
-          el = document.documentElement
-        , rfs =
-               el.requestFullScreen
-            || el.webkitRequestFullScreen
-            || el.mozRequestFullScreen
-    ;
+document.addEventListener("dblclick", function() {
+    var el = document.documentElement;
+    var rfs = el.requestFullScreen || el.webkitRequestFullScreen || el.mozRequestFullScreen;
     rfs.call(el);
 });
 
@@ -113,7 +108,7 @@ function addWall(x,y,message,onEnd){
 				}
 
 			};	
-			imgPapier.src="papier.png";	
+			imgPapier.src="/img/papier.png";
 		}
 }
 
@@ -160,33 +155,11 @@ function getXY(canvas,func){
 
 
 function start(){
-    startFullScreen();
     window.canvas.width=window.innerWidth-100;
     window.canvas.height=window.innerHeight-50;
-    //httpGet("startSession",function(){});
 
     setInterval(function(){
         var zone_text=document.getElementById("zone_text");
-
-        /*
-         httpGet("getDemandes?event="+idEvent+"&date="+dateDemande,function(rep){
-         demandes=JSON.parse(rep);
-         demandes.forEach(function(demande){
-
-         if(demande.dtDemande>dateDemande)dateDemande=demande.dtDemande;
-
-         var icon=demande.demandIcon;
-         if(demande.reponse!=null)icon=demande.responsIcon;
-         getXY(canvas);
-         httpGet("getUsers?users="+demande.from+","+demande.to,function(rep){
-         var users=JSON.parse(rep);
-         addPortrait(x,y,users[0],40);
-         addPortrait(x+50,y+50,users[1],40);
-         addImage(x,y,100,icon);
-         });
-         });
-         });
-         */
 
         getMessage(getParam()["event"],date,function(rep){
             if(rep.status!=204){
@@ -210,16 +183,7 @@ function start(){
     },5000);
 }
 
-</script>
 
-<script>
-    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-    ga('create', 'UA-79765109-1', 'auto');
-    ga('send', 'pageview');
 
 </script>
 

@@ -23,9 +23,6 @@ import com.googlecode.objectify.annotation.Cache;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 
-import javax.crypto.Cipher;
-import javax.crypto.spec.SecretKeySpec;
-import java.security.Key;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
@@ -42,7 +39,7 @@ public class User implements Comparable<User> {
 	
 	@Id public String email; 					//Id interne des Users (adresse mail)
 	
-	public String name="";						//Nom du User	
+	public String name="";						//Nom du User
 	private String facebookid=null;
 	private String firstname;
     private String humeur;
@@ -50,6 +47,7 @@ public class User implements Comparable<User> {
 	public String photo=null;
 	private String state="";
     public Boolean anonymous=false;
+    public Long dtFirstConnexion=System.currentTimeMillis();
 	
 	public String currentEvent="";
 	
@@ -64,20 +62,9 @@ public class User implements Comparable<User> {
 	private Long dtLastPosition;
     private String home;
     private String picture="";
+    public String lang="en";
+    public Integer lastCGU=0;   //Dernière CGU validée
 
-    String encrypt(String password, String key){
-        try
-        {
-            Key clef = new SecretKeySpec(key.getBytes("ISO-8859-2"),"Blowfish");
-            Cipher cipher=Cipher.getInstance("Blowfish");
-            cipher.init(Cipher.ENCRYPT_MODE,clef);
-            return new String(cipher.doFinal(password.getBytes()));
-        }
-        catch (Exception e)
-        {
-            return null;
-        }
-    }
 
     public User(String email,String name,String facebookid,String photo){
 		this.email=email.toLowerCase();
@@ -92,9 +79,8 @@ public class User implements Comparable<User> {
 
     void initUser(infoFacebook infos) {
         if(infos.email!=null) {
-            String s=encrypt(infos.email, "hh4271");
-            //this.email = URLEncoder.encode(encrypt(infos.email, "hh4271"), StandardCharsets.US_ASCII.toString());
-            this.email= BaseEncoding.base64().encode(s.getBytes());
+            String s=Tools.encrypt(infos.email, "hh4271");
+            this.email= BaseEncoding.base64().encode(s.getBytes()).replace("+","_");
         }
         else
             this.email = infos.id;
@@ -104,7 +90,9 @@ public class User implements Comparable<User> {
         this.photo = infos.link;
         this.home = "https://www.facebook.com/" + infos.id;
         this.picture=infos.picture;
-
+        this.lat=48.0;
+        this.lg=2.0;
+        this.lang=infos.getLocale().split("_")[0];
     }
 
     public User(infoFacebook i) {
@@ -148,10 +136,11 @@ public class User implements Comparable<User> {
 	@Override
 	public int compareTo(User o) {
 		if(o.score>this.score)
-			return -1;
-		else
 			return 1;
+		else
+			return -1;
 	}
+
 
 
 	public boolean addScore(Vote v) {
@@ -172,6 +161,8 @@ public class User implements Comparable<User> {
 		else
 			this.photo="personne.png";
 	}
+
+
 
 
 
@@ -309,5 +300,29 @@ public class User implements Comparable<User> {
 
     public void setAnonymous(Boolean anonymous) {
         this.anonymous = anonymous;
+    }
+
+    public Long getDtFirstConnexion() {
+        return dtFirstConnexion;
+    }
+
+    public void setDtFirstConnexion(Long dtFirstConnexion) {
+        this.dtFirstConnexion = dtFirstConnexion;
+    }
+
+    public String getLang() {
+        return lang;
+    }
+
+    public void setLang(String lang) {
+        this.lang = lang;
+    }
+
+    public Integer getLastCGU() {
+        return lastCGU;
+    }
+
+    public void setLastCGU(Integer lastCGU) {
+        this.lastCGU = lastCGU;
     }
 }

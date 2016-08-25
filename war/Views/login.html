@@ -1,0 +1,25 @@
+<div id="fb-root"></div>
+
+<ion-view view-title="Login" hide-nav-bar="true">
+    <ion-content>
+        <div style="text-align: center">
+            <br><br>
+            <img style="width:80%;" src="../img/logo440.png">
+            <br><br><br>
+            <button class="button icon-left ion-social-facebook button-positive"
+                    data-ng-show="!logged"
+                    data-ng-disabled="!facebookReady"
+                    data-ng-click="IntentLogin()">
+                Login with Facebook
+            </button>
+
+
+            <button ng-hide="true"
+                    class="button icon-left ion-social-google button-positive"
+                    data-ng-click="GoogleLogin()">
+                Login with Google+
+            </button>
+            <br>
+        </div>
+    </ion-content>
+</ion-view>

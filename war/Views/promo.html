@@ -1,10 +1,9 @@
 <html>
 <head>
 <meta charset="ISO-8859-1">
-<link href='https://fonts.googleapis.com/css?family=Indie+Flower' rel='stylesheet' type='text/css'>
-<script src="Tools.js"></script>
-<script src="swipe.js"></script>
-<script src="qrcode.js"></script>
+<script src="/js/Tools.js"></script>
+<script src="/js/qrcode.js"></script>
+<script src="https://apis.google.com/js/client.js?onload=init"></script>
 
     <style type="text/css">
 h1 {
@@ -21,7 +20,7 @@ h2 {
 
     </style>
 <title>SlideShow</title>
-    <script src="Main.js"></script>
+    <script src="/js/Main.js"></script>
 </head>
 
 <body style="background-color:black">
@@ -35,26 +34,19 @@ h2 {
  </div>
 
 <script>
-var idEvent=getParam()["event"];
-
-/**
- * 
- */
-function start(){
-    shorturl(DOMAIN+"/login.html?event="+idEvent,function(short){
-        new QRCode(document.getElementById("qrcode"), {
-            text: short.result.id,
-            width: 400,
-            height: 400,
-            correctLevel : QRCode.CorrectLevel.H
+    function start(){
+        shorturl(DOMAIN+"/index.html?event="+idEvent,function(short){
+            new QRCode(document.getElementById("qrcode"), {
+                text: short.result.id,
+                width: 400,
+                height: 400,
+                correctLevel : QRCode.CorrectLevel.H
+            });
         });
-        document.getElementById("url").innerHTML="<h2>"+short.result.id+"</h2>";
-    });
-
-    setInterval(function(){showClassement(idEvent,document.getElementById("invites"),false);},4000);
-
-    startFullScreen();
-}
+        //getInvite(getParam()["event"]);
+        //setInterval(function(){showClassement(idEvent,document.getElementById("invites"),false);},4000);
+        startFullScreen();
+    }
 </script>
 
 </body>

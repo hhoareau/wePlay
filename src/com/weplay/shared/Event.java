@@ -23,9 +23,16 @@ import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
 
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.logging.Logger;
 
 
@@ -43,25 +50,35 @@ public class Event implements Comparable<Event>,Serializable {
 	
 	@Id public String Id="event"+System.currentTimeMillis(); 													//Id interne des messages
 	@Index
-    private Long dtStart;
-	@Index public Long dtEnd;
+    public Long dtStart;
+
+    @Index
+    public Long dtEnd;
 
     public boolean opened=true;		//Indique si l'evt est ouvert au non invit�
 	private String title="";
 	private String logo="";
+    private String description="";
+    private String website=null;
 	public String ipAdresse=null;
 	private String facebook_event;
-	public String idLieu=null;		//Description de l'endroit
 	public String password=null;
-	@Index
+
+
+    public List<String> orders=new ArrayList<>();
+
+    private Boolean needLoc=false;
+
+    @Index
     private String owner=null;
 	private Integer maxOnline=50;
-	private String typeDemandes;
 	private String flyer="";
-		
-	private List<Song> playlist=new ArrayList<Song>();
+
+
+	private List<String> playlist=new ArrayList<String>();
 	public List<String> Invites=new ArrayList<String>();				
 	public List<String> Presents=new ArrayList<String>();
+    public Song currentSong=null;
 
 	public Long lastSave=0L;	//Date du dernier message post�
 
@@ -78,6 +95,7 @@ public class Event implements Comparable<Event>,Serializable {
     public Integer scorePlaySong=2;
     private Integer playlistLimits=20;
     public Integer minDistance=1000;
+    private String order="";
 
 
     //@NotSaved public List<User> classement;
@@ -96,37 +114,55 @@ public class Event implements Comparable<Event>,Serializable {
 		this.dtStart=dtStart;
 		this.dtEnd=this.dtStart+duration*3600*1000;
 		this.title=title;
-		this.idLieu=place.Id;
 		this.owner=owner;
 		if(password!=null && password.length()>0)this.password=password;
 		this.lat=lat;
         this.lng=lng;
-		this.typeDemandes=typeDemandes;
 	}
 
+    public Event(String title, User own) {
+        this.dtStart=System.currentTimeMillis();
+        this.dtEnd=this.dtStart+3600*1000;
+        this.title=title;
+        this.lat=48.0;
+        this.lng=2.0;
+        this.owner=own.email;
 
-	
-	public Song getSong(String id){
-		for(Song s:playlist)
-			if(s.Id.equals(Id))return s;
-		
-		return null;
-	}
-	
+    }
+
+
+
 	public boolean addSong(Song song){
-		for(Integer i=0;i<playlist.size();i++){
-			Song s=playlist.get(i);
-			if(s.Id!=null && s.Id.equals(song.Id)){
-				if(song.dtCreate!=s.dtCreate)s.score++;
-				playlist.set(i, s);
-				return true;
-			}
-		}
-		
-		this.playlist.add(song);
+		song.idEvent=this.getId();
+        for(String s:this.playlist)
+			if(s!=null && s.equals(song.text))return false;
+
+		this.playlist.add(song.text);
+        addOrder("playlist");
 		return true;
 	}
 
+
+
+
+    public void sendInvite(String dests,String from){
+        for(String dest:dests.split(";")){
+            Properties props = new Properties();
+            Session session = Session.getDefaultInstance(props, null);
+            try {
+                javax.mail.Message msg = new MimeMessage(session);
+                msg.setFrom(new InternetAddress(Tools.ADMIN_EMAIL));
+                msg.addRecipient(MimeMessage.RecipientType.TO, new InternetAddress(dest));
+                msg.setSubject("Invitation for " + this.title);
+                msg.setText("Dear, Open "+Tools.DOMAIN+"/index.html?event="+this.getId()+"&from="+from+" to join the event");
+                Transport.send(msg);
+            } catch (AddressException e) {
+                e.printStackTrace();
+            } catch (MessagingException e) {
+                e.printStackTrace();
+            }
+        }
+    }
 
 
 	@Override
@@ -139,21 +175,42 @@ public class Event implements Comparable<Event>,Serializable {
 
 	
 	public void addInvited(User u) {
-		if(!this.Invites.contains(u.email))
-			this.Invites.add(u.email);
-	}
+		if(!this.Invites.contains(u.email)){
+            addOrder("addinvited");
+            this.Invites.add(u.email);
+        }
 
+	}
 
 	public boolean addPresents(User u) {
 		if(!this.Presents.contains(u.email)){
 			this.Presents.add(u.email);
-		}
+            addOrder("adduser");
+            u.currentEvent=this.Id;
+        }
 
-        u.currentEvent=this.Id;
-		return true;
+        return true;
+
+
 	}
 
-	public boolean delPresents(User u) {
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Song getCurrentSong() {
+        return currentSong;
+    }
+
+    public void setCurrentSong(Song currentSong) {
+        this.currentSong = currentSong;
+    }
+
+    public boolean delPresents(User u) {
 		if(this.Presents.contains(u.email)){
 			this.Presents.remove(u.email);
 			u.currentEvent=null;
@@ -162,23 +219,6 @@ public class Event implements Comparable<Event>,Serializable {
 		
 		return false;
 	}
-
-	public String[] getDemande(int pos){
-		String[] s=this.typeDemandes.split("nature=");
-		if(pos>s.length)return null;
-
-        return ("nature="+s[pos]).split("\n");
-	}
-	
-	public String getDemande(String nature){
-		for(String s:this.typeDemandes.split("nature=")){
-			if(s.startsWith(nature)){
-				return(s.replace(nature+"\r\n",""));
-			}	
-		}
-		return null;
-	}
-
 
     public String getId() {
         return Id;
@@ -244,12 +284,12 @@ public class Event implements Comparable<Event>,Serializable {
         this.facebook_event = facebook_event;
     }
 
-    public String getIdLieu() {
-        return idLieu;
+    public Boolean getNeedLoc() {
+        return needLoc;
     }
 
-    public void setIdLieu(String idLieu) {
-        this.idLieu = idLieu;
+    public void setNeedLoc(Boolean needLoc) {
+        this.needLoc = needLoc;
     }
 
     public String getPassword() {
@@ -276,14 +316,6 @@ public class Event implements Comparable<Event>,Serializable {
         this.maxOnline = maxOnline;
     }
 
-    public String getTypeDemandes() {
-        return typeDemandes;
-    }
-
-    public void setTypeDemandes(String typeDemandes) {
-        this.typeDemandes = typeDemandes;
-    }
-
     public String getFlyer() {
         return flyer;
     }
@@ -292,9 +324,6 @@ public class Event implements Comparable<Event>,Serializable {
         this.flyer = flyer;
     }
 
-    public void setPlaylist(List<Song> playlist) {
-        this.playlist = playlist;
-    }
 
     public List<String> getInvites() {
         return Invites;
@@ -406,6 +435,57 @@ public class Event implements Comparable<Event>,Serializable {
 
     public void setMinDistance(Integer minDistance) {
         this.minDistance = minDistance;
+    }
+
+
+
+    public String getOrder() {
+        return order;
+    }
+
+    public void setOrder(String order) {
+        this.order = order;
+    }
+
+    public void addOrder(String order) {
+        List<String> nw = new ArrayList<>();
+        for (String s : this.orders) {
+            if (s.indexOf(order) == -1) {
+                int k = 0;
+                for (k = 0; k < nw.size(); k++) {
+                    String dt1 = nw.get(k).replace("{\"dtOrder\":", "").split(",")[0];
+                    String dt2 = s.replace("{\"dtOrder\":", "").split(",")[0];
+                    if (Long.parseLong(dt1) < Long.parseLong(dt2)) break;
+                }
+                nw.add(k, s);
+            }
+        }
+        this.orders=nw;
+        this.orders.add(0,"{\"dtOrder\":"+System.currentTimeMillis()+",\"order\":\""+order.toLowerCase()+"\"}");
+    }
+
+    public List<String> getOrders() {
+        return orders;
+    }
+
+    public void setOrders(List<String> orders) {
+        this.orders = orders;
+    }
+
+    public List<String> getPlaylist() {
+        return playlist;
+    }
+
+    public void setPlaylist(List<String> playlist) {
+        this.playlist = playlist;
+    }
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
     }
 }
 

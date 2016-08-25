@@ -2,15 +2,19 @@
 <head>
 <meta charset="ISO-8859-1">
 
-    <script src="Tools.js"></script>
+    <script src="../js/Tools.js"></script>
 
-    <link rel="stylesheet" type="text/css" href="Leficarbar.css">
+    <link rel="stylesheet" type="text/css" href="../Leficarbar.css">
     <meta name="viewport" content="width=320">
-    <script src="webtorrent.min.js"></script>
+    <script src="../js/webtorrent.min.js"></script>
 
 <title>Deezer Players</title>
 </head>
 <body onload="start()">
+
+
+<img src="/img/player.png" id="imgplayer">
+
 
 <div id="player_zone" style="width:100%">
     <audio id="player" controls="controls">
@@ -45,8 +49,7 @@ function fade(step,func){
             player.volume+=step;
         else {
             if (step < 0){
-                player.volume = 0;
-                player.pause();
+                pause();
             }
             else
                 player.volume = 1;
@@ -60,22 +63,33 @@ function getVolume(){
 }
 
 function isReady(){
-    return player.readyState;
+    return(ready);
 }
 
+function pause(){
+    player.volume = 0;
+    player.pause();
+}
+
+function removePath(s){
+    var ss = s.split("/");
+    return ss[ss.length-1];
+}
 
 function findFile(name){
     var files=parent.document.getElementById("fileselector").files;
     for(var i=0;i<files.length;i++){
-        if(files[i].name.toLowerCase()===name.toLowerCase())
+        if(files[i].name.toLowerCase()===removePath(name.toLowerCase()))
             return files[i];
     }
     return null;
 }
 
 
-function load(name,func){
+function load(name,func,err_func){
     var f=findFile(name);
+    if(f==null)err_func();
+
     var url;
     if(window.createObjectURL){
         url = window.createObjectURL(f)
@@ -91,24 +105,28 @@ function load(name,func){
     player.src = url;
 }
 
+function Quit(){
+    //player.quit();
+}
 
 function isPlaying(){
     return(player.paused==false);
 }
 
-function play(song,delay,func) {
+function play(song,delay,func,err_func) {
     if (song == null || song == undefined)return;
     if (delay == undefined)delay = 0;
 
     load(song, function () {
         player.play();
         func(player.duration);
-    });
+    },err_func);
 }
 
 function start(){
-
+    ready=true;
 }
+
 </script>
 </body>
 </html>

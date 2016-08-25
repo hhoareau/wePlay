@@ -1,38 +1,47 @@
 package com.weplay.shared;
 
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-
-import java.text.DateFormat;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.List;
-import java.util.Locale;
-import java.util.Scanner;
-import java.util.TimeZone;
-import java.util.UUID;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import javax.crypto.Cipher;
+import javax.crypto.spec.SecretKeySpec;
 import javax.mail.MessagingException;
 import javax.mail.Multipart;
 import javax.mail.Part;
 import javax.mail.internet.MimeMessage;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.Key;
+import java.text.DateFormat;
+import java.util.*;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 public class Tools {
 	public static final Logger log = Logger.getLogger(Tools.class.getName());
 
-	private static final String ADMIN_EMAIL = "mailsellerserver@gmail.com";
-		
-	private static String sep_champs=",";
+	public static final String ADMIN_EMAIL = "shifumix-admin@gmail.com";
+    public static final String DOMAIN = "https://weplaywebsite.appspot.com";
+
+    private static String sep_champs=",";
 	private static String sep_enreg="sepenreg";
 	public static String char_perso="_";
+
+    public static String encrypt(String password, String key){
+        try
+        {
+            Key clef = new SecretKeySpec(key.getBytes("ISO-8859-2"),"Blowfish");
+            Cipher cipher=Cipher.getInstance("Blowfish");
+            cipher.init(Cipher.ENCRYPT_MODE,clef);
+            return new String(cipher.doFinal(password.getBytes()));
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
+    }
+
 
     public static double distance(double lat_a, double lon_a, double lat_b, double lon_b) {
         if(lat_a==lat_b & lon_a==lon_b)return 0.0;

@@ -1,0 +1,78 @@
+<html>
+<head>
+<meta charset="ISO-8859-1">
+    <link rel="stylesheet" type="text/css" href="/Leficarbar.css">
+    <meta name="viewport" content="width=320">
+
+    <script src="/js/webtorrent.min.js"></script>
+    <script src="/js/Tools.js"></script>
+    <script src="/js/id3v2.js"></script>
+    <script src="/js/Main.js"></script>
+    <script src="/js/qrcode.js"></script>
+    <script src="MusicPlayer.js"></script>
+    <script src="https://apis.google.com/js/client.js?onload=init"></script>
+
+    <title>Players</title>
+</head>
+
+<body onload="start()" onunload="onQuit()" onbeforeunload="onBeforeQuit()">
+
+        <div style="text-align: center;">
+            <h2>Connect this device to your audio system</h2>
+
+            <div id="lblMessage"></div>
+            <br>
+
+            <div style="text-align: center;width: 100%">
+                <img id="djlogo" src="/img/dj.png" witdh="80%">
+                <img id="djphoto" style="position: absolute;width:100px;">
+                <div id="players" style="width: 100%;display:inline-block;text-align:center;">
+                        <table><tr>
+                            <td><div>player</div></td>
+                            <td><div>player</div></td>
+                            <td><div>player</div></td>
+                            <td><div>player</div></td>
+                            <td><div>player</div></td>
+                        </tr></table>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="dz-root"></div>
+
+
+        <div id="playlist"></div>
+
+        <br><br>
+
+        <table><tr>
+            <td><a class="mobilebutton" href="javascript:onQuit()">Deezer Account</a></td>
+            <td><a class="mobilebutton" href="javascript:playNextSong()">Next Song</a></td>
+            <td>
+                <div class="image-upload">
+                    <label for="fileselector">
+                        <a class="mobilebutton">My songs</a>
+                        <!-- <img src="/img/home.png" style="width:40px"> -->
+                    </label>
+
+                    <input id="fileselector" type="file" name="datafile"  name="file[]"
+                           accept="audio/*" size="40" webkitdirectory mozdirectory
+                           onchange="analyseDirectory(this)">
+                </div>
+
+            </td>
+        </tr></table>
+
+
+
+<script>
+    var players = [null,null,null,null,null];
+    onLoadFrame=function(elt,k){
+        players[k-1]=elt.contentWindow;
+    };
+
+</script>
+
+</body>
+</html>

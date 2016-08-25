@@ -1,0 +1,125 @@
+<html>
+<head>
+<meta charset="ISO-8859-1">
+
+    <script src="/js/Tools.js"></script>
+
+    <link rel="stylesheet" type="text/css" href="/Leficarbar.css">
+    <meta name="viewport" content="width=320">
+    <script src="https://www.youtube.com/iframe_api"></script>
+
+<title>Youtube Players</title>
+</head>
+<body onload="start()">
+
+<img src="/img/player.png" id="imgplayer" width="0" height="0">
+
+<div id="player_zone" style="width:100%">
+    <div id="player"></div>
+</div>
+
+<div id="playlist"></div>
+
+<script>
+
+    function loadScript(url, callback,func_failed){   // Adding the script tag to the head as suggested before
+        var head = document.getElementsByTagName('head')[0];
+        var script = document.createElement('script');
+        script.type = 'text/javascript';
+        script.src = url;
+        script.onreadystatechange = callback;
+        script.onerror=func_failed;
+        script.onload = callback;
+        head.appendChild(script);
+    }
+
+    function pause(){
+        player.setVolume(0);
+        player.pauseVideo();
+    }
+
+//see : https://developers.google.com/youtube/js_api_reference?hl=fr
+var timer=null;
+var crossfadeTimer=null;
+var gEnd=null;
+var gStep=0;
+var player;
+var gVolume=0;
+    var duration=0;
+var path=getParam()["path"];
+var ready=false;
+
+function setVolume(vol){
+    if(vol<=100 && vol>=0)
+        player.setVolume(vol);
+}
+
+    function getDuration(){
+        return duration;
+    }
+
+function fade(step,func){
+    clearInterval(crossfadeTimer);
+    crossfadeTimer = setInterval(function () {
+        if(player.getVolume()+step>0 && player.getVolume()+step<100)
+            player.setVolume(player.getVolume()+step);
+        else {
+            if (step < 0){
+                pause();
+            }
+            else
+                player.setVolume(100);
+            if(func!=undefined)func(player.volume);
+        }
+    }, 500);
+}
+
+
+function getVolume(){
+    return player.getVolume();
+}
+
+function isReady(){
+    return player.readyState;
+}
+
+    function Quit(){
+        player.quit();
+    }
+
+function isPlaying(){
+    if(player==undefined)return false;
+    return(player.getPlayerState()==1);
+}
+
+function play(song,delay,func,err_func) {
+    if (song == null || song == undefined)return;
+    if (delay == undefined)delay = 0;
+    player.loadVideoById({videoId: song});
+    func(player.getDuration());
+}
+
+
+function start() {
+    setTimeout(function(){
+        player = new YT.Player('player',
+                {   height: '200',
+                    width: '300',
+                    events: {
+                        'onReady': function(event){
+                            player.readyState=true;
+                            event.target.playVideo();
+                        },
+                        'onStateChange':   function(event) {
+                            if(event.data==1)duration=player.getDuration();
+                        }
+                    }
+                }
+        );
+    },2000);
+
+}
+
+</script>
+</body>
+</html>

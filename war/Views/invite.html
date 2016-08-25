@@ -1,0 +1,21 @@
+<ion-view view-title="Invite">
+    <ion-content>
+
+        <ion-item>
+        <div class="item text-center item-image" style="text-align: center;">
+            <div style="width:150px;text-align: center;" id="qrcode"></div>
+        </div>
+
+        <div class="item item-button-right" style="font-size: large">
+            {{url}}
+            <button class="button button-small icon-left ion-ios-copy button-positive" ng-click="copy()">Copy</button>
+        </div>
+
+        <div class="item item-input item-button-right" focus-me>
+            <input type="email" ng-model="email.dests" name="email" placeholder="email to invite" my-enter="sendInvitations()">
+            <button class="button button-small icon-left ion-android-send button-positive" ng-click="sendInvitations()">Send</button>
+        </div>
+        </ion-item>
+
+    </ion-content>
+</ion-view>

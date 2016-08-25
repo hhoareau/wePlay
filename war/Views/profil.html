@@ -1,0 +1,36 @@
+<ion-view view-title="My Profil">
+    <ion-content>
+        <div class="card">
+            <div class="item item-divider">
+                {{user.firstname}}
+            </div>
+            <div class="item">
+                <ion-checkbox ng-model="user.anonymous">{{'PROFIL.ANONYMOUS' | translate}}</ion-checkbox>
+            </div>
+            <div class="item">
+                <button class="button icon-left ion-power button-dark" ng-click="quitEvent()">Quit Event</button>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="item item-divider">
+                Master of Ceremony
+            </div>
+            <div class="item" style="text-align: center">
+                <button ng-show="user.email==event.owner"
+                        class="button icon-left ion-android-delete button-assertive"
+                        ng-click="closeEvent()">{{'PROFIL.CLOSE_EVENT' | translate}}</button>
+            </div>
+            <div class="item" style="text-align: center">
+                <ion-list ng-show="user.email==event.owner">
+                    <ion-item ng-repeat="link in links" ng-click="openLink(link)">
+                        <h3>{{link.title}}</h3><span style="font-size: xx-small">{{link.description}}</span>
+                    </ion-item>
+                </ion-list>
+            </div>
+
+        </div>
+
+
+    </ion-content>
+</ion-view>

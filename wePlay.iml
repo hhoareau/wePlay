@@ -36,7 +36,6 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" scope="PROVIDED" name="AppEngine Dev 1.9.37" level="application_server_libraries" />
     <orderEntry type="library" name="com.googlecode.objectify:objectify:5.1.13" level="project" />
     <orderEntry type="library" name="com.google.appengine:appengine-local-endpoints:1.9.38" level="project" />
     <orderEntry type="library" name="com.google.appengine:appengine-api-1.0-sdk:1.9.38" level="project" />

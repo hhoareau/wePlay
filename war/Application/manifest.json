@@ -1,17 +1,17 @@
 {
   "manifest_version": 2,
-  "name": "WePlay : Social DJing",
+  "name": "Shifumix : Social DJing",
   "description": "Social DJing",
   "version": "1.1",
   "icons": {
-    "128": "logo.png"
+    "128": "logo128.png"
   },
   "app": {
     "urls": [
-      "https://weplaywebsite.appspot.com/"
+      "https://www.shifumix.com/"
     ],
     "launch": {
-      "web_url": "https://weplaywebsite.appspot.com/"
+      "web_url": "https://www.shifumix.com/"
     }
   },
   "permissions": []

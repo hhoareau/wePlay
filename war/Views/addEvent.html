@@ -1,0 +1,84 @@
+<ion-view view-title="Choose en event" ng-controller="addEventCtrl" hide-nav-bar="true">
+    <ion-content>
+
+        {{message}}<br>
+
+            <div class="item item-input-inset">
+                <label class="item-input-wrapper" focus-me>
+                    <input placeholder="{{ 'ADDEVENT.TITLE' | translate }}"
+                           type="text" style="text-align:left;"
+                           ng-model="event.title" autofocus
+                           ng-change="onChangePicture()">
+                </label>
+
+                <button class="button button-small icon-left ion-save button-positive" ng-click="sendEvent()">
+                    {{'ADDEVENT.SAVE' | translate}}
+                </button>
+            </div>
+
+            <div class="item" style="text-align: center;">
+                    <ng-map center="[48.0,2.0]" data-tap-disabled="true"></ng-map>
+                    <button style="display:block;position:absolute;left:10px;top:10px;" class="button button-icon ion-search" ng-click="search()"></button>
+            </div>
+
+        <div class="list">
+
+            <label class="item item-input">
+                <input placeholder="{{'ADDEVENT.START' | translate }}" type="date"
+                       ng-model="event.dtStart"
+                       ng-change="onChangePicture()">
+            </label>
+
+            <label class="item item-input">
+                <input placeholder="{{'ADDEVENT.DESCRIPTION' | translate}}" ng-model="event.description" type="text">
+            </label>
+
+            <label class="item item-input">
+                <input placeholder="{{'ADDEVENT.WEBSITE' | translate}}" ng-model="event.website" type="url">
+            </label>
+
+
+            <label class="item item-input">
+                <input placeholder="{{'ADDEVENT.PASSWORD' | translate}}" ng-model="event.password" type="password">
+            </label>
+
+            <label class="item item-input">
+                <span class="input-label">{{ 'ADDEVENT.SONGSBYDEFAULT' | translate }}</span>
+                <input style="text-align:right;" type="range" min="0" max="30" step="1" ng-model="nsongs">&nbsp;{{nsongs}}
+                <span class="input-label">&nbsp;{{ 'ADDEVENT.LABELSONG' | translate }}</span>
+            </label>
+
+            <label class="item item-input">
+                <span class="input-label">{{ 'ADDEVENT.DURATION' | translate }}</span>
+                <input style="text-align:right" type="range" min="0" max="24" step="1" name="volume" ng-model="event.duration" ng-change="onChangePicture()">&nbsp;{{event.duration}}
+                <span class="input-label">&nbsp;hours</span>
+            </label>
+
+            <label class="item item-input">
+                <span class="input-label">{{ 'ADDEVENT.VISIBLE' | translate }}</span>
+                <input ng-model="event.minDistance" type="range" max="30000" min="0" step="200" value="500">&nbsp;{{event.minDistance/1000}}&nbsp;km
+            </label>
+
+            <label class="item item-input">
+                <span class="input-label">{{ 'ADDEVENT.MAXGUEST' | translate }}</span>
+                <input ng-model="event.maxOnline" type="range" min="0" max="500" step="1" value="50">&nbsp;{{event.maxOnline}}&nbsp;personnes
+            </label>
+
+            <br>
+
+            <div class="item" style="text-align: center">
+             Flyer
+             <input type="checkbox" ng-model="event.autoflyer" checked="true" ng-change="onChangePicture()">Auto
+                <imgfiles on-select="getFlyer(photo)"></imgfiles>
+
+              <br>
+                <img style="margin:3px" ng-src="{{event.flyer}}"></img>
+                <br>
+                <button class="button icon-left ion-save button-positive" ng-click="sendEvent()">Save my event</button>
+            </div>
+        </div>
+
+
+    </ion-content>
+    </ion-view>
+

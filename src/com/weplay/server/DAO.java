@@ -18,14 +18,12 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 package com.weplay.server;
 
-import com.weplay.shared.*;
+import com.google.appengine.api.datastore.QueryResultIterator;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.ObjectifyService;
+import com.weplay.shared.*;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 import static com.googlecode.objectify.ObjectifyService.ofy;
@@ -49,7 +47,10 @@ public class DAO  {
 			ObjectifyService.register(Lieu.class);
             ObjectifyService.register(Photo.class);
             ObjectifyService.register(LocalFile.class);
+            ObjectifyService.register(Blob.class);
     }
+
+
 
     public static synchronized DAO getInstance() {
         if (null == dao) {
@@ -77,7 +78,6 @@ public class DAO  {
 	
 
 	public void raz() {
-		log.warning("Raz");
         ofy().delete().keys(ofy().load().type(Message.class).keys().list());
         ofy().delete().keys(ofy().load().type(Song.class).keys().list());
         ofy().delete().keys(ofy().load().type(User.class).keys().list());
@@ -85,6 +85,7 @@ public class DAO  {
         ofy().delete().keys(ofy().load().type(Lieu.class).keys().list());
         ofy().delete().keys(ofy().load().type(Event.class).keys().list());
         ofy().delete().keys(ofy().load().type(LocalFile.class).keys().list());
+        ofy().delete().keys(ofy().load().type(Blob.class).keys().list());
 	}
 	
 
@@ -103,23 +104,40 @@ public class DAO  {
             e.printStackTrace();
             return null;
 		}
-		
 	}
 
 
+    public Photo join(Photo p){
+        if(!p.photo.startsWith("blob:"))
+            return p;
+        else{
+            List<String> ids= Arrays.asList(p.photo.replace("blob:", "").split(";"));
+            Collection<Blob> lb=ofy().load().type(Blob.class).ids(ids).values();
+            p.photo="";
+            for(Blob b:lb)
+                p.photo+=b.data;
+            return p;
+        }
+    }
+
+    public List<Photo> join(List<Photo> lp){
+        for(Photo p:lp)
+            p=join(p);
+        return lp;
+    }
 
 	public List<Photo> getPhotosSince(Event e,long dt) {
-		return ofy().load().type(Photo.class)
-					.filter("dtMessage >", dt)
-					.filter("idEvent", e.Id)
-					.list();
-	}
+        return join(ofy().load().type(Photo.class)
+                .filter("dtCreate >", dt)
+                .filter("idEvent", e.Id)
+                .list());
+    }
 
 	/**
 	 * Retrouve l'evenement d'un message
-	 * @param m
+	 * @param
 	 * @return
-	 */
+
 	public Event findEvents(Message m){
 		for(Event e:ofy().load().type(Event.class).filter("dtStart <", m.dtMessage)
 								.filter("dtEnd >", m.dtMessage).list()){
@@ -132,6 +150,7 @@ public class DAO  {
 		
 		return null;
 	}
+     */
 	
 	/**
 	 * Donne les message depuis x heure
@@ -162,7 +181,7 @@ public class DAO  {
 	 * @return la liste de toutes les chansons demand� pour une soir�e
 	 */
 	public List<Song> getSongs(Event e){
-		return ofy().load().type(Song.class).filter("idEvent", e.Id).filter("dtPlay",null).list();
+        return ofy().load().type(Song.class).filter("idEvent", e.Id).filter("dtPlay",null).list();
 	}
 
 
@@ -179,6 +198,7 @@ public class DAO  {
 
 
 	public void save(Event event) {
+        event.lastSave=System.currentTimeMillis();
 		ofy().save().entities(event);
 	}
 
@@ -223,33 +243,12 @@ public class DAO  {
 		if(lng==null || lat==null)return le;
         for(Event e:ofy().load().type(Event.class).filter("dtStart <=", dt)	.list()){
             Double d=Tools.distance(lat,lng,e.lat,e.lng,'K')*1000;
-            if(e.dtEnd>dt && d<e.minDistance)le.add(e);
+            if(e.dtEnd!=null && e.minDistance!=null && e.dtEnd>dt && d<e.minDistance)le.add(e);
         }
 		return le;
 	}
 
-	/**
-	 * Retourne la liste des evenement possible pour un utilisateur donn�e
-	 * @param u
-	 * @return
-	 */
-	public List<Event> findEvents(User u) {
-		if(u==null)return null;
-		
-		List<Event> rc=new ArrayList<Event>();
-		
-		for(Event e:this.getActifEvents()){
-			Lieu l=this.findLieu(e.idLieu);
-			e.distanceFromUser=l.distance(u);
-			
-			if(e.Invites.contains(u.email) || (e.ipAdresse!=null && e.ipAdresse.equals(u.ip)))
-				rc.add(e);
-			else{	
-				if(e.opened && e.distanceFromUser<100)rc.add(e);
-			}
-		}		
-		return rc;
-	}
+
 
 	/**
 	 * Retourne les evenemnts actuellement actifs
@@ -275,16 +274,6 @@ public class DAO  {
 	}
 
 
-	/**
-	 * 
-	 * @param Id
-	 * @return
-	 */
-    Lieu findLieu(String Id) {
-		if(Id==null)return null;
-		return ofy().load().type(Lieu.class).id(Id).now();
-	}
-	
 	
 	/**
 	 * 
@@ -328,20 +317,23 @@ public class DAO  {
         if(playlist.size()==0)return new ArrayList<Song>();
         Collections.sort(playlist);
         if(nbr>playlist.size())nbr=playlist.size();
-        return playlist.subList(0,nbr);
+        return playlist.subList(0, nbr);
     }
+
 
     public List<Photo> getPhoto(String event, long dtStart, long dtEnd) {
         List<Photo> rc=new ArrayList<Photo>();
-        for(Photo p:ofy().load().type(Photo.class).filter("idEvent", event).filter("dtMessage >",dtStart).list())
-            if(p.dtMessage<dtEnd)rc.add(p);
+        for(Photo p:ofy().load().type(Photo.class).filter("idEvent", event).filter("dtCreate >",dtStart).list())
+            if(p.dtCreate<dtEnd)rc.add(join(p));
+
         return rc;
     }
 
+
     public Photo getLastPhoto(String idevent) {
-        List<Photo> rc=ofy().load().type(Photo.class).filter("idEvent", idevent).order("dtMessage").list();
+        List<Photo> rc=ofy().load().type(Photo.class).filter("idEvent", idevent).order("dtCreate").list();
         if(rc.size()>0)
-            return rc.get(rc.size()-1);
+            return join(rc.get(rc.size()-1));
         else
             return null;
     }
@@ -350,14 +342,15 @@ public class DAO  {
         return ofy().load().type(Event.class).filter("owner",u.email).filter("dtEnd >",System.currentTimeMillis()).list();
     }
 
-    public void save(List<LocalFile> lf) {
+    public void saveFiles(List<LocalFile> lf) {
         ofy().save().entities(lf);
     }
 
+    //@return
     public List<LocalFile> findLocal(String q,String event) {
         List<LocalFile> rc=new ArrayList<>();
         for(LocalFile lf:ofy().load().type(LocalFile.class).filter("event",event).list())
-            if(lf.getText().indexOf(q)>=0)
+            if(lf.getArtist().indexOf(q)>=0 || lf.getTitle().indexOf(q)>=0)
                 rc.add(lf);
         return rc;
     }
@@ -365,5 +358,39 @@ public class DAO  {
     public void razlocalfile(String event) {
         List<LocalFile> rc=ofy().load().type(LocalFile.class).filter("event", event).list();
         ofy().delete().entities(rc);
+    }
+
+    //@return Song list with email as voter
+    public Collection<Song> getPreferSongs(String email,Integer nSongs) {
+        Collection<Song> songs=new ArrayList<>();
+        QueryResultIterator<Song> q=ofy().load().type(Song.class).iterator();
+        while(q.hasNext() && songs.size()<nSongs){
+            Song s=q.next();
+            if(s.contain(email) || s.from.split(";")[0].equals(email))
+                if(!songs.contains(s))
+                    songs.add(s);
+        }
+        return songs;
+    }
+
+    public List<Event> getLastEvents(int i) {
+        List<Event> rc=ofy().load().type(Event.class).order("dtStart").filter("dtEnd", ">0").list();
+        if(rc.size()<i)return(rc);
+
+        return rc.subList(0, i);
+    }
+
+    public Collection<Song> getBestSongs(Event e, int i) {
+        List<Song> rc=ofy().load().type(Song.class).order("score").list();
+        if(rc.size()<i)i=rc.size()-1;
+        return rc.subList(0,i);
+    }
+
+    public void save(List<Message> mes) {
+        ofy().save().entities(mes);
+    }
+
+    public void saveList(List<Blob> lb) {
+        ofy().save().entities(lb);
     }
 }

@@ -2,10 +2,12 @@
 <head>
 <meta charset="ISO-8859-1">
 <link href='https://fonts.googleapis.com/css?family=Indie+Flower' rel='stylesheet' type='text/css'>
-<link rel="stylesheet" type="text/css" href="Leficarbar.css">
-    <script src="Tools.js"></script>
-    <script src="swipe.js"></script>
-    <script src="qrcode.js"></script>
+<link rel="stylesheet" type="text/css" href="../Leficarbar.css">
+    <script src="/js/Tools.js"></script>
+    <script src="/js/Main.js"></script>
+    <script src="/js/swipe.js"></script>
+    <script src="/js/qrcode.js"></script>
+    <script src="https://apis.google.com/js/client.js?onload=init"></script>
 
     <style type="text/css">
 h1 {
@@ -14,10 +16,21 @@ h1 {
 }
 </style>
 <title>SlideShow</title>
-    <script src="Main.js"></script>
+    <script src="../js/Main.js"></script>
 </head>
 
 <body style="background-color:black">
+
+<!-- Google Tag Manager -->
+<noscript><iframe src="//www.googletagmanager.com/ns.html?id=GTM-NMMJGK"
+                  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-NMMJGK');</script>
+<!-- End Google Tag Manager -->
+
 
  <br>
 <br>
@@ -50,10 +63,10 @@ addEventListener("click", function() {
 function RefreshSlideshow(){
 	var div = document.getElementById("slides");
 	div.innerHTML="";
-    if(delay==null)delay=10;
+    if(delay==null)delay=10000;
     slideshow(delay,idEvent,function(rep){
         if(rep.result.items==undefined || rep.result.items.length==0){
-            shorturl(DOMAIN+"/login.html?event="+idEvent,function(short){
+            shorturl(DOMAIN+"/index.html?event="+idEvent,function(short){
                 new QRCode(document.getElementById("qrcode"), {
                     text: short.result.id,
                     width: 400,
