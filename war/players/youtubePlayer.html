@@ -43,7 +43,7 @@ var timer=null;
 var crossfadeTimer=null;
 var gEnd=null;
 var gStep=0;
-var player;
+var player={};
 var gVolume=0;
     var duration=0;
 var path=getParam()["path"];
@@ -54,9 +54,13 @@ function setVolume(vol){
         player.setVolume(vol);
 }
 
-    function getDuration(){
-        return duration;
+    function getPos(){
+        return player.getCurrentTime();
     }
+
+function getDuration(){
+    return duration;
+}
 
 function fade(step,func){
     clearInterval(crossfadeTimer);
@@ -80,12 +84,14 @@ function getVolume(){
 }
 
 function isReady(){
+    if(player==undefined)return false;
     return player.readyState;
+    //return(player.getPlayerState()!=-1);
 }
 
-    function Quit(){
-        player.quit();
-    }
+function Quit(){
+    player.quit();
+}
 
 function isPlaying(){
     if(player==undefined)return false;
@@ -96,7 +102,11 @@ function play(song,delay,func,err_func) {
     if (song == null || song == undefined)return;
     if (delay == undefined)delay = 0;
     player.loadVideoById({videoId: song});
-    func(player.getDuration());
+    setTimeout(function(){
+        var duration=player.getDuration();
+        $$("YouTube play retourne la durée : "+duration)
+        func(duration);
+    },1000);
 }
 
 
@@ -108,16 +118,16 @@ function start() {
                     events: {
                         'onReady': function(event){
                             player.readyState=true;
-                            event.target.playVideo();
                         },
                         'onStateChange':   function(event) {
-                            if(event.data==1)duration=player.getDuration();
+                            if(event.data==1)
+                                duration=player.getDuration();
                         }
                     }
                 }
         );
+        player.readyState=false;
     },2000);
-
 }
 
 </script>

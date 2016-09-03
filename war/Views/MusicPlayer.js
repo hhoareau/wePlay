@@ -2,16 +2,17 @@
  * Created by u016272 on 12/08/2016.
  */
 
-const delayFadeOut=30;
+const delayFadeOut=15;
 const maxDuration=3600;
 
 var players=[];
 var timer = null;
-var timerPlay = null;
+var playersReady=false;
 var crossfadeTimer = null;
 var currentPlayer = 0;
 var reader = window.jsmediatags;
 var file;
+var lst = [];
 
 //var client = new WebTorrent();
 function torrentload() {
@@ -34,6 +35,7 @@ function torrentload() {
         });
     });
 }
+
 function getSongs(files, func) {
     var queue = [];
     var j = 0;
@@ -60,6 +62,10 @@ function getSongs(files, func) {
                 queue[i].artist = tags.Artist || t2.Artist;
                 queue[i].album = tags.Album || t2.Album;
                 queue[i].genre = tags.Genre || "";
+
+                if(queue[i].title=="" && queue[i].artist==""){
+                    consle.log(queue[i]);
+                }
             }
 
             if (i == queue.length - 1)
@@ -79,7 +85,7 @@ function parseFile(file, callback) {
             File: file.name
         });
         callback(tags, file);
-    })
+    });
 }
 function runSearch(query) {
     var regex = new RegExp(query.trim().replace(/\s+/g, '.*'), 'ig');
@@ -95,13 +101,17 @@ function canPlay(type) {
     var a = document.createElement('audio');
     return !!(a.canPlayType && a.canPlayType(type).replace(/no/, ''));
 }
-function analyseDirectory(finder, func) {
-    clearTimeout(timer);
 
-    var lst = [];
+
+function analyseDirectory(finder, func) {
+    informe("analyse du repertoire "+finder,true);
+
+    clearTimeout(timer);
+    lst = [];
+
     getSongs(finder.files, function (songs) {
         for (var i = 0; i < songs.length; i++) {
-            if (i % 5 == 0)informe(i + "/" + songs.length + " songs analysed", true);
+
             if (songs[i].title == undefined || songs[i].title == null)continue;
             if (songs[i].name == undefined || songs[i].name == null)continue;
             if (songs[i].artist == undefined || songs[i].artist == null)continue;
@@ -121,37 +131,62 @@ function analyseDirectory(finder, func) {
                 informe(lst.length + " songs loaded");
             });
         }
-
         else
             informe("No song to load");
 
         playNextSong();
     });
 }
-onQuit=function() {
-    var rc = false;
-    players.forEach(function(player){
-        rc = rc || player.player.isPlaying();
+
+window.onbeforeunload=function (event) {
+    $$("unload form");
+    var idEvent=getParam()["event"];
+
+    updateevent(idEvent,"musicPlayer",null,function(){
+        if(lst.length>0){
+            razlocalfile(idEvent);
+            $$("RAZ des fichiers locaux");
+        }
     });
+
+    players.forEach(function(player){player.Quit();});
+
+    var rc = (lst.length>0);
+    for(var i=0;i<players.length;i++)
+        rc = rc || players[i].player.isPlaying();
 
     if (rc)
-        if (!window.confirm("You're playing music. Are you sure you want to stop ?"))
-            return false;
+        return("You're playing music. Are you sure you want to stop ?");
+};
 
-    razlocalfile(getParam()["event"]);
 
-    players.forEach(function(player){
-        player.Quit();
-    });
+window.onfocus=function() {
+    updateevent(getParam()["event"], "hasFocus", true);
+};
 
-}
 
 function allPlayersAreReady(){
+    if(getParam()["offline"]=="true")return true;
+    if(playersReady)return true;
+
+    var rc=true;
     for(var i=0;i<players.length;i++)
-        if(!players[i].player.isReady())
-            return false;
-    return true;
+        if(!players[i].player.isReady()){
+            rc=false;
+            players[i].window.style.visibility="hidden";
+        }
+        else
+            players[i].window.style.visibility="visible";
+
+    if(rc){
+        informe("All players are ready, you can push your music !");
+        playersReady=true;
+    }
+
+    return rc;
 }
+
+
 //Rechercher du meilleur player suivant le type de chanson à jouer
 function findBestPlayer(origin) {
     for(var i=0;i<players.length;i++)
@@ -167,17 +202,18 @@ function findBestPlayer(origin) {
 function playNextSong() {
     clearTimeout(timer);
     if (allPlayersAreReady()) {
-        console.log("All player are ready");
-        informe("");
         getsongtoplay(getParam()["event"], function (rep) {
             if (rep.status == 204) {
                 timer = setTimeout(playNextSong, 10000);
             } else {
                 clearTimeout(timer);
-                var idSong = rep.result.text;
+                var song=rep.result;
+                if(song==undefined)song=rep;
+
+                var idSong = song.text;
                 var r={
                     old:currentPlayer,
-                    new:findBestPlayer(rep.result.origin)
+                    new:findBestPlayer(song.origin)
                 };
                 if(r.new==-1)return false;
 
@@ -185,30 +221,49 @@ function playNextSong() {
                 players[r.new].buttonplay.src="/img/play.png";
                 players[r.old].buttonplay.src="/img/pause.png";
 
-                //Assure le crossfade entre les deux player
+                //Assure le crossfade entre les deux players s'ils sont différents
                 if (r.old != r.new) {
                     players[r.old].player.fade(-10);
                     players[r.new].player.fade(+10);
                 }
 
-                players[r.new].player.play(idSong, 2, function (duration) {
-                    if (rep.result.duration > 0)
-                        timer = setTimeout(playNextSong, (rep.result.duration - delayFadeOut) * 1000);
-                    else if (duration == undefined || duration == 0) { //Parfois la duree n'est pas disponible immediatement (youtube)
-                        setTimeout(function () {
-                            duration = players[r.new].player.getDuration() - 5;
-                            timer = setTimeout(playNextSong, (Math.min(duration,maxDuration) - delayFadeOut) * 1000);
-                        }, 5000);
+                var tempoDuration=10;
+                //Start the song to the new player
+                players[r.new].player.play(idSong, 2, function () {
+                    if(song.from!=undefined){
+                        $("djname").innerHTML="<span style='color: black;'>"+song.from.firstname+"</span>";
+                        $("djname").left=$("djlogo").left+$("djlogo").width/2-$("djname").width/2;
+                        $("djname").top=$("djlogo").top+100;
                     }
-                    else timer = setTimeout(playNextSong, (Math.min(duration,maxDuration) - delayFadeOut) * 1000);
+
+                    $$("Duree actuel du titre : "+song.duration);
+                    var delayToNextSong;
+
+                    if (song.duration > 0){
+                        delayToNextSong=(song.duration - delayFadeOut);
+                        timer = setTimeout(playNextSong, delayToNextSong * 1000);
+                        $$("Chargement du prochain titre dans "+delayToNextSong+" sec");
+
+                    }
+                    else{
+                        $$("Programme la récupération de la duree du titre pour les prochaines secondes");
+                        setTimeout(function () {
+                            song.duration = players[r.new].player.getDuration() - tempoDuration;
+
+                            delayToNextSong = (Math.min(song.duration, maxDuration) - delayFadeOut);
+                            $$("Récupération de la duree a posteriori : " + song.duration);
+
+                            timer = setTimeout(playNextSong, delayToNextSong * 1000);
+                            $$("Chargement du prochain titre dans "+delayToNextSong+" sec");
+
+                        }, tempoDuration * 1000);
+                    }
 
 
-                }, function (err) { razlocalfile(idEvent, function () {
+                }, function (err) { razlocalfile(getParam()["event"], function () {
                         informe("Local songs deleted");
                     });
                 });
-
-
             }
         });
     } else {
@@ -236,10 +291,6 @@ function chkCompatibility() {
 }
 
 
-window.addEventListener("beforeunload", function () {
-    stopcurrentsong(getParam()["event"]);
-});
-
 //Permet la creation des players
 //@param h hauteur du lecteur
 //@param w
@@ -247,6 +298,7 @@ window.addEventListener("beforeunload", function () {
 //@param pauseImave image a placer lorsque le lecteur est en pause
 //@param h hauteur du lecteur
 function createPlayers(zone,lst,h,w,pauseImage){
+    $$("initialisation des players");
     var k=0;
     var divs=zone.getElementsByTagName("div");
     for(var i=0;i<divs.length;i++){
@@ -267,6 +319,7 @@ function createPlayers(zone,lst,h,w,pauseImage){
             players[k].player=iframe.contentWindow;
             players[k].typePlayer=lst[k*2].replace("Player.html","");
             players[k].origin=lst[k*2+1];
+            players[k].window=iframe;
             k++;
         }
     }
@@ -274,30 +327,42 @@ function createPlayers(zone,lst,h,w,pauseImage){
 
 function start() {
     informe("Players loading",true);
-    createPlayers(
-        $("players"),
-        ["deezerPlayer.html?appid=182662",DEEZER,"filePlayer.html",LOCAL,
-            "filePlayer.html",LOCAL,"youtubePlayer.html",
-            YOUTUBE,"youtubePlayer.html",YOUTUBE],
-        100,100);
 
-    informe("waiting players",true);
+    refresh_event(getParam()["event"],function(){
+        if(myevent.musicPlayer!=null){
+            informe("Only one player is authorized");
+            setTimeout(function(){window.close()},2000);
+            return;
+        }
 
-    $("djphoto").top=$("djlogo").top;
-    $("djphoto").left=$("djlogo").left+$("djlogo").width/2-$("djphoto").width/2;
+        myevent.musicPlayer=navigator.platform;
+        sendevent(myevent);
 
-    //chkCompatibility();
-    //getInvite(getParam()["event"],150);
+        createPlayers(
+            $("players"),
+            ["deezerPlayer.html?appid=182662",DEEZER,"filePlayer.html",LOCAL,
+                "filePlayer.html",LOCAL,"youtubePlayer.html",
+                YOUTUBE,"youtubePlayer.html",YOUTUBE],
+            100,100);
 
-    //Utiliser un torrent : WebTorrent
-    //var WebTorrent = require('webtorrent');
-    /*
+        informe("waiting players",true);
 
-     var magnetURI = 'magnet:?xt=urn:btih:F6B163EC5643A37E4A44D38FE9B538D261D020A9&dn=single+yo+gotti+rihanna+feat+young+thug+hip+hop+rap+single+2015+itunes+plus+m4a+aac+exclusive+june+2015+uj+rip&tr=udp%3A%2F%2Ftracker.publicbt.com%2Fannounce&tr=udp%3A%2F%2Fglotorrents.pw%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce';
+        //chkCompatibility();
+        //getInvite(getParam()["event"],150);
 
-     */
-    //document.getElementById("fileselector").value=getCookie("pathfile");
-    //torrentload();
+        //Utiliser un torrent : WebTorrent
+        //var WebTorrent = require('webtorrent');
+        /*
 
-    setTimeout(playNextSong, 5000);
+         var magnetURI = 'magnet:?xt=urn:btih:F6B163EC5643A37E4A44D38FE9B538D261D020A9&dn=single+yo+gotti+rihanna+feat+young+thug+hip+hop+rap+single+2015+itunes+plus+m4a+aac+exclusive+june+2015+uj+rip&tr=udp%3A%2F%2Ftracker.publicbt.com%2Fannounce&tr=udp%3A%2F%2Fglotorrents.pw%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce';
+
+         */
+        //document.getElementById("fileselector").value=getCookie("pathfile");
+        //torrentload();
+
+        setTimeout(playNextSong, 5000);
+    },function(){
+        informe("This event not exist");
+        setTimeout(function(){window.close()},2000);
+    });
 }

@@ -33,7 +33,7 @@ public class Vote implements Serializable {
 
 	protected static final Logger log = Logger.getLogger(Vote.class.getName());
 	
-	//@Id public String Id; 					//Id interne des Users (adresse mail)
+	//@Id public String Id; 					//Id interne des Users (adresse email)
 	
 	private String votant;						//Nom du User
 	private String caracteristique;

@@ -1,0 +1,41 @@
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<title>Allphoto</title>
+
+
+    <script src="/js/Tools.js"></script>
+    <script src="/js/Main.js"></script>
+    <script src="https://apis.google.com/js/client.js?onload=init"></script>
+
+</head>
+<body style="background-color:black;border-color: black;">
+
+<h2>Click on the photo you want download</h2>
+<div id="zone_photos"></div>
+
+<script>
+
+var photo_size=getParam()["photo_size"];
+var canvas = document.getElementById('myCanvas');
+var context = canvas.getContext('2d');
+var idEvent=getParam()["event"];
+var zones=null;
+var x=0,y=0;
+
+function start(){
+        getMessage(getParam()["event"],null,function(rep) {
+            if (rep.status != 204) {
+                photos = rep.result.items;
+                photos.forEach(function(photo){
+                   $("zone_photo").innerHTML+="<img download src='"+photo.src+"'><br>"
+                });
+            }
+        });
+}
+
+</script>
+
+
+</body>
+</html>

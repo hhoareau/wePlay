@@ -1,21 +1,28 @@
 <ion-view view-title="Invite">
     <ion-content>
 
-        <ion-item>
-        <div class="item text-center item-image" style="text-align: center;">
-            <div style="width:150px;text-align: center;" id="qrcode"></div>
+        <div class="item text-center">
+            <div style="display:inline-block; width:200px;" id="qrcode"></div>
         </div>
 
-        <div class="item item-button-right" style="font-size: large">
+        <div class="item text-left item-button-right" style="font-size: large">
             {{url}}
-            <button class="button button-small icon-left ion-ios-copy button-positive" ng-click="copy()">Copy</button>
+            <button class="button icon-left ion-ios-copy button-positive" ng-click="copy()">
+                <span style="font-size: small;">
+                    {{'INVITE.COPY' | translate}}
+                </span>
+
+            </button>
         </div>
 
-        <div class="item item-input item-button-right" focus-me>
+        <div class="item text-left item-input item-button-right" focus-me>
             <input type="email" ng-model="email.dests" name="email" placeholder="email to invite" my-enter="sendInvitations()">
-            <button class="button button-small icon-left ion-android-send button-positive" ng-click="sendInvitations()">Send</button>
+            <button class="button icon-left ion-android-send button-positive" ng-click="sendInvitations()">
+               <span style="font-size: small;">
+                    {{'INVITE.SEND' | translate}}
+                </span>
+            </button>
         </div>
-        </ion-item>
 
     </ion-content>
 </ion-view>

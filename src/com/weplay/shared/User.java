@@ -37,9 +37,11 @@ import java.util.logging.Logger;
 public class User implements Comparable<User> {
 	protected static final Logger log = Logger.getLogger(User.class.getName());
 	
-	@Id public String email; 					//Id interne des Users (adresse mail)
-	
-	public String name="";						//Nom du User
+	@Id public String id; 					//Id interne des Users (adresse email)
+
+    public String email ="";
+
+    public String name="";						//Nom du User
 	private String facebookid=null;
 	private String firstname;
     private String humeur;
@@ -48,13 +50,17 @@ public class User implements Comparable<User> {
 	private String state="";
     public Boolean anonymous=false;
     public Long dtFirstConnexion=System.currentTimeMillis();
-	
+	public String message="";
+
 	public String currentEvent="";
-	
-	public Double lg=null;
+
+    //Position du user
+	public Double lng=null;
 	public Double lat=null;
-	
-	private ArrayList<Vote> votes=new ArrayList<Vote>();
+    public Double precision=1000000.0; //Precision de la position
+
+
+    private ArrayList<Vote> votes=new ArrayList<Vote>();
 	//public ArrayList<Demande> demandes=new ArrayList<Demande>();
 
 	public Integer score=0;
@@ -67,7 +73,7 @@ public class User implements Comparable<User> {
 
 
     public User(String email,String name,String facebookid,String photo){
-		this.email=email.toLowerCase();
+		this.id=email;
 		if(name==null || name.length()==0)
 			this.name=email.split("@")[0];
 		else
@@ -77,21 +83,19 @@ public class User implements Comparable<User> {
 		if(photo!=null && photo.length()>0)this.photo=photo;
 	}
 
-    void initUser(infoFacebook infos) {
-        if(infos.email!=null) {
-            String s=Tools.encrypt(infos.email, "hh4271");
-            this.email= BaseEncoding.base64().encode(s.getBytes()).replace("+","_");
-        }
-        else
-            this.email = infos.id;
 
+    void initUser(infoFacebook infos) {
+        String s=Tools.encrypt(infos.id, "hh4271");
+        this.id= BaseEncoding.base64().encode(s.getBytes()).replace("+","_");
+
+        this.email =infos.email;
         this.facebookid=infos.id;
         this.firstname = infos.first_name;
         this.photo = infos.link;
         this.home = "https://www.facebook.com/" + infos.id;
         this.picture=infos.picture;
         this.lat=48.0;
-        this.lg=2.0;
+        this.lng=2.0;
         this.lang=infos.getLocale().split("_")[0];
     }
 
@@ -102,6 +106,9 @@ public class User implements Comparable<User> {
 
     public User(String email) {
         initUser(new infoFacebook(email));
+        this.lat=48.0;
+        this.lng=2.0;
+        this.dtLastPosition=System.currentTimeMillis();
     }
 
 
@@ -112,7 +119,7 @@ public class User implements Comparable<User> {
 	 * @param lat
 	 */
 	public void setPosition(Double lg,Double lat){
-		this.lg=lg;
+		this.lng=lg;
 		this.lat=lat;
 		this.dtLastPosition=System.currentTimeMillis();
 	}
@@ -126,11 +133,11 @@ public class User implements Comparable<User> {
 
 
 	/**
-	 * Format destin� au mail ou page web
+	 * Format destin� au email ou page web
 	 * @return
 	 */
 	public String toMail(){
-		return("bonjour "+name+"\n Votre email enregistre est le "+email+" \n");
+		return("bonjour "+name+"\n Votre email enregistre est le "+id+" \n");
 	}
 
 	@Override
@@ -162,17 +169,6 @@ public class User implements Comparable<User> {
 			this.photo="personne.png";
 	}
 
-
-
-
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
 
     public String getName() {
         return name;
@@ -230,12 +226,12 @@ public class User implements Comparable<User> {
         this.currentEvent = currentEvent;
     }
 
-    public Double getLg() {
-        return lg;
+    public Double getLng() {
+        return lng;
     }
 
-    public void setLg(Double lg) {
-        this.lg = lg;
+    public void setLng(Double lg) {
+        this.lng = lg;
     }
 
     public Double getLat() {
@@ -324,5 +320,39 @@ public class User implements Comparable<User> {
 
     public void setLastCGU(Integer lastCGU) {
         this.lastCGU = lastCGU;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+
+    public Double getPrecision() {
+        return precision;
+    }
+
+    public void setPrecision(Double precision) {
+        this.precision = precision;
+    }
+
+
+    public String getId() {
+        return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

@@ -41,6 +41,11 @@ function setVolume(vol){
         player.volume=vol/100;
 }
 
+function getDuration(){
+    return player.duration;
+}
+
+
 function fade(step,func){
     step=step/100;
     clearInterval(crossfadeTimer);

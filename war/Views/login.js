@@ -34,7 +34,7 @@ App.controller("loginCtrl", function($scope,Facebook,$state,$window){
         // From now on you can use the Facebook service just as Facebook api says
         Facebook.login(function(response) {
             $scope.me();
-        });
+        },{scope:"public_profile,email,user_events"});
     };
 
     $scope.IntentLogin = function() {
@@ -46,25 +46,20 @@ App.controller("loginCtrl", function($scope,Facebook,$state,$window){
 
 
     $scope.me = function() {
-        Facebook.api('/me',{fields:"locale,first_name,last_name,email,picture"}, function(response) {
-            response.picture=response.picture.data.url;
-            adduser(response,function(user){
-                window.localStorage.setItem("user",JSON.stringify(user.result));
-                window.localStorage.setItem("email",user.result.email);
-                $state.go("selEvent",{},{reload:true});
+        var s=window.localStorage.getItem("user");
+        if(s=="null"){
+            Facebook.api('/me',{fields:"locale,first_name,last_name,email,picture"}, function(response) {
+                response.picture=response.picture.data.url;
+                adduser(response,function(user){
+                    window.localStorage.setItem("user",JSON.stringify(user.result));
+                    $state.go("selEvent",{},{reload:true});
+                });
             });
-        });
+            Facebook.api("/me/events", function (resp) {
+                localStorage.setItem("facebook_events",JSON.stringify(resp.data));
+            });
+        }
     };
-
-
-    $scope.logout = function() {
-        Facebook.logout(function() {
-            $scope.$apply(function() {
-                $scope.user   = {};
-                $scope.logged = false;
-            });
-        });
-    }
 
     /**
      * Taking approach of Events :D
@@ -86,5 +81,7 @@ App.controller("loginCtrl", function($scope,Facebook,$state,$window){
         }
     });
 
+    $scope.$on("$ionicView.loaded",function(){
+        window.localStorage.setItem("user",null);
+    });
 });
-

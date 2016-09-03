@@ -1,38 +1,20 @@
 
 
 
-function resizeBase64Img(base64, maxsize,func) {
-    if(base64.length<3000000){
-        func(base64);
-        return;
-    }
 
-    console.log("Resizing");
-    var canvas = document.createElement("canvas");
-    var img=new Image();
-    img.src=base64;
-    img.onload=function(){
-        var ratio=maxsize/Math.max(this.width,this.height);
-
-        canvas.width =this.width*ratio;
-        canvas.height =this.height*ratio;
-        var context = canvas.getContext("2d");
-
-        context.drawImage(img, 0, 0,canvas.width,canvas.height);
-        var rc=canvas.toDataURL("image/jpeg", 1.0);
-        func(rc);
-    };
-}
-
-App.controller('PhotosCtrl', function ($scope,$interval,$ionicPopup,$translate) {
+App.controller('PhotosCtrl', function ($scope,$interval,$ionicPopup,$ionicLoading,$translate,$interval,$timeout) {
    initGlobal($translate);
     var photo_interval=5000;
-
-    var promise=$interval(refresh_photo, photo_interval);
+    var h=null;
 
     $scope.message="";
     $scope.event=myevent;
     $scope.withMessage = {};
+
+    $scope.downloadPhotos=function (col){
+        col.items.forEach(function(photo){
+        });
+    }
 
     var s = window.localStorage.getItem("withMessage");
     if (s != null)
@@ -40,62 +22,45 @@ App.controller('PhotosCtrl', function ($scope,$interval,$ionicPopup,$translate) 
     else
         $scope.withMessage.checked = false;
 
-    $scope.showPopup = function (func) {
-        $scope.data = {};
 
-        // An elaborate, custom popup
-        var myPopup = $ionicPopup.show({
-            template: '<input autofocus focus-me type="text" ng-model="data.message">',
-            title: 'Enter your message',
-            scope: $scope,
-            buttons: [
-                {text: 'Cancel'},
-                {
-                    text: '<b>Save</b>',
-                    type: 'button-positive',
-                    onTap: function (e) {
-                        if (!$scope.data.message) {
-                            //don't allow the user to close unless he enters wifi password
-                            e.preventDefault();
-                        } else {
-                            return $scope.data.message;
-                        }
-                    }
-                }
-            ]
-        });
-        myPopup.then(func);
-    };
 
 
     function send(theFile, photo, success, failure) {
         var max_photo_size = 500;
-        resizeBase64Img(theFile, max_photo_size, function (newImg) {
-            photo.photo = newImg;
-            $scope.lastphoto=newImg;
-            $interval.cancel(promise);
+        $ionicLoading.show({template:'Photo sending'});
 
-            sendphoto(myevent.id, photo,
-                function () {
-                    if(success!=undefined)success();
-                    $scope.message="Photo sended";
-                    promise=$interval(refresh_photo, photo_interval);
-                },
-                function () {
-                    $scope.message="Photo not sended";
-                    failure();
-                    promise=$interval(refresh_photo, photo_interval);
-                },
-                function (code) {
-                    console.log(code);
-                }
-            );
-        });
+        $timeout(function(){
+            resizeBase64Img(theFile, max_photo_size, function (newImg) {
+
+                photo.photo = newImg;
+                $scope.lastphoto=newImg;
+                $ionicLoading.hide();
+
+                sendphoto(myevent.id, photo,
+
+                    function () {
+                        if(success!=undefined)success();
+                        $scope.message="Photo sended";
+                        promise=$interval(refresh_photo, photo_interval);
+                    },
+                    function () {
+                        $scope.message="Photo not sended";
+                        failure();
+                        promise=$interval(refresh_photo, photo_interval);
+                    },
+                    function (code) {
+                        console.log(code);
+                    }
+                );
+            });
+        },200);
     }
 
 
     $scope.getPhoto = function (photoPromise) {
+
         photoPromise.then(function (theFile) {
+
             var photo = {};
             photo.text = "";
             photo.anonymous = ($scope.anonymous == true);
@@ -105,7 +70,7 @@ App.controller('PhotosCtrl', function ($scope,$interval,$ionicPopup,$translate) 
             photo.from = email;
 
             if ($scope.withMessage.checked != null && $scope.withMessage.checked)
-                $scope.showPopup(function (res) {
+                showPopup($scope,$ionicPopup,"Enter your message","your message here",function (res) {
                     if (res != undefined)photo.text = res;
                     send(theFile, photo);
                 });
@@ -115,6 +80,7 @@ App.controller('PhotosCtrl', function ($scope,$interval,$ionicPopup,$translate) 
     };
 
 
+    /*
     $scope.takePicture = function () {
         var options = {
             quality: 50,
@@ -126,28 +92,35 @@ App.controller('PhotosCtrl', function ($scope,$interval,$ionicPopup,$translate) 
         // Take picture using device camera and retrieve image as base64-encoded string
         //@see: https://github.com/driftyco/ionic-example-cordova-camera/blob/master/plugins/org.apache.cordova.camera/doc/index.md
         navigator.camera.getPicture(function (imageData) {
+
             var photo = "data:image/jpeg;base64," + imageData;
             sendphoto(myevent.id, photo);
         }, function () {
         }, options);
     };
+    */
 
-    function refresh_photo() {
-        if(isPresent("addphoto"))
+    refresh_photo=function(force) {
+        if(isPresent("addphoto" || force))
             getLastPhoto(myevent.id, function (resp) {
                 if(resp.status!=204){
                     $scope.lastphoto = resp.result.photo;
+                    if(!resp.result.anonymous)
+                        getuser(resp.result.from,function(r){
+                           $scope.from= r.result;
+                        });
                     $scope.$apply();
                 }
             });
     }
 
-    $scope.$on("$ionicView.leave", function () {
+    $scope.$on("$ionicView.beforeLeave", function () {
         window.localStorage.setItem("withMessage", $scope.withMessage.checked);
+        $interval.cancel(h);
     });
 
-    $scope.$on("$ionicView.enter", function(){
-        refresh_photo();
-        setInterval(refresh_photo,5000);
+    $scope.$on("$ionicView.afterEnter", function(){
+        refresh_photo(true);
+        h=$interval(refresh_photo,5000);
     });
 });

@@ -4,7 +4,11 @@
 var App = angular.module('App', ['ionic','pascalprecht.translate','ngCordova','angular-clipboard','facebook','ngStorage','ngMap']);
 
 App.config(function($stateProvider,$urlRouterProvider,FacebookProvider,$translateProvider) {
-    FacebookProvider.init(FACEBOOK_ID);
+
+    FacebookProvider.init({
+        appId:FACEBOOK_ID,
+        version    : 'v2.7'
+    });
 
     $translateProvider.translations('en',{
        'ADDEVENT.TITLE':'Title',
@@ -14,19 +18,27 @@ App.config(function($stateProvider,$urlRouterProvider,FacebookProvider,$translat
         'SELEVENT.CREATE':'Create your Event',
         'SELEVENT.WELCOME':'Hello, Find an event !',
         'ADDEVENT.PASSWORD': "Password to enter (optional)",
-        'SELEVENT.NOPOSITION': "Geolocalisation required to find an event",
+        'SELEVENT.NOPOSITION': "You must authorize geolocalisation to select an event",
         'SELEVENT.USELASTPOSITION': "No geolocalisation, Last position used",
+        'PROFIL.PLAYER':"To play the playlist on your audio system",
+        'PROFIL.GALLERY':"Connect this computer to a public display",
+        'PROFIL.SLIDESHOW':"Connect this computer to a public display",
+        'PROFIL.CHARTS':"Connect this computer to a public display",
         'ADDEVENT.LABELSONG': "songs",
         'HOME.ADDSONG':'Push your music !',
         'ADDEVENT.VISIBLE': "Event visible at",
         'ADDEVENT.SONGSBYDEFAULT': "Start playlist with ",
-        'SELEVENT.MYEVENTS': "My old and futur events",
+        'SELEVENT.MYEVENTS': "My events",
         'PROFIL.CLOSE_EVENT': "Close This Event",
         'PROFIL.ANONYMOUS': "Anonymous",
         "PHOTO.TAKEPICTURE": "Take a picture",
         'ADDEVENT.MAXGUEST': "Max guest",
         'ADDEVENT.DESCRIPTION': "Teaser of your event",
-        'ADDEVENT.WEBSITE':"Web site of your event"
+        'ADDEVENT.WEBSITE':"Web site of your event",
+        'SELEVENT.LOGOUT':"Change profil",
+        'INVITE.COPY':"Copy the link",
+        'INVITE.SEND':"Send invitation",
+        'PHOTO.DOWNLOAD':"Photos download"
     });
 
     $translateProvider.translations('fr',{
@@ -38,19 +50,24 @@ App.config(function($stateProvider,$urlRouterProvider,FacebookProvider,$translat
         'SELEVENT.WELCOME':'Bonjour, Trouver un événement !',
         'ADDEVENT.PASSWORD': "Mot de passe",
         'ADDEVENT.LABELSONG': "titres",
-        "SELEVENT.NOPOSITION": "Géolocatlisation nécessaire pour trouver un évenement",
+        "SELEVENT.NOPOSITION": "Vous devez activer la géolocalisation pour sélectionner un événement",
         'ADDEVENT.SONGSBYDEFAULT': "Playlist de départ",
         'ADDEVENT.VISIBLE': "Evénement visible a",
         'HOME.ADDSONG':'Ajouter votre musique !',
         'SELEVENT.USELASTPOSITION': "Localisation impossible, utilisation de la dernière position",
         'SELEVENT.JOINFAILED': "impossible de ce joindre à cet évenement",
-        'SELEVENT.MYEVENTS': "Mes événements passés ou futurs",
+        'SELEVENT.MYEVENTS': "Mes événements",
         'PROFIL.CLOSE_EVENT': "Clore l'événement",
         'PROFIL.ANONYMOUS': "Anonyme",
         "PHOTO.TAKEPICTURE": "Partager une photo",
         'ADDEVENT.MAXGUEST': "Participants max",
+        'SELEVENT.LOGOUT':"Changer de profil",
         'ADDEVENT.DESCRIPTION':"Teaser de l'événement",
-        'ADDEVENT.WEBSITE':"Site web de l'événement"
+        'ADDEVENT.WEBSITE':"Site web de l'événement",
+        'INVITE.COPY':"Copier le lien",
+        'INVITE.SEND':"Envoyer l'invitation",
+        'PHOTO.DOWNLOAD':"Télécharger mes photos"
+
     });
 
     $translateProvider.preferredLanguage('en');
@@ -59,7 +76,8 @@ App.config(function($stateProvider,$urlRouterProvider,FacebookProvider,$translat
         .state('tabs', {
             url: '/tabs',
             templateUrl: 'Views/tabs.html',
-            abstract: true
+            abstract: true,
+            controller: 'tabsCtrl'
         })
 
         .state('selEvent', {
@@ -116,7 +134,6 @@ App.config(function($stateProvider,$urlRouterProvider,FacebookProvider,$translat
             }
         })
 
-
         .state('search', {
             url: '/search',
             templateUrl: 'Views/search.html',
@@ -125,10 +142,12 @@ App.config(function($stateProvider,$urlRouterProvider,FacebookProvider,$translat
 
         .state('addEvent', {
             url: '/addevent',
+            params: {facebook_event:null},
             cache: false,
             templateUrl: 'Views/addEvent.html',
             controller: 'addEventCtrl'
         })
+
 
         .state('tabs.invite', {
             url: '/invite?event&email',
@@ -156,9 +175,19 @@ App.config(function($stateProvider,$urlRouterProvider,FacebookProvider,$translat
 
 
 
-App.run(function($ionicPlatform,$state){
+App.run(function($ionicPlatform,$window){
     $ionicPlatform.ready(function() {
-
+        //Chargement de google meta tag
+        (function (w, d, s, l, i) {
+            w[l] = w[l] || []; w[l].push({ 'gtm.start': new Date().getTime(), event: 'gtm.js' });
+            var f = d.getElementsByTagName(s)[0],
+                j = d.createElement(s),
+                dl = l != 'dataLayer' ? '&l=' + l : '';
+            j.async = true;
+            j.src = '//www.googletagmanager.com/gtm.js?id=' + i + dl;
+            f.parentNode.insertBefore(j, f);
+        })($window, document, 'script', 'tm', 'GTM-MJBVLV');
+        //note: I've changed original code to use $window instead of window
     });
 });
 

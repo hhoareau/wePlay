@@ -55,16 +55,13 @@ App.factory('ExifRestorer', function () {
         var ExifRestorer = {};
         ExifRestorer.restore = function(origFileBase64, resizedFileBase64)
         {
-            if (!origFileBase64.match("data:image/jpeg;base64,"))
-            {
+            if (!origFileBase64.match("data:image/jpeg;base64,")){
                 return resizedFileBase64;
             }
 
             var rawImage = this.decode64(origFileBase64.replace("data:image/jpeg;base64,", ""));
             var segments = this.slice2Segments(rawImage);
-
             var image = this.exifManipulation(resizedFileBase64, segments);
-
             return this.encode64(image);
 
         };
@@ -83,8 +80,7 @@ App.factory('ExifRestorer', function () {
         ExifRestorer.getExifArray = function(segments)
         {
             var seg;
-            for (var x = 0; x < segments.length; x++)
-            {
+            for (var x = 0; x < segments.length; x++){
                 seg = segments[x];
                 if (seg[0] == 255 & seg[1] == 225) //(ff e1)
                 {
@@ -116,8 +112,7 @@ App.factory('ExifRestorer', function () {
             var head = 0,
                 segments = [];
 
-            while (1)
-            {
+            while (1){
                 if (rawImageArray[head] == 255 & rawImageArray[head + 1] == 218){break;}
                 if (rawImageArray[head] == 255 & rawImageArray[head + 1] == 216)
                 {
@@ -136,8 +131,6 @@ App.factory('ExifRestorer', function () {
 
             return segments;
         };
-
-
 
         ExifRestorer.KEY_STR = "ABCDEFGHIJKLMNOP" +
         "QRSTUVWXYZabcdef" +
@@ -323,9 +316,11 @@ App.directive('camera', function ($q, ExifRestorer) {
      */
     return {
         restrict: 'E',
-        template: '<input type="file" capture="camera" accept="image/*" id="camera" style="visibility: hidden;" />' +
-        '<img>' +
-        '<img style="max-width:40px;padding: 0px;margin: 0px;" src="img/camera.png" ng-click="takePhoto()">',
+        template:   '<div style="display:inline-block;text-align: center;">'+
+                    '<input type="file" capture="camera" accept="image/*" id="camera" style="visibility: hidden;width:0px;height: 0px;" />'+
+                    //'<i class="icon ion-photos"></i>'+
+                    '<img style="display:inline-block;width:50px;padding: 0px;margin: 0px;" src="img/camera.png" ng-click="takePhoto()">'+
+                    '</div>',
         scope: {
             onSelect: '&'
         },

@@ -53,11 +53,11 @@ function onStart(){
 	if(!cookieEnabled)alert("Vous devez accepter les cookies pour vous enregistrer");
 	
 		informe();
-		var mail=getParameters()["mail"];
-		document.getElementById("user").value=mail;
+		var email=getParameters()["email"];
+		document.getElementById("user").value=email;
 		
 		var name=getParameters()["name"];
-		if(name==undefined)name=mail.split("@")[0];
+		if(name==undefined)name=email.split("@")[0];
 		document.getElementById("name").value=name;
 		
 		document.getElementById("facebookid").value=getParameters()["facebookid"];

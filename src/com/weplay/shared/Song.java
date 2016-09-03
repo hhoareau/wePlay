@@ -11,7 +11,7 @@ import java.util.Collection;
 
 @Subclass(index=true)
 @Cache
-public class Song extends Message implements Serializable,Comparable<Song>,Cloneable {
+public class Song extends Message implements Serializable,Comparable<Song> {
 	public static final long serialVersionUID = 1L;
     private static final Integer TORRENT = 0;
     public static final Integer DEEZER = 1;
@@ -46,6 +46,7 @@ public class Song extends Message implements Serializable,Comparable<Song>,Clone
         this.title=f.getTitle();
         this.shortTitle=this.title.substring(0, Math.min(MAXLEN_SHORT_TITLE, this.title.length()));
         this.text=f.getText();
+        this.setId(this.getId()+BaseEncoding.base64().encode(this.text.getBytes()));
         this.setAuthor(f.getArtist());
         this.origin=LOCAL;
     }
@@ -103,14 +104,6 @@ public class Song extends Message implements Serializable,Comparable<Song>,Clone
 
     public String getTitle() {
         return title;
-    }
-
-    public String getFrom() {
-        return from;
-    }
-
-    public void setFrom(String from) {
-        this.from = from;
     }
 
     public ArrayList<String> getVotants() {

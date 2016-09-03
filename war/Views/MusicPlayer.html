@@ -15,63 +15,68 @@
     <title>Players</title>
 </head>
 
-<body onload="start()" onunload="onQuit()" onbeforeunload="onBeforeQuit()">
+<body>
 
-        <div style="text-align: center;">
-            <h2>Connect this device to your audio system</h2>
+<!-- Google Tag Manager -->
+<iframe src="//www.googletagmanager.com/ns.html?id=GTM-MJBVLV"
+        height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+<script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+        '//www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','GTM-MJBVLV');</script>
+<!-- End Google Tag Manager -->
 
-            <div id="lblMessage"></div>
-            <br>
 
-            <div style="text-align: center;width: 100%">
-                <img id="djlogo" src="/img/dj.png" witdh="80%">
-                <img id="djphoto" style="position: absolute;width:100px;">
-                <div id="players" style="width: 100%;display:inline-block;text-align:center;">
-                        <table><tr>
-                            <td><div>player</div></td>
-                            <td><div>player</div></td>
-                            <td><div>player</div></td>
-                            <td><div>player</div></td>
-                            <td><div>player</div></td>
-                        </tr></table>
-                </div>
-            </div>
+<div style="text-align: center;">
+    <div id="lblMessage"></div>
+    <br>
+    <div style="width; 100%;text-align: center;">
+        <img id="djlogo" src="/img/dj.png" style="max-width:300px;">
+        <div id="djname" style="color:red;position:absolute;"></div>
+        <br>
+        <div id="players" style="display:inline-block;text-align:center;">
+                <table><tr style="text-align: center;">
+                    <td><div>player</div></td>
+                    <td><div>player</div></td>
+                    <td><div>player</div></td>
+                    <td><div>player</div></td>
+                    <td><div>player</div></td>
+                </tr></table>
+        </div>
+        <br>
+        <div style="display: inline-block;">
+            <table>
+                <tr>
+                    <td><a class="mobilebutton" href="javascript:onQuit()">Deezer Account</a></td>
+                    <td><a class="mobilebutton" href="javascript:playNextSong()">Next Song</a></td>
+                    <td>
+                        <div class="image-upload">
+                            <label for="fileselector">
+                                <a class="mobilebutton">My songs</a>
+                                <!-- <img src="/img/home.png" style="width:40px"> -->
+                            </label>
 
+                            <input id="fileselector" type="file" name="datafile"  name="file[]"
+                                   accept="audio/*" size="40" webkitdirectory mozdirectory
+                                   onchange="analyseDirectory(this)">
+                        </div>
+                    </td>
+                </tr>
+            </table>
         </div>
 
-        <div id="dz-root"></div>
+    </div>
+</div>
 
+<div id="dz-root"></div>
+<div id="playlist"></div>
 
-        <div id="playlist"></div>
-
-        <br><br>
-
-        <table><tr>
-            <td><a class="mobilebutton" href="javascript:onQuit()">Deezer Account</a></td>
-            <td><a class="mobilebutton" href="javascript:playNextSong()">Next Song</a></td>
-            <td>
-                <div class="image-upload">
-                    <label for="fileselector">
-                        <a class="mobilebutton">My songs</a>
-                        <!-- <img src="/img/home.png" style="width:40px"> -->
-                    </label>
-
-                    <input id="fileselector" type="file" name="datafile"  name="file[]"
-                           accept="audio/*" size="40" webkitdirectory mozdirectory
-                           onchange="analyseDirectory(this)">
-                </div>
-
-            </td>
-        </tr></table>
-
-
+<br><br>
 
 <script>
     var players = [null,null,null,null,null];
-    onLoadFrame=function(elt,k){
-        players[k-1]=elt.contentWindow;
-    };
-
+    onLoadFrame=function(elt,k){players[k-1]=elt.contentWindow;};
 </script>
 
 </body>

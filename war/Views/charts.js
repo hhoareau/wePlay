@@ -5,18 +5,25 @@
 App.controller('chartsCtrl', function ($scope,$interval,$translate){
     initGlobal($translate);
     $scope.users=[];
+    var h=null;
 
-    refresh_charts=function(){
-        getClassement(myevent.id,function(resp){
-            $scope.users=resp.result.items;
-        });
+    refresh_charts=function(force){
+        if(isPresent("users") || force==true)
+            getClassement(myevent.id,function(resp){
+                $scope.users=resp.result.items;
+                $scope.$apply();
+            });
     };
 
-    refresh_charts();
-    var p=$interval(refresh_charts,10000);
-
-    $scope.$on("$ionicView.leave",function(){
-       $interval.cancel(p);
+    $scope.$on("$ionicView.beforeLeave", function () {
+        $interval.cancel(h);
     });
+
+    $scope.$on("$ionicView.afterEnter", function(){
+        refresh_charts(true);
+        h=$interval(refresh_charts,5000);
+    });
+
+
 
 });

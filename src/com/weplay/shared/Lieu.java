@@ -132,8 +132,8 @@ public class Lieu  {
 	}
 	
 	public Double distance(User u) {
-		if(u.lat==null || u.lg==null || this.lat==null || this.lng==null) return (double) 100000000;
-		return Tools.distance(u.lat,u.lg,this.lat,this.lng,'K');
+		if(u.lat==null || u.lng==null || this.lat==null || this.lng==null) return (double) 100000000;
+		return Tools.distance(u.lat,u.lng,this.lat,this.lng,'K');
 	}
 
 	public String getAddress() {

@@ -45,15 +45,13 @@ import java.util.logging.Logger;
  */
 @Entity
 @Cache
-public class Event implements Comparable<Event>,Serializable {
+public class Event implements Serializable {
 	protected static final Logger log = Logger.getLogger(Event.class.getName());
 	
 	@Id public String Id="event"+System.currentTimeMillis(); 													//Id interne des messages
-	@Index
-    public Long dtStart;
 
-    @Index
-    public Long dtEnd;
+    @Index public Long dtStart;
+    @Index public Long dtEnd;
 
     public boolean opened=true;		//Indique si l'evt est ouvert au non invit�
 	private String title="";
@@ -63,14 +61,12 @@ public class Event implements Comparable<Event>,Serializable {
 	public String ipAdresse=null;
 	private String facebook_event;
 	public String password=null;
-
+    public List<Integer> sources=new ArrayList<Integer>();
 
     public List<String> orders=new ArrayList<>();
-
     private Boolean needLoc=false;
 
-    @Index
-    private String owner=null;
+    private User owner=null;
 	private Integer maxOnline=50;
 	private String flyer="";
 
@@ -78,11 +74,16 @@ public class Event implements Comparable<Event>,Serializable {
 	private List<String> playlist=new ArrayList<String>();
 	public List<String> Invites=new ArrayList<String>();				
 	public List<String> Presents=new ArrayList<String>();
+
+    public Double sponsor=0.0; //Versement réaliser pour faire remonter l'appli à la une
+
     public Song currentSong=null;
+    public String musicPlayer=null; //Information about the music player
+    public Boolean playerHasFocus=false;
 
 	public Long lastSave=0L;	//Date du dernier message post�
 
-	public Double distanceFromUser;
+	//public Double distanceFromUser;
 
     public Double lat=0.0;
     public Double lng=0.0;
@@ -110,7 +111,7 @@ public class Event implements Comparable<Event>,Serializable {
 	 * @param duration 
 	 * @param owner
 	 */
-	public Event(String title,String password,Lieu place,Long dtStart,int duration,String owner,String typeDemandes,Double lat,Double lng){
+	public Event(String title,String password,Lieu place,Long dtStart,int duration,User owner,String typeDemandes,Double lat,Double lng){
 		this.dtStart=dtStart;
 		this.dtEnd=this.dtStart+duration*3600*1000;
 		this.title=title;
@@ -126,8 +127,8 @@ public class Event implements Comparable<Event>,Serializable {
         this.title=title;
         this.lat=48.0;
         this.lng=2.0;
-        this.owner=own.email;
-
+        this.owner=own;
+        this.minDistance=100000;
     }
 
 
@@ -143,55 +144,84 @@ public class Event implements Comparable<Event>,Serializable {
 	}
 
 
+    protected double distance(double lat_a, double lon_a, double lat_b, double lon_b) {
+        if(lat_a==lat_b & lon_a==lon_b)return 0.0;
+        double a = Math.PI / 180;
+        double lat1 = lat_a * a;
+        double lat2 = lat_b * a;
+        double lon1 = lon_a * a;
+        double lon2 = lon_b * a;
 
+        double t1 = Math.sin(lat1) * Math.sin(lat2);
+        double t2 = Math.cos(lat1) * Math.cos(lat2);
+        double t3 = Math.cos(lon1 - lon2);
+        double t4 = t2 * t3;
+        double t5 = t1 + t4;
+        double rad_dist = Math.atan(-t5/Math.sqrt(-t5 * t5 +1)) + 2 * Math.atan(1);
 
-    public void sendInvite(String dests,String from){
-        for(String dest:dests.split(";")){
-            Properties props = new Properties();
-            Session session = Session.getDefaultInstance(props, null);
-            try {
-                javax.mail.Message msg = new MimeMessage(session);
-                msg.setFrom(new InternetAddress(Tools.ADMIN_EMAIL));
-                msg.addRecipient(MimeMessage.RecipientType.TO, new InternetAddress(dest));
-                msg.setSubject("Invitation for " + this.title);
-                msg.setText("Dear, Open "+Tools.DOMAIN+"/index.html?event="+this.getId()+"&from="+from+" to join the event");
-                Transport.send(msg);
-            } catch (AddressException e) {
-                e.printStackTrace();
-            } catch (MessagingException e) {
-                e.printStackTrace();
-            }
+        return (rad_dist * 3437.74677 * 1.1508) * 1609.3470878864446;
+    }
+    
+    public double distanceFrom(User u){
+        Double d= distance(u.getLat(),u.getLng(),this.getLat(),this.getLng());
+        return d;
+    }
+
+    public static void sendMail(String dest,String from,String subject,String body){
+        Properties props = new Properties();
+        Session session = Session.getDefaultInstance(props, null);
+        try {
+            javax.mail.Message msg = new MimeMessage(session);
+            msg.setFrom(new InternetAddress(from));
+            msg.addRecipient(MimeMessage.RecipientType.TO, new InternetAddress(dest));
+            msg.setSubject(subject);
+            msg.setText(body);
+            Transport.send(msg);
+        } catch (AddressException e) {
+            e.printStackTrace();
+        } catch (MessagingException e) {
+            e.printStackTrace();
         }
     }
 
+    public void sendInvite(String dests,String from,String shorturl){
+        for(String dest:dests.split(";")){
+            if(shorturl==null)shorturl=Tools.DOMAIN+"/index.html?event="+this.getId()+"&from="+from;
+            sendMail(dest,Tools.ADMIN_EMAIL,"Invitation for " + this.title,"Dear, Open "+shorturl+" to join the event");
+        }
+    }
 
-	@Override
-	public int compareTo(Event o) {
-		if(o.distanceFromUser<this.distanceFromUser)
-			return -1;
-		else
-			return 1;
-	}
+    public void sendCloseMail() {
+        sendMail(this.owner.getEmail(),
+                Tools.ADMIN_EMAIL,
+                this.title+" photos",
+                "Find all the photo with "+Tools.DOMAIN+"/Views/AllPhotos.html?event="+this.getId());
+    }
 
+    public void sendCloseMail(User u){
+            String body="If you wan't to follow "+this.owner+ "for the next party, open this link :";
+            Event.sendMail(u.getEmail(),Tools.ADMIN_EMAIL,"End of the party",body);
+    }
+	
 	
 	public void addInvited(User u) {
-		if(!this.Invites.contains(u.email)){
+		if(!this.Invites.contains(u.id)){
             addOrder("addinvited");
-            this.Invites.add(u.email);
+            this.Invites.add(u.id);
         }
-
 	}
 
+    //Add a new user
 	public boolean addPresents(User u) {
-		if(!this.Presents.contains(u.email)){
-			this.Presents.add(u.email);
-            addOrder("adduser");
-            u.currentEvent=this.Id;
+        if(distanceFrom(u)>this.minDistance) {
+            u.message = "you are not close to the event";
+            return false;
         }
-
+            
+        this.Presents.add(u.id);
+        addOrder("adduser");
+        u.currentEvent=this.Id;
         return true;
-
-
 	}
 
     public String getDescription() {
@@ -211,9 +241,10 @@ public class Event implements Comparable<Event>,Serializable {
     }
 
     public boolean delPresents(User u) {
-		if(this.Presents.contains(u.email)){
-			this.Presents.remove(u.email);
+		if(this.Presents.contains(u.id)){
+			this.Presents.remove(u.id);
 			u.currentEvent=null;
+            this.sendCloseMail(u);
 			return true;
 		}
 		
@@ -300,12 +331,20 @@ public class Event implements Comparable<Event>,Serializable {
         this.password = password;
     }
 
-    public String getOwner() {
+    public User getOwner() {
         return owner;
     }
 
-    public void setOwner(String owner) {
+    public void setOwner(User owner) {
         this.owner = owner;
+    }
+
+    public Double getSponsor() {
+        return sponsor;
+    }
+
+    public void setSponsor(Double sponsor) {
+        this.sponsor = sponsor;
     }
 
     public Integer getMaxOnline() {
@@ -348,14 +387,7 @@ public class Event implements Comparable<Event>,Serializable {
     public void setLastSave(Long lastSave) {
         this.lastSave = lastSave;
     }
-
-    public Double getDistanceFromUser() {
-        return distanceFromUser;
-    }
-
-    public void setDistanceFromUser(Double distanceFromUser) {
-        this.distanceFromUser = distanceFromUser;
-    }
+    
 
     public Double getLat() {
         return lat;
@@ -438,7 +470,6 @@ public class Event implements Comparable<Event>,Serializable {
     }
 
 
-
     public String getOrder() {
         return order;
     }
@@ -486,6 +517,30 @@ public class Event implements Comparable<Event>,Serializable {
 
     public void setWebsite(String website) {
         this.website = website;
+    }
+
+    public List<Integer> getSources() {
+        return sources;
+    }
+
+    public void setSources(List<Integer> sources) {
+        this.sources = sources;
+    }
+
+    public String getMusicPlayer() {
+        return musicPlayer;
+    }
+
+    public void setMusicPlayer(String musicPlayer) {
+        this.musicPlayer = musicPlayer;
+    }
+
+    public Boolean getPlayerHasFocus() {
+        return playerHasFocus;
+    }
+
+    public void setPlayerHasFocus(Boolean playerHasFocus) {
+        this.playerHasFocus = playerHasFocus;
     }
 }
 

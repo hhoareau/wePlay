@@ -5,15 +5,24 @@
 
 if(window.location.host=="localhost:8080"){
     DOMAIN="http://"+window.location.host;
-    FACEBOOK_ID="604761326359317";
-    GOOGLE_API_KEY="AIzaSyCl46r3eXdyJlj6siZoCoF2WMifESqZo_0";
-} else{
+    FACEBOOK_ID="911650875607406";
+    GOOGLE_API_KEY="AIzaSyD9ulABAnLWARLXAIajXW5c-3Rj5Wqp-Ss";
+};
+if(window.location.host=="weplaywebsite.appspot.com"){
     DOMAIN="https://"+window.location.host;
     FACEBOOK_ID="604761063026010";
     GOOGLE_API_KEY="AIzaSyCl46r3eXdyJlj6siZoCoF2WMifESqZo_0";
 }
+if(window.location.host=="shifumixweb.appspot.com"){
+    DOMAIN="https://"+window.location.host;
+    FACEBOOK_ID="901681453271015";
+    GOOGLE_API_KEY="AIzaSyD9ulABAnLWARLXAIajXW5c-3Rj5Wqp-Ss";
+}
+
+const DELAY_TUTO=10; //10 minutes
 const DEBUG=true;
 ROOT_API=DOMAIN+'/_ah/api';
+
 
 //const colors=[];
 //colors["photo"]="red";
@@ -88,7 +97,12 @@ function getcurrentsong(evt,func){
 }
 
 function getsongtoplay(evt,func){
-    gapi.client.ficarbar.getsongtoplay({event:evt}).then(func);
+    try{
+        gapi.client.ficarbar.getsongtoplay({event:evt}).then(func);
+    } catch (e){
+        httpGet("getsongtoplay?event="+evt,func);
+    }
+
 }
 
 function gettopsongs(evt,nbr,func){
@@ -100,11 +114,11 @@ function getmagnets(torrents,func){
 }
 
 function addScore(user,score,func){
-    gapi.client.ficarbar.addscore({email:user,score:score}).then(func);
+    gapi.client.ficarbar.addscore({user:user,score:score}).then(func);
 }
 
 function join(event,email,password,from,func){
-    gapi.client.ficarbar.join({event:event,email:email,password:password,from:from}).then(func);
+    gapi.client.ficarbar.join({event:event,user:email,password:password,from:from}).then(func);
 }
 
 function querymusic(query,func){
@@ -113,7 +127,12 @@ function querymusic(query,func){
 
 
 function getuser(email,func){
-    gapi.client.ficarbar.getuser({email:email}).then(func);
+    try{
+        gapi.client.ficarbar.getuser({user:email}).then(func);
+    } catch (e){
+        httpGet("getuser?email="+email,func);
+    }
+
 }
 
 function getMessage(event,dt,func){
@@ -134,8 +153,12 @@ function getplaylist(event,func){
 }
 
 
-function sendinvitations(event,dests,from,func){
-    gapi.client.ficarbar.sendinvite({event:event,dests:dests,from:from}).then(func);
+function sendinvitations(event,dests,from,shorturl,func){
+    gapi.client.ficarbar.sendinvite({
+        event:event,
+        dests:dests,
+        from:from,
+        shorturl:shorturl}).then(func);
 }
 
 
@@ -147,16 +170,31 @@ function stopcurrentsong(event,func){
     gapi.client.ficarbar.stopcurrentsong({event:event}).then(func);
 }
 
-
-
-
+function sendevent(event,func){
+    $$("Post de l'event au serveur:"+JSON.stringify(event));
+    var req= gapi.client.request({
+        path: ROOT_API+'/ficarbar/v1/sendevent',
+        method: 'POST',
+        body:event
+    }).then(func);
+}
 
 function quit(email,event,func){
-    gapi.client.ficarbar.quit({email:email,event:event}).then(func);
+    gapi.client.ficarbar.quit({user:email,event:event}).then(func);
+}
+
+function updateevent(event,field,value,func){
+    //httpGet("updateevent?event="+event+"&field="+field+"&value="+value,func,null,false);
+    gapi.client.ficarbar.updateevent({event:event,value:value,field:field}).then(func);
 }
 
 function raz(func){
-    gapi.client.ficarbar.raz().then(func);
+    try{
+        gapi.client.ficarbar.raz().then(func);
+    } catch (e){
+        httpGet("raz",func);
+    }
+
 }
 
 function razlocalfile(event,func){
@@ -167,11 +205,15 @@ function setscore(email,event,id,step,func){
     gapi.client.ficarbar.setscore({user:email,event:event,song:id,step:step}).then(func);
 }
 
-
 function geteventsaround(pos,func){
-    gapi.client.ficarbar.geteventsaround({lat:pos.lat,lng:pos.lng}).then(function(resp){
+    try{
+        gapi.client.ficarbar.geteventsaround({lat:pos.lat,lng:pos.lng}).then(function(resp){
             if(resp.status==200)func(resp.result.items);
         });
+    } catch(e) {
+        httpGet("geteventsaround?lat=48&lng=2", func);
+    }
+
 }
 
 function shorturl(url,func){
@@ -181,36 +223,51 @@ function shorturl(url,func){
 }
 
 function geteventsfrom(email,func){
-    gapi.client.ficarbar.geteventsfrom({email:email}).then(function(resp2){
+    gapi.client.ficarbar.geteventsfrom({user:email}).then(function(resp2){
         if(resp2.status==200)func(resp2.result.items);
     });
 }
 
-
-function getevent(id,func){
-    gapi.client.ficarbar.getevent({event:id}).then(func);
+function getevent(id,user,func){
+    if(user==null)
+        gapi.client.ficarbar.getevent({event:id}).then(func);
+    else
+        gapi.client.ficarbar.getevent({event:id,user:user.id,lat:user.lat,lng:user.lng}).then(func);
 }
 
 const boundary = '-------314159265358979323846';
 const delimiter = "\r\n--" + boundary + "\r\n";
 const close_delim = "\r\n--" + boundary + "--";
 
-
 function httpPost(service,params,body,jauge,func){
     var xhr = new XMLHttpRequest();
     xhr.open('POST', ROOT_API+'/ficarbar/v1/'+service+"?"+params, true);
-    xhr.setRequestHeader('Content-Type', 'multipart/mixed; boundary="' + boundary + '"');
-    //xhr.setRequestHeader('authorization', 'Bearer ' + gapi.auth.getToken().access_token);
+
+    /*
     xhr.upload.addEventListener("progress", function(e) {
         jauge.value=parseFloat(e.loaded / e.total * 100).toFixed(2);
     }, false);
+    */
 
     xhr.onreadystatechange = function(e) {
         if (xhr.readyState == 4) {
             func(xhr.responseText);
         }
     };
-    xhr.send(multipartRequestBody);
+    xhr.send(JSON.stringify(body));
+}
+
+function httpGet(service,func,func_error,asynchron){
+    if(asynchron==undefined)asynchron=true;
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', ROOT_API+'/ficarbar/v1/'+service, asynchron);
+    xhr.onreadystatechange = function(e) {
+        if (xhr.readyState == 4) {
+            func(JSON.parse(xhr.responseText));
+        } else
+            if(func_error!=undefined)func_error(xhr);
+    };
+    xhr.send();
 }
 
 
@@ -223,14 +280,17 @@ function sendphoto(event,photo,func_success,func_rejected,func_progress){
     }).then(func_success,func_rejected,func_progress);
 }
 
-
 function uploadfiles(list,func){
-    var req= gapi.client.request({
-        path: ROOT_API+'/ficarbar/v1/uploadfiles',
-        method: 'POST',
-        body:list
-    });
-    req.execute(func);
+    try{
+        var req= gapi.client.request({
+            path: ROOT_API+'/ficarbar/v1/uploadfiles',
+            method: 'POST',
+            body:list
+        });
+        req.execute(func);
+    } catch(e){
+        httpPost("uploadfiles",{},list,null,func);
+    }
 }
 
 function addsong(id,song,func,err_func){
@@ -250,7 +310,6 @@ function searchlocal(query,event,func){
     gapi.client.ficarbar.searchlocal({query:query,event:event}).then(func);
 }
 
-
 function searchvideo(query,max_result,func){
     gapi.client.setApiKey(GOOGLE_API_KEY);
     gapi.client.youtube.search.list({
@@ -269,7 +328,6 @@ function searchvideo(query,max_result,func){
     });
 }
 
-
 function senduser(user,update,func){
     var req= gapi.client.request({
         path: ROOT_API+'/ficarbar/v1/senduser',
@@ -284,7 +342,7 @@ function addevent(email,event,nsongs,func,err_func){
     var req= gapi.client.request({
         path: ROOT_API+'/ficarbar/v1/addevent',
         method: 'POST',
-        params: {email:email,nsongs:nsongs},
+        params: {user:email,nsongs:nsongs},
         body:event
     }).then(func,err_func);
 }
@@ -299,21 +357,17 @@ function httpGetAsync(theUrl, callback) {
     xmlHttp.send(null);
 }
 
-
-
 function deezerSearch(query,func){
     queryd(query,function(res){
         func(JSON.parse(res));
     });
 }
 
-
 function utf8_to_b64(str) {
     return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(match, p1) {
         return String.fromCharCode('0x' + p1);
     }));
 }
-
 
 function to2D(p){
     var x= p.lng;
@@ -350,20 +404,29 @@ function showEventIn(evt,user_pos,max_size){
 }
 
 function initGlobal(translater){
-    user=JSON.parse(window.localStorage.getItem("user"));
-    email=user.email;
+    try{
+        user=JSON.parse(window.localStorage.getItem("user"));
+    }catch (e){
+        window.localStorage.setItem("user","");
+        location.href="/index.html";
+    }
+
     var s=window.localStorage.getItem("event");
-    if(s!=undefined && s.length>0)myevent=JSON.parse(s);
+    if(s!=undefined && s.length>0)
+        myevent=JSON.parse(s);
+    else
+        myevent=null;
 
     try{
         if(user==undefined || gapi==undefined || gapi.client==undefined)
-            document.location.href="/start";
+            document.location.href="/";
     }catch (e){
-        if(myevent!=null)
+        if(myevent!=null && myevent.dtEnd==null)
             document.location.href="/index.html?event="+myevent.id;
         else
             document.location.href="/index.html";
     }
+
 
     if(translater!=undefined)
         translater.use(user.lang);
@@ -402,4 +465,93 @@ function getInvite(idEvent,size){
         if(elt_url!=null)
             elt_url.innerHTML="<h2>"+short.result.id+"</h2>";
     });
+}
+
+
+function refresh_event(idevent,func,func_quit,func_error){
+    getevent(idevent,user,function(resp) {
+        if(resp.status!=200)
+            if(func_error!=undefined)
+                func_error();
+            else
+                func_quit();
+        else{
+            myevent = resp.result;
+            window.localStorage.setItem("event",JSON.stringify(myevent));
+            if (myevent.dtEnd != undefined && myevent.dtEnd < new Date())
+                func_quit()
+            else
+                func(resp.result);
+        }
+    });
+}
+
+showPopup = function ($scope,$ionicPopup,title,placeholder,func) {
+    $scope.data = {};
+
+    // An elaborate, custom popup
+    var myPopup = $ionicPopup.show({
+        template: '<input autofocus focus-me type="text" ng-model="data.message" placeholder="'+placeholder+'">',
+        title: title,
+        scope: $scope,
+        buttons: [
+            {text: 'Cancel'},
+            {
+                text: '<b>Save</b>',
+                type: 'button-positive',
+                onTap: function (e) {
+                    if (!$scope.data.message) {
+                        //don't allow the user to close unless he enters wifi password
+                        e.preventDefault();
+                    } else {
+                        return $scope.data.message;
+                    }
+                }
+            }
+        ]
+    });
+
+    myPopup.then(func);
+};
+
+
+showConfirm = function($ionicPopup,message,func_yes,func_no) {
+    $ionicPopup.confirm({
+        title: 'Confirm',
+        template: message
+    }).then(function(res) {
+        if(res) {
+            func_yes();
+        } else {
+            if(func_no!=undefined)func_no();
+        }
+    });
+};
+
+function resizeBase64Img(base64, maxsize,func) {
+    if(base64.length<3000000){
+        func(base64);
+        return;
+    }
+
+    $$("Resizing photo");
+    var canvas = document.createElement("canvas");
+    var img=new Image();
+    img.src=base64;
+    img.onload=function(){
+        $$("photo loaded");
+        var ratio=maxsize/Math.max(this.width,this.height);
+
+        canvas.width =this.width*ratio;
+        canvas.height =this.height*ratio;
+        var context = canvas.getContext("2d");
+
+        context.drawImage(img, 0, 0,canvas.width,canvas.height);
+        $$("drawImage ended");
+
+        var rc=canvas.toDataURL("image/jpeg", 1.0);
+        $$("end conversion");
+
+        func(rc);
+    };
 }

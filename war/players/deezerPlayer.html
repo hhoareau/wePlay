@@ -48,6 +48,10 @@
         return DZ.player.getVolume();
     }
 
+    function getPosition(){
+        return DZ.player.position();
+    }
+
     function Quit(){
         DZ.logout();
     }
@@ -82,12 +86,12 @@
                 fade(-10,function () {
                     DZ.player.playTracks([song]);
                     DZ.player.play();
-                    fade(+10,func(0));
+                    fade(+10,func());
                 });
             }else{
                 DZ.player.playTracks([song]);
                 DZ.player.play();
-                fade(+10,func(0));
+                fade(+10,func());
             }
 
         },delay*1000);

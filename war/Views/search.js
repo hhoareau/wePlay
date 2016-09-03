@@ -1,8 +1,19 @@
-App.controller('SearchCtrl',function($scope,$state,$ionicHistory,$translate,$ionicLoading){
+App.controller('SearchCtrl',function($scope,$state,$ionicHistory,$translate,$ionicLoading,$window){
     initGlobal($translate);
 
+    $scope.viewCharts = function () {
+        $window.open('http://www.uk-charts.top-source.info/2000-to-2009.shtml');
+    };
+
+    addResult=function(s){
+        for(var i=0;i<$scope.songs.length;i++){
+            if(s.order<=$scope.songs[i].order)break;
+        }
+        $scope.songs.splice(i,0,s);
+    }
 
     DZ.init({appId  : '182662',channelUrl : 'https://weplaywebsite.appspot.com/channel.html'});
+
 
     $scope.searching=false;
     $scope.songs=[];
@@ -13,8 +24,8 @@ App.controller('SearchCtrl',function($scope,$state,$ionicHistory,$translate,$ion
 
         user=JSON.parse(window.localStorage.getItem("user"));
 
-        s.title=song.title;
-        s.from=email+";"+user.firstname+";"+user.anonymous;
+        s.title=song.title.replace("\"","").replace("\"","").replace("\"","");
+        s.from=user;
         s.type=3;
         s.idEvent=myevent.id;
         s.origin=song.origin;
@@ -67,7 +78,7 @@ App.controller('SearchCtrl',function($scope,$state,$ionicHistory,$translate,$ion
                             song.author="";
                         }
                         if(song.title!=undefined && song.title.length+song.author.length>5)
-                            $scope.songs.push(song);
+                            addResult(song);
                     }
                 });
             });
@@ -78,7 +89,7 @@ App.controller('SearchCtrl',function($scope,$state,$ionicHistory,$translate,$ion
                     $scope.searching=false;
                     resp.result.items.forEach(function(song){
                         song.order=0;
-                        $scope.songs.push(song);
+                        addResult(song);
                     });
                 }
             });
@@ -93,7 +104,8 @@ App.controller('SearchCtrl',function($scope,$state,$ionicHistory,$translate,$ion
                     if(s.text==undefined)s.text=s.id;
                     s.title=s.title.replace(new RegExp("'",'g')," ");
 
-                    $scope.songs.push(s);
+                    addResult(s);
+
                 }
 
                 $scope.$apply();
@@ -112,7 +124,7 @@ App.controller('SearchCtrl',function($scope,$state,$ionicHistory,$translate,$ion
         $ionicHistory.goBack();
     }
 
-    $scope.$on("$ionicView.enter", function( event ){
+    $scope.$on("$ionicView.afterEnter", function(){
         $scope.search();
     });
 

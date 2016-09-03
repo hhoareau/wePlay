@@ -21,8 +21,8 @@ import java.util.regex.Pattern;
 public class Tools {
 	public static final Logger log = Logger.getLogger(Tools.class.getName());
 
-	public static final String ADMIN_EMAIL = "shifumix-admin@gmail.com";
-    public static final String DOMAIN = "https://weplaywebsite.appspot.com";
+	public static final String ADMIN_EMAIL = "noreply@shifumixweb.appspotmail.com";
+    public static final String DOMAIN = "https://shifumixweb.appspot.com";
 
     private static String sep_champs=",";
 	private static String sep_enreg="sepenreg";
@@ -204,13 +204,13 @@ public class Tools {
 	}
 	
 	/**
-	 * Recherche une adresse mail dans un corps de mail
+	 * Recherche une adresse email dans un corps de email
 	 * TODO � tester
 	 * @see http://imss-www.upmf-grenoble.fr/prevert/Prog/Java/CoursJava/expressionsRegulieres.html  
 	 * @see http://www.regxlib.com/DisplayPatterns.aspx?cattabindex=0&categoryId=1
 	 * 
 	 * @param s
-	 * @return la liste des mail trouver dans le document
+	 * @return la liste des email trouver dans le document
 	 */
 	public static List<String> findMail(String s){
 		
@@ -233,7 +233,7 @@ public class Tools {
 			   }
 		
 		if(rc.size()==0){
-			log.severe("Aucun adresse mail trouv� dans "+s);
+			log.severe("Aucun adresse email trouv� dans "+s);
 		}
 		
 		return rc;

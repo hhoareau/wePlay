@@ -3,25 +3,48 @@
  */
 
 var target=null;
+var circle=null;
+
 
 App.controller("addEventCtrl", function($scope,$ionicPlatform,$state,$translate,$filter) {
     var canvas = null;
     initGlobal($translate);
 
+    $scope.srcList = [
+        { text: "YouTube", checked: true },
+        { text: "Deezer", checked: true },
+        { text: "Local", checked: true }
+    ];
+
     $scope.$on('mapInitialized', function(event, map) {
         $scope.map = map;
 
-        $scope.map.addListener("center_changed",function(){
-           if(target!=null)
-               target.setPosition(this.getCenter());
-            else{
-               target = new google.maps.Marker({
-                   position: pos,
+        $scope.map.addListener("mousedown",function(evt){
+            $scope.event.address="";
+        });
+
+        $scope.map.addListener("center_changed",function(evt){
+            if(target!=null){
+                circle.setCenter(this.getCenter());
+                target.setPosition(this.getCenter());
+            }else{
+                target = new google.maps.Marker({
+                   position: {lat:user.lat,lng:user.lng},
                    name: "Soiree",
-                   draggable: true
-               });
-               target.setMap(this);
-           }
+                   draggable: true,
+                   map:this
+                });
+
+                circle=new google.maps.Circle({
+                    strokeColor: '#FF0000',
+                    strokeOpacity: 0.1,
+                    fillColor: '#FF0000',
+                    fillOpacity: 0.1,
+                    map: this,
+                    center:  {lat:user.lat,lng:user.lng},
+                    radius: $scope.minDistance
+                });
+            }
         });
 
         $scope.map.setOptions({
@@ -31,17 +54,27 @@ App.controller("addEventCtrl", function($scope,$ionicPlatform,$state,$translate,
             clickableIcons:false
             });
 
-        if(user.pos==undefined)user.pos={latitude:48,longitude:2};
+        if($scope.event.address.length===0)
+            $scope.map.setCenter({lat:user.lat,lng:user.lng});
+        else
+            $scope.searchAddress();
 
-        var pos={lat:user.pos.latitude,lng:user.pos.longitude};
-        if(user.pos.latitude!=undefined){
-            $scope.map.setCenter(pos);
-            $scope.$apply();
-        }
+        $scope.$apply();
     });
 
-    $scope.sendEvent=function(){
+    $scope.searchAddress=function(){
+        new google.maps.Geocoder().geocode({'address':$scope.event.address},function(infos){
+            if(infos.length==1)
+                $scope.map.setCenter({
+                    lat:infos[0].geometry.location.lat(),
+                    lng:infos[0].geometry.location.lng()
+                });
+        });
 
+    };
+
+
+    $scope.sendEvent=function(){
         var evt=$scope.event;
 
         if(target==null){
@@ -51,7 +84,7 @@ App.controller("addEventCtrl", function($scope,$ionicPlatform,$state,$translate,
 
         evt.dtStart=Date.parse($scope.event.dtStart);
         evt.dtEnd=evt.dtStart+evt.duration*3600*1000;
-        evt.owner=user.email;
+        evt.owner=user;
         evt.lat=target.position.lat();
         evt.lng=target.position.lng();
 
@@ -60,16 +93,17 @@ App.controller("addEventCtrl", function($scope,$ionicPlatform,$state,$translate,
         else
             evt.flyer="";
 
-        addevent(user.email,evt,parseInt($scope.nsongs),function(resp){
+        addevent(user.id,evt,parseInt($scope.nsongs),function(resp){
             if(resp.status==200){
                 if(evt.dtStart<new Date())
                     window.localStorage.setItem("currentevent",resp.id);
+                $state.reload();
                 $state.go("selEvent",{},{reload: true});
             }
             else
                 console.log("Add error");
         });
-    }
+    };
 
     $scope.getFlyer=function (photoPromise) {
         photoPromise.then(function (theFile) {
@@ -111,11 +145,22 @@ App.controller("addEventCtrl", function($scope,$ionicPlatform,$state,$translate,
     }
 
     $scope.event={};
+
+    if($state.params.facebook_event!=undefined){
+        $scope.event.title=$state.params.facebook_event.name;
+        $scope.event.dtStart=new Date(Date.parse($state.params.facebook_event.start_time)).toISOString();
+        $scope.event.description=$state.params.facebook_event.description;
+        $scope.event.address=$state.params.facebook_event.place.name;
+        $scope.event.facebookid=$state.params.facebook_event.id;
+    }else{
+        $scope.event.dtStart=new Date();
+        $scope.event.title=user.firstname+"'s night";
+        $scope.event.address="";
+    }
+
     $scope.nsongs=10;
-    $scope.event.dtStart=new Date();
     $scope.event.autoflyer=false;
-    $scope.event.title=user.firstname+"'s night";
     $scope.event.duration=8;
     $scope.event.maxonline=100;
-    $scope.event.minDistance=1000;
+    $scope.event.minDistance=10000;
 });

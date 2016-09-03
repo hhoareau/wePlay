@@ -42,7 +42,7 @@ import java.io.Serializable;
 public class Message implements Serializable,Cloneable {
 
 	String text="";
-	public String from="";
+	public User from=null;
 	String title="";
 
     String next=null;
@@ -104,11 +104,11 @@ public class Message implements Serializable,Cloneable {
 		return("Message : "+this.title+" contient "+this.text+" de type "+this.type+" de "+this.from);
 	}
 
-    public String getFrom() {
+    public User getFrom() {
         return from;
     }
 
-    public void setFrom(String from) {
+    public void setFrom(User from) {
         this.from = from;
     }
 

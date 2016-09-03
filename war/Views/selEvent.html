@@ -6,10 +6,24 @@
 
 <ion-view view-title="{{user.firstname}}, {{'SELEVENT.WELCOME' | translate}}" ng-controller="selEventCtrl" hide-nav-bar="true">
     <ion-content>
+        <div class="card">
+            <div class="item item-divider item-button-right">
+                {{user.firstname}}
+                <button class="button button-small nopadding icon-left ion-power button-calm" ng-click="logout()">
+                    <span style="font-size: small;">{{'SELEVENT.LOGOUT' | translate}}</span>
+                </button>
+            </div>
+            <div class="item item-button-right">
+                <img ng-src="{{user.picture}}">
+                <button class="button button-positive" ng-click="addEvent()">
+                    {{'SELEVENT.CREATE' | translate}}
+                </button>
+            </div>
+        </div>
+
         <div class="item" style="text-align: center;">
             <ng-map center="[48.0,2.0]" data-tap-disabled="true"></ng-map>
-            <button style="display: block;position: absolute;left: 30px;top: 30px;"
-                    class="button button-small button-positive" ng-click="getPos()">Localise</button>
+            <button style="display: block;position: absolute;left: 30px;top: 30px;" class="button button-small button-positive" ng-click="centerOnLoc()">Localise</button>
         </div>
 
             <div class="card">
@@ -20,18 +34,22 @@
                 <div class="item" style="text-align: center">
                     <img style="max-width: 150px;" ng-src="{{preview.flyer}}" ng-show="preview.flyer.length>0"><br>
                     {{preview.description}}
+                    {{message}}
                 </div>
             </div>
 
-            <div style="text-align: center">
-                <button class="button button-positive" ng-click="addEvent()">
-                    {{'SELEVENT.CREATE' | translate}}
-                </button>
+            <div ng-show="facebook_events.length>=0">
+                Evenements facebook<br>
+                <ion-item ng-repeat="evt in facebook_events" ng-click="createFacebookEvent(evt)">
+                    {{evt.name}}
+                </ion-item>
             </div>
 
-            <h1> {{'SELEVENT.MYEVENTS' | translate}}</h1>
-            <ion-item ng-repeat="evt in myevents" ng-click="setEvent(evt,false)">
-                {{evt.title}}
-            </ion-item>
+            <div ng-show="myevents.length>0">
+                <h1> {{'SELEVENT.MYEVENTS' | translate}}</h1>
+                <ion-item ng-repeat="evt in myevents" ng-click="setEvent(evt,false)">
+                    {{evt.title}}
+                </ion-item>
+            </div>
     </ion-content>
 </ion-view>

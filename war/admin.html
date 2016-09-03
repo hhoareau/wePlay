@@ -11,31 +11,52 @@
 </head>
 
 
-<body onload="start">
+<body onload="start()">
 <h2>Console admin</h2>
 
 <div id="console" style="visibility: visible">
 <a href="/_ah/admin">Admin local</a><br><br>
-    <a href="/_ah/api/ficarbar/v1/init?scenario=1">Scenario 1</a><br>
-<a href="https://console.cloud.google.com/appengine/quotadetails?project=weplaywebsite&moduleId=default">Admin distant</a><br>
+    <h2>Scenarii</h2>
+    <div id="scenarios"></div>
+    <br>
+
+    <a href="https://console.cloud.google.com/appengine/quotadetails?project=shifumixweb&moduleId=default">Admin distant</a><br>
 <a href="/">Connexion</a><br>
-<!-- <a href="javascript:raz(function(){window.open('/');})">Raz</a> -->
 </div>
 
-<script>
-function start(){
-    document.getElementById("console").style.visibility="visible";
-}
-</script>
 
 <br>
 
-Cliquer sur le flash code <br>pour ouvrir l'interface utilisateur<br>
 <a target=_blank  href="photo.html">
-<img src="QRCode_photo.png"></img></a>
-
 
 <br><br><a href='javascript:raz()'>Repartir de zéro (efface la base de donnees)</a>
+
+    <br>
+    <div id="lstEvent"></div>
+
+
+<script>
+    function scenario(i){
+        httpGet("/_ah/api/ficarbar/v1/init?scenario="+i,function(event){
+           window.open(event.order.get(0));
+        });
+    }
+
+    function start(){
+        $("console").style.visibility="visible";
+
+        geteventsaround({lat:48,lng:2},function(resp){
+           resp.items.forEach(function(item){
+              $("lstEvent").innerHTML+="<a href='Views/MusicPlayer.html?offline=true&event="+item.id+"'>"+item.title+"</a><br>";
+           });
+        });
+
+        scenarii=["creation d'une soiree","ajout de songs"]
+        $("scenarios").innerHTML="";
+        for(var i=0;i<scenarii.length;i++)
+            $("scenarios").innerHTML+="<a href='javascript:scenario("+i+")'>"+scenarii[i]+"</a><br>";
+    }
+</script>
 
 </body>
 </html>

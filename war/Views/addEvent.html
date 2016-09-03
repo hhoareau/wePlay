@@ -22,6 +22,9 @@
             </div>
 
         <div class="list">
+            <label class="item item-input">
+                <input id="pac-input" type="text" placeholder="Search Box" ng-model="event.address" my-enter="searchAddress()">
+            </label>
 
             <label class="item item-input">
                 <input placeholder="{{'ADDEVENT.START' | translate }}" type="date"
@@ -42,27 +45,40 @@
                 <input placeholder="{{'ADDEVENT.PASSWORD' | translate}}" ng-model="event.password" type="password">
             </label>
 
-            <label class="item item-input">
-                <span class="input-label">{{ 'ADDEVENT.SONGSBYDEFAULT' | translate }}</span>
-                <input style="text-align:right;" type="range" min="0" max="30" step="1" ng-model="nsongs">&nbsp;{{nsongs}}
-                <span class="input-label">&nbsp;{{ 'ADDEVENT.LABELSONG' | translate }}</span>
-            </label>
+            <ion-item>
+                <ion-title>Advanced <settings></settings></ion-title>
+                <label class="item item-input">
+                    <span class="input-label">{{ 'ADDEVENT.SONGSBYDEFAULT' | translate }}</span>
+                    <input style="text-align:right;" type="range" min="0" max="30" step="1" ng-model="nsongs">&nbsp;{{nsongs}}
+                    <span class="input-label">&nbsp;{{ 'ADDEVENT.LABELSONG' | translate }}</span>
+                </label>
 
-            <label class="item item-input">
-                <span class="input-label">{{ 'ADDEVENT.DURATION' | translate }}</span>
-                <input style="text-align:right" type="range" min="0" max="24" step="1" name="volume" ng-model="event.duration" ng-change="onChangePicture()">&nbsp;{{event.duration}}
-                <span class="input-label">&nbsp;hours</span>
-            </label>
+                <label class="item item-input">
+                    <span class="input-label">{{ 'ADDEVENT.DURATION' | translate }}</span>
+                    <input style="text-align:right" type="range" min="0" max="24" step="1" name="volume" ng-model="event.duration" ng-change="onChangePicture()">&nbsp;{{event.duration}}
+                    <span class="input-label">&nbsp;hours</span>
+                </label>
 
-            <label class="item item-input">
-                <span class="input-label">{{ 'ADDEVENT.VISIBLE' | translate }}</span>
-                <input ng-model="event.minDistance" type="range" max="30000" min="0" step="200" value="500">&nbsp;{{event.minDistance/1000}}&nbsp;km
-            </label>
+                <label class="item item-input">
+                    <span class="input-label">{{ 'ADDEVENT.VISIBLE' | translate }}</span>
+                    <input ng-model="event.minDistance" type="range" max="30000" min="0" step="200">&nbsp;{{event.minDistance/1000}}&nbsp;km
+                </label>
 
-            <label class="item item-input">
-                <span class="input-label">{{ 'ADDEVENT.MAXGUEST' | translate }}</span>
-                <input ng-model="event.maxOnline" type="range" min="0" max="500" step="1" value="50">&nbsp;{{event.maxOnline}}&nbsp;personnes
-            </label>
+                <label class="item item-input">
+                    <span class="input-label">{{ 'ADDEVENT.MAXGUEST' | translate }}</span>
+                    <input ng-model="event.maxOnline" type="range" min="0" max="500" step="1">&nbsp;{{event.maxOnline}}&nbsp;personnes
+                </label>
+            </ion-item>
+
+            <ion-item>
+                <ion-title>Sources</ion-title>
+                <ion-checkbox ng-repeat="item in srcList"
+                              ng-model="item.checked"
+                              ng-checked="item.checked">
+                    {{ item.text }}
+                </ion-checkbox>
+                </ion-item>
+
 
             <br>
 

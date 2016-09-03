@@ -5,8 +5,14 @@
     <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no, width=device-width">
     <title>Main</title>
 
-    <link href='css/ionic.min.css' rel='stylesheet' type='text/css'>
+    <!--
+    @see: http://ionicframework.com/docs/cli/sass.html
+    <link href="css/ionic.app.css" rel="stylesheet">
     <link href='css/app.variables.scss' rel='stylesheet' type='text/css'>
+    -->
+
+    <link href='css/ionic.css' rel='stylesheet' type='text/css'>
+
     <script src="js/Main.js"></script>
     <script src="js/Tools.js"></script>
     <script src="js/ionic.bundle.min.js"></script>
@@ -16,10 +22,6 @@
     <script src="js/camera.js"></script>
     <script src="js/ngStorage.min.js"></script>
     <script src="js/ng-map.min.js"></script>
-    <!--
-    <script src="js/dz.js"></script>
-    <script src="js/client.js?onload=init"></script>
-    -->
     <script src="js/app.js"></script>
 
     <script src="js/directives.js"></script>
@@ -35,6 +37,7 @@
     <script src="Views/splash.js"></script>
     <script src="Views/addEvent.js"></script>
     <script src="Views/charts.js"></script>
+    <script src="Views/tabs.js"></script>
 
     <script src="js/qrcode.js"></script>
 </head>
@@ -49,6 +52,12 @@
 <ion-nav-view>
 </ion-nav-view>
 
+<script>
+    window.onbeforeunload=function(){
+        initGlobal();
+        quit(user.email,myevent.id);
+    }
+</script>
 
 
 </body>

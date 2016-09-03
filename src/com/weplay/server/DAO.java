@@ -93,13 +93,13 @@ public class DAO  {
 		if(user==null)
 			return new ArrayList<Message>();
 		else
-			return ofy().load().type(Message.class).filter("idUser", user.email).list();
+			return ofy().load().type(Message.class).filter("idUser", user.id).list();
 	}
 
 
 	public User findUser(User u) {
 		try{
-			return ofy().load().type(User.class).id(u.email).now();
+			return ofy().load().type(User.class).id(u.id).now();
 		} catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -171,8 +171,10 @@ public class DAO  {
 	}
 	
 
-	public List<User> getPresents(Event e){
-		return (List<User>) ofy().load().type(User.class).ids(e.Invites).values();
+	public Collection<User> getPresents(Event e){
+        List<String> presents=e.getPresents();
+        Collection<User> rc=ofy().load().type(User.class).ids(presents).values();
+		return rc;
 	}
 
 	/**
@@ -202,8 +204,13 @@ public class DAO  {
 		ofy().save().entities(event);
 	}
 
-	
-	public Event findEvent(String idEvent) {
+    public Event getFirstEvent() {
+        List<Event> l=getActifEvents();
+        return l.get(0);
+    }
+
+
+    public Event findEvent(String idEvent) {
 		if(idEvent==null)return null;
 		try{
 			return ofy().load().type(Event.class).id(idEvent).now();
@@ -255,10 +262,13 @@ public class DAO  {
 	 * @return All actif events
 	 */
     List<Event> getActifEvents() {
-        return ofy().load().type(Event.class)
-                .filter("dtStart <=", System.currentTimeMillis())
-                .filter("dtEnd >", System.currentTimeMillis())
-                .list();
+        List<Event> rc=new ArrayList<>();
+
+        for(Event e:ofy().load().type(Event.class).filter("dtStart <=", System.currentTimeMillis()).list())
+            if(e.dtEnd>System.currentTimeMillis())
+                rc.add(e);
+
+        return rc;
 	}
 
 	public void save(Vote vote) {
@@ -339,7 +349,11 @@ public class DAO  {
     }
 
     public List<Event> findActifEventsFrom(User u) {
-        return ofy().load().type(Event.class).filter("owner",u.email).filter("dtEnd >",System.currentTimeMillis()).list();
+        List<Event> rc=new ArrayList<>();
+        for(Event e:ofy().load().type(Event.class).filter("dtEnd >",System.currentTimeMillis()).list())
+            if(e.getOwner().id.equals(u.id))
+                rc.add(e);
+        return rc;
     }
 
     public void saveFiles(List<LocalFile> lf) {
@@ -350,7 +364,7 @@ public class DAO  {
     public List<LocalFile> findLocal(String q,String event) {
         List<LocalFile> rc=new ArrayList<>();
         for(LocalFile lf:ofy().load().type(LocalFile.class).filter("event",event).list())
-            if(lf.getArtist().indexOf(q)>=0 || lf.getTitle().indexOf(q)>=0)
+            if(lf.getArtist().indexOf(q.toLowerCase())>=0 || lf.getTitle().indexOf(q.toLowerCase())>=0)
                 rc.add(lf);
         return rc;
     }
@@ -366,7 +380,7 @@ public class DAO  {
         QueryResultIterator<Song> q=ofy().load().type(Song.class).iterator();
         while(q.hasNext() && songs.size()<nSongs){
             Song s=q.next();
-            if(s.contain(email) || s.from.split(";")[0].equals(email))
+            if(s.contain(email) || s.from.id.equals(email))
                 if(!songs.contains(s))
                     songs.add(s);
         }
