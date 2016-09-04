@@ -57,60 +57,65 @@ App.controller('SearchCtrl',function($scope,$state,$ionicHistory,$translate,$ion
             window.localStorage.setItem("last_search",q);
             //Toast.create("Respons loading");
 
-            searchvideo(q,10,function(resp){
-                $ionicLoading.hide();
-                var k=0;
-                resp.forEach(function(item){
-                    if(item.id.videoId!=undefined){
-                        k++;
-                        song={};
-                        song.origin=YOUTUBE;
-                        song.text=item.id.videoId;
-                        song.id="yt"+item.id.videoId;
-                        song.duration=0;
-                        song.order=k;
-                        var s=item.snippet.title;
-                        if(s.indexOf(" - ")){
-                            song.author= s.split(" - ")[0];
-                            song.title=s.split(" - ")[1];
-                        } else {
-                            song.title=s;
-                            song.author="";
-                        }
-                        if(song.title!=undefined && song.title.length+song.author.length>5)
-                            addResult(song);
-                    }
-                });
-            });
-
             searchlocal(q,myevent.id,function(resp){
                 $ionicLoading.hide();
                 if(resp.status==200 && resp.result.items!=undefined){
                     $scope.searching=false;
                     resp.result.items.forEach(function(song){
                         song.order=0;
+
                         addResult(song);
                     });
                 }
+
+                DZ.api('/search/?q='+q, function(response){
+                    $ionicLoading.hide();
+                    for(var i=0;i<response.data.length;i++){
+                        var s=response.data[i];
+                        s.origin=1;
+                        s.order=i;
+                        s.author = s.author || s.artist.name;
+                        if(s.text==undefined)s.text=s.id;
+                        s.title=s.title.replace(new RegExp("'",'g')," ");
+                        addResult(s);
+                    }
+                });
+
+                searchvideo(q,10,function(resp){
+                    $ionicLoading.hide();
+                    var k=0;
+                    resp.forEach(function(item){
+                        if(item.id.videoId!=undefined){
+                            k++;
+                            song={};
+                            song.origin=YOUTUBE;
+                            song.text=item.id.videoId;
+                            song.id="yt"+item.id.videoId;
+                            song.duration=0;
+                            song.order=k;
+                            var s=item.snippet.title;
+                            if(s.indexOf(" - ")){
+                                song.author= s.split(" - ")[0];
+                                song.title=s.split(" - ")[1];
+                            } else {
+                                song.title=s;
+                                song.author="";
+                            }
+
+                            if(song.title!=undefined && song.title.length+song.author.length>5)
+                                addResult(song);
+                        }
+                    });
+                });
+
+
             });
 
-            DZ.api('/search/?q='+q, function(response){
-                $ionicLoading.hide();
-                for(var i=0;i<response.data.length;i++){
-                    var s=response.data[i];
-                    s.origin=1;
-                    s.order=i;
-                    s.author = s.author || s.artist.name;
-                    if(s.text==undefined)s.text=s.id;
-                    s.title=s.title.replace(new RegExp("'",'g')," ");
 
-                    addResult(s);
 
-                }
 
-                $scope.$apply();
 
-            });
+
 
 
         }

@@ -102,10 +102,13 @@
     }
 
     window.dzAsyncInit = function() {
+        domain=getParam()["domain"].replace("http://localhost:8080","https://shifumixweb.appspot.com");
+        domain="https://shifumixweb.appspot.com";
+
         appid=getParam()["appid"];
         DZ.init({
             appId  : appid,
-            channelUrl : 'https://weplaywebsite.appspot.com/channel.html',
+            channelUrl : domain+'/channel.html',
             player: {
                 container: 'player',
                 width : 800,

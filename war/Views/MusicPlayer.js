@@ -14,6 +14,19 @@ var reader = window.jsmediatags;
 var file;
 var lst = [];
 
+function setUserAgent(window, userAgent) {
+    if (window.navigator.userAgent != userAgent) {
+        var userAgentProp = { get: function () { return userAgent; } };
+        try {
+            Object.defineProperty(window.navigator, 'userAgent', userAgentProp);
+        } catch (e) {
+            window.navigator = Object.create(navigator, {
+                userAgent: userAgentProp
+            });
+        }
+    }
+}
+
 //var client = new WebTorrent();
 function torrentload() {
     gettopsongs(idEvent, 5, function (res) {
@@ -195,7 +208,7 @@ function findBestPlayer(origin) {
             (origin==DEEZER && players[i].origin==DEEZER)
         )return(i);
 
-    console.log("None player available");
+    $$("None player available");
     return -1;
 }
 
@@ -291,6 +304,13 @@ function chkCompatibility() {
 }
 
 
+function logoutDeezer(){
+    players.forEach(function(player){
+       if(player.origin==DEEZER);
+            player.player.Quit();
+    });
+}
+
 //Permet la creation des players
 //@param h hauteur du lecteur
 //@param w
@@ -320,6 +340,7 @@ function createPlayers(zone,lst,h,w,pauseImage){
             players[k].typePlayer=lst[k*2].replace("Player.html","");
             players[k].origin=lst[k*2+1];
             players[k].window=iframe;
+            setUserAgent(players[k].player,"Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.84 Safari/537.36");
             k++;
         }
     }
@@ -340,7 +361,7 @@ function start() {
 
         createPlayers(
             $("players"),
-            ["deezerPlayer.html?appid=182662",DEEZER,"filePlayer.html",LOCAL,
+            ["deezerPlayer.html?appid="+DEEZER_KEY+"&domain="+DOMAIN,DEEZER,"filePlayer.html",LOCAL,
                 "filePlayer.html",LOCAL,"youtubePlayer.html",
                 YOUTUBE,"youtubePlayer.html",YOUTUBE],
             100,100);

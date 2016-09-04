@@ -4,6 +4,7 @@ App.controller("selEventCtrl", function($scope,$state,$interval,$ionicHistory,$t
     var markers=[];
     var timer;
     var lastPos;
+    var myposition=null;
 
     //see: https://blog.brunoscopelliti.com/facebook-authentication-in-your-angularjs-web-app/
     $scope.logout=function(){
@@ -107,6 +108,19 @@ App.controller("selEventCtrl", function($scope,$state,$interval,$ionicHistory,$t
                     user.dtLastPosition=position.timestamp;
                     user.precision=position.coords.accuracy;
 
+                    if(myposition==null)
+                        myposition=new google.maps.Marker({
+                            position: {lat:user.lat,lng:user.lng},
+                            title : user.firstname,
+                            caption:user.firstname,
+                            animation: google.maps.Animation.DROP,
+                            zIndex: -1,
+                            icon: "/img/me.png",
+                            map: $scope.map
+                        });
+                    else
+                        myposition.setPosition({lat:user.lat,lng:user.lng});
+
                     window.localStorage.setItem("user",JSON.stringify(user));
                     senduser(user,null,function(rep){
                         console.log(rep);
@@ -185,7 +199,12 @@ App.controller("selEventCtrl", function($scope,$state,$interval,$ionicHistory,$t
     $scope.myevents=[];
     $scope.preview={};
     $scope.user=user;
-    $scope.facebook_events=JSON.parse(localStorage.getItem("facebook_events"));
+    $scope.facebook_events=[];
+
+    JSON.parse(localStorage.getItem("facebook_events")).forEach(function(e){
+        if(new Date(e.end_time).getTime()>new Date().getTime())
+            $scope.facebook_events.push(e);
+    });
 
 
     $scope.$on("$ionicView.loaded",function(){

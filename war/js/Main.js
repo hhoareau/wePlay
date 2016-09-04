@@ -7,16 +7,21 @@ if(window.location.host=="localhost:8080"){
     DOMAIN="http://"+window.location.host;
     FACEBOOK_ID="911650875607406";
     GOOGLE_API_KEY="AIzaSyD9ulABAnLWARLXAIajXW5c-3Rj5Wqp-Ss";
+    DEEZER_KEY="190062";
+    //DEEZER_KEY="182662";
 };
 if(window.location.host=="weplaywebsite.appspot.com"){
     DOMAIN="https://"+window.location.host;
     FACEBOOK_ID="604761063026010";
     GOOGLE_API_KEY="AIzaSyCl46r3eXdyJlj6siZoCoF2WMifESqZo_0";
+    DEEZER_KEY="182662";
 }
+
 if(window.location.host=="shifumixweb.appspot.com"){
     DOMAIN="https://"+window.location.host;
     FACEBOOK_ID="901681453271015";
     GOOGLE_API_KEY="AIzaSyD9ulABAnLWARLXAIajXW5c-3Rj5Wqp-Ss";
+    DEEZER_KEY="190062";
 }
 
 const DELAY_TUTO=10; //10 minutes
@@ -280,6 +285,7 @@ function sendphoto(event,photo,func_success,func_rejected,func_progress){
     }).then(func_success,func_rejected,func_progress);
 }
 
+
 function uploadfiles(list,func){
     try{
         var req= gapi.client.request({
@@ -307,6 +313,7 @@ function searchtorrent(query,func){
 }
 
 function searchlocal(query,event,func){
+    gapi.client.setApiKey(null);
     gapi.client.ficarbar.searchlocal({query:query,event:event}).then(func);
 }
 

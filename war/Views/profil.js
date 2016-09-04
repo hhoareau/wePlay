@@ -3,6 +3,7 @@ App.controller('ProfilCtrl', function ($scope,$state,$translate,$ionicPopup,$win
 
     $scope.user = user;
     $scope.event = myevent;
+    $scope.links=[];
 
     var links = [];
     links.push({
@@ -30,10 +31,14 @@ App.controller('ProfilCtrl', function ($scope,$state,$translate,$ionicPopup,$win
         description: "PROFIL.CHARTS",
         url: "Views/publicCharts.html?event=" + myevent.id
     });
-    $scope.links = links;
+
+    links.forEach(function(lk){
+        lk.description=$translate.instant(lk.description);
+        $scope.links.push(lk);
+    });
 
     $scope.quitEvent = function () {
-        quit(user.email, myevent.id, function (resp) {
+        quit(user.email, myevent.d, function (resp) {
             user = resp.result;
             window.localStorage.setItem("user", JSON.stringify(user));
             $state.go("selEvent", {}, {reload: true});

@@ -489,8 +489,18 @@ public class Rest {
     public List<Song> searchlocal(@Named("query") String q,@Named("event") String event) {
         q=q.replace(" ","+");
         List<Song> rc=new ArrayList<>();
-        for(LocalFile f:dao.findLocal(q.toLowerCase(),event))
-            rc.add(new Song(f));
+        for(LocalFile f:dao.findLocal(q.toLowerCase(),event))rc.add(new Song(f));
+
+        if(rc.size()==0){
+            if(q.indexOf(" ")>-1)
+                for(LocalFile f:dao.findLocal(q.toLowerCase().split(" ")[0],event))rc.add(new Song(f));
+        }
+
+        if(rc.size()==0 && q.indexOf(" ")==-1){
+            for(LocalFile f:dao.findLocal(q.toLowerCase().substring(0,q.length()-2),event))rc.add(new Song(f));
+        }
+
+
         return rc;
     }
 

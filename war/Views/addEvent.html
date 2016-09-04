@@ -26,18 +26,19 @@
                 <input id="pac-input" type="text" placeholder="Search Box" ng-model="event.address" my-enter="searchAddress()">
             </label>
 
-            <label class="item item-input">
+            <label class="item item-input text-left">
                 <input placeholder="{{'ADDEVENT.START' | translate }}" type="date"
                        ng-model="event.dtStart"
                        ng-change="onChangePicture()">
+                &nbsp;{{'ADDEVENT.APARTIRDE' | translate }}&nbsp;
+                <input placeholder="{{'ADDEVENT.START' | translate }}" type="number" max="24" min="0"
+                       ng-model="event.hour"
+                       ng-change="onChangePicture()">
+                h
             </label>
 
             <label class="item item-input">
                 <input placeholder="{{'ADDEVENT.DESCRIPTION' | translate}}" ng-model="event.description" type="text">
-            </label>
-
-            <label class="item item-input">
-                <input placeholder="{{'ADDEVENT.WEBSITE' | translate}}" ng-model="event.website" type="url">
             </label>
 
 
@@ -51,6 +52,10 @@
                     <span class="input-label">{{ 'ADDEVENT.SONGSBYDEFAULT' | translate }}</span>
                     <input style="text-align:right;" type="range" min="0" max="30" step="1" ng-model="nsongs">&nbsp;{{nsongs}}
                     <span class="input-label">&nbsp;{{ 'ADDEVENT.LABELSONG' | translate }}</span>
+                </label>
+
+                <label class="item item-input">
+                    <input placeholder="{{'ADDEVENT.WEBSITE' | translate}}" ng-model="event.website" type="url">
                 </label>
 
                 <label class="item item-input">

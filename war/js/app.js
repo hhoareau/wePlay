@@ -38,11 +38,13 @@ App.config(function($stateProvider,$urlRouterProvider,FacebookProvider,$translat
         'SELEVENT.LOGOUT':"Change profil",
         'INVITE.COPY':"Copy the link",
         'INVITE.SEND':"Send invitation",
-        'PHOTO.DOWNLOAD':"Photos download"
+        'PHOTO.DOWNLOAD':"Photos download",
+         'ADDEVENT.APARTIRDE':"at"
     });
 
     $translateProvider.translations('fr',{
         'ADDEVENT.TITLE':'Titre',
+        'ADDEVENT.APARTIRDE':"à partir de",
         'ADDEVENT.START':'Début',
         'ADDEVENT.DURATION':'Durée',
         'ADDEVENT.SAVE':'Enregistrer',

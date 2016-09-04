@@ -17,13 +17,13 @@ App.controller("addEventCtrl", function($scope,$ionicPlatform,$state,$translate,
     ];
 
     $scope.$on('mapInitialized', function(event, map) {
-        $scope.map = map;
+        $scope.map2 = map;
 
-        $scope.map.addListener("mousedown",function(evt){
+        $scope.map2.addListener("mousedown",function(evt){
             $scope.event.address="";
         });
 
-        $scope.map.addListener("center_changed",function(evt){
+        $scope.map2.addListener("center_changed",function(evt){
             if(target!=null){
                 circle.setCenter(this.getCenter());
                 target.setPosition(this.getCenter());
@@ -47,7 +47,7 @@ App.controller("addEventCtrl", function($scope,$ionicPlatform,$state,$translate,
             }
         });
 
-        $scope.map.setOptions({
+        $scope.map2.setOptions({
             disableDefaultUI:true,
             rotateControl:false,
             mapTypeId:google.maps.MapTypeId.ROADMAP,
@@ -55,7 +55,7 @@ App.controller("addEventCtrl", function($scope,$ionicPlatform,$state,$translate,
             });
 
         if($scope.event.address.length===0)
-            $scope.map.setCenter({lat:user.lat,lng:user.lng});
+            $scope.map2.setCenter({lat:user.lat,lng:user.lng});
         else
             $scope.searchAddress();
 
@@ -65,7 +65,7 @@ App.controller("addEventCtrl", function($scope,$ionicPlatform,$state,$translate,
     $scope.searchAddress=function(){
         new google.maps.Geocoder().geocode({'address':$scope.event.address},function(infos){
             if(infos.length==1)
-                $scope.map.setCenter({
+                $scope.map2.setCenter({
                     lat:infos[0].geometry.location.lat(),
                     lng:infos[0].geometry.location.lng()
                 });
@@ -82,8 +82,8 @@ App.controller("addEventCtrl", function($scope,$ionicPlatform,$state,$translate,
             return;
         }
 
-        evt.dtStart=Date.parse($scope.event.dtStart);
-        evt.dtEnd=evt.dtStart+evt.duration*3600*1000;
+        evt.dtStart=new Date(new Date($scope.event.dtStart).toDateString()+" "+evt.hour+":00").getTime();
+        evt.dtEnd=new Date(evt.dtStart).getTime()+evt.duration*3600*1000;
         evt.owner=user;
         evt.lat=target.position.lat();
         evt.lng=target.position.lng();
@@ -148,7 +148,8 @@ App.controller("addEventCtrl", function($scope,$ionicPlatform,$state,$translate,
 
     if($state.params.facebook_event!=undefined){
         $scope.event.title=$state.params.facebook_event.name;
-        $scope.event.dtStart=new Date(Date.parse($state.params.facebook_event.start_time)).toISOString();
+        $scope.event.dtStart=new Date($state.params.facebook_event.start_time);
+        $scope.event.hour=new Date($state.params.facebook_event.start_time).getHours();
         $scope.event.description=$state.params.facebook_event.description;
         $scope.event.address=$state.params.facebook_event.place.name;
         $scope.event.facebookid=$state.params.facebook_event.id;
@@ -156,6 +157,7 @@ App.controller("addEventCtrl", function($scope,$ionicPlatform,$state,$translate,
         $scope.event.dtStart=new Date();
         $scope.event.title=user.firstname+"'s night";
         $scope.event.address="";
+        $scope.event.hour=new Date().getHours()-1;
     }
 
     $scope.nsongs=10;
@@ -163,4 +165,5 @@ App.controller("addEventCtrl", function($scope,$ionicPlatform,$state,$translate,
     $scope.event.duration=8;
     $scope.event.maxonline=100;
     $scope.event.minDistance=10000;
+
 });
