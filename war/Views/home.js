@@ -1,6 +1,7 @@
 
+var timerHome=null;
+
 App.controller('HomeCtrl', function ($scope,$interval,$state,$translate){
-    var h=null;
     initGlobal($translate);
 
     $scope.event=myevent;
@@ -20,6 +21,7 @@ App.controller('HomeCtrl', function ($scope,$interval,$state,$translate){
     function refresh_playlist(force){
         if(isPresent("playlist") || isPresent("join") || force==true)
             getplaylist(myevent.id,function(resp) {
+                $scope.songs=[];
                 $scope.currentsong=resp.result.items[resp.result.items.length-1];
                 resp.result.items.splice(resp.result.items.length-1,1);
                 $scope.songs = resp.result.items;
@@ -36,17 +38,21 @@ App.controller('HomeCtrl', function ($scope,$interval,$state,$translate){
                             ($scope.songs[i].votants.indexOf(user.id+"-1")>-1);
                         }
                 }
-                $scope.$apply();
             });
     }
 
     $scope.$on("$ionicView.afterEnter",function() {
         refresh_playlist(true);
-        h=$interval(refresh_playlist,5000);
+        timerHome=$interval(refresh_playlist,5000);
     });
 
     $scope.$on("$ionicView.beforeLeave",function(){
-        $interval.cancel(h);
+        $interval.cancel(timerHome);
+    });
+
+    $scope.$on("$ionicView.unload",function(event,data){
+        initGlobal();
+        leave(user.id,myevent.id);
     });
 
 });

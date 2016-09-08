@@ -1,10 +1,24 @@
 <ion-view view-title="Charts" ng-controller="chartsCtrl">
     <ion-content>
+        <div class="row row-top">
+            <div class="col col-offset-70 text-left">General</div>
+            <div class="col text-right">Event</div>
+        </div>
         <div ng-repeat="user in users" class="row"  style="padding: 4px;">
-            <div class="col col-center col-20" style="width: auto;"><img ng-src="{{user.picture}}"></div>
-            <div class="col col-center col-50 text-right" style="text-align:left;vertical-align:middle;"> {{user.firstname}}</div>
+            <div class="col col-center col-20" style="width: auto;">
+                <img ng-src="{{user.picture}}" ng-click="showUser(user)" ng-hide="{{user.anonymous}}">
+                <img src="/img/anonymous.jpg" ng-show="{{user.anonymous}}">
+            </div>
+            <div class="col col-center col-50 text-right" style="text-align:left;vertical-align:middle;">
+                <span style="font-size: large;">
+                {{user.firstname}}
+                </span>
+            </div>
             <div class="col col-center" style="text-align:right;vertical-align:middle;">
                 <span style="font-size:2em">{{user.score}}</span>&nbsp;pts
+            </div>
+            <div class="col col-center" style="text-align:right;vertical-align:middle;">
+                <span style="font-size:2em">{{user.scoreEvent}}</span>&nbsp;pts
             </div>
         </div>
     </ion-content>

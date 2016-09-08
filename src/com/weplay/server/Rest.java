@@ -8,7 +8,6 @@ import com.google.appengine.labs.repackaged.com.google.common.io.BaseEncoding;
 import com.google.appengine.labs.repackaged.org.json.JSONException;
 import com.google.appengine.labs.repackaged.org.json.JSONObject;
 import com.google.appengine.repackaged.com.google.gson.Gson;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import com.weplay.shared.*;
 
 import java.util.ArrayList;
@@ -27,6 +26,9 @@ public class Rest {
     public static final Long TYPE_SONG = 3L;
     public static final Long TYPE_DEMANDE = 4L;
     private static final int MAX_QUOTA = 1000000;
+    private static final String PASSWORD_MAIL = "hh4271";
+    private static final Long DELAY_DECONNEXION = 60L; //en minute
+
 
     private static DAO dao = DAO.getInstance();
     public static Logger log = Logger.getLogger(String.valueOf(Rest.class));
@@ -41,6 +43,22 @@ public class Rest {
         User u=dao.findUser(user);
         return dao.findActifEventsFrom(u);
     }
+
+
+    @ApiMethod(name = "sanity", httpMethod = ApiMethod.HttpMethod.GET, path = "sanity")
+    public void sanity(@Named("param") String param) {
+        //for(User u:dao.getAllUser())
+        for(Event e:dao.getAllEvents()){
+            for(User u:dao.getUsers(e.getPresents()))
+                if((System.currentTimeMillis()-u.getDtLastConnexion())>(DELAY_DECONNEXION*1000L*60L))
+                    e.delPresents(u);
+
+            if(e.getPresents().size()==0)
+                e.close();
+            dao.save(e);
+        }
+    }
+
 
     @ApiMethod(name = "init", httpMethod = ApiMethod.HttpMethod.GET, path = "init")
     public Event init(@Named("scenario") Integer i,@Nullable @Named("event") String idEvent){
@@ -81,8 +99,16 @@ public class Rest {
 
     @ApiMethod(name = "getevent", httpMethod = ApiMethod.HttpMethod.GET, path = "getevent")
     public Event getevent(@Named("event") String id,@Nullable @Named("user") String user,@Nullable  @Named("lat") Double lat,@Nullable  @Named("lng") Double lng) {
+        Event e=dao.findEvent(id);
 
         if(user!=null){
+            Long lastUpdate=e.getLastUpdate().get(user);
+            if(lastUpdate==null || System.currentTimeMillis()-lastUpdate>60000){
+                e.getLastUpdate().put(user,System.currentTimeMillis());
+                dao.save(e);
+            }
+
+
             User u=dao.findUser(user);
             if(u!=null)
                 if(Tools.distance(lat,lng,u.getLat(),u.getLng())>500){ //Si l'utilisateur à beaucoup bouger on met a jour sa position
@@ -92,7 +118,7 @@ public class Rest {
                 }
         }
 
-        return dao.findEvent(id);
+        return e;
     }
 
     @ApiMethod(name = "adduser", httpMethod = ApiMethod.HttpMethod.GET, path = "adduser")
@@ -107,6 +133,7 @@ public class Rest {
         User u = dao.findUser(BaseEncoding.base64().encode(id.getBytes()).replace("+","_"));
         if (u == null) {
             u = new User(infos);
+            u.addHistory("create");
             dao.save(u);
         }
         return u;
@@ -171,12 +198,18 @@ public class Rest {
                 return null;
             }
 
+            if(e.dtStart>System.currentTimeMillis()){
+                u.message="Event not already start";
+                return u;
+            }
+
             if (e.Presents.contains(u.id)) {
                 u.message = "already present";
             } else {
                 if (e.addPresents(u)) {
+                    u.score+=e.scoreStart;
+                    u.addHistory("join");
                     u.currentEvent = e.getId();
-                    u.score = e.scoreStart;
                     User f = dao.findUser(from);
                     if (f != null) {
                         f.score += e.scoreInvite;
@@ -237,6 +270,7 @@ public class Rest {
             User from=dao.findUser(g.from.id);
             if(from==null)return null;
 
+            from.addHistory("song");
             if(from.score<e.minScore)return(null);
 
             from.score+=e.scorePostSong;
@@ -452,7 +486,6 @@ public class Rest {
         return u;
     }
 
-
     @ApiMethod(name = "slideshow", httpMethod = ApiMethod.HttpMethod.GET, path = "slideshow")
     public List<Photo> slideshow(@Nullable @Named("delay") Long delay,@Named("event") String idEvent){
         List<Photo> lPhoto=new ArrayList<>();
@@ -478,6 +511,7 @@ public class Rest {
         User toUpdate=dao.findUser(u.id);
         if(toUpdate!=null && update!=null){
             if(update.indexOf("anonymous")>-1)toUpdate.anonymous=u.anonymous;
+            if(update.indexOf("history")>-1)toUpdate.history=u.history;
             dao.save(toUpdate);
         } else {
             dao.save(u);
@@ -546,7 +580,13 @@ public class Rest {
         Event e = dao.findEvent(id);
         if (e == null) return null;
 
-        List<User> lu = dao.getUsers(e.Presents);
+        List<User> lu = new ArrayList<>();
+        for(User u:dao.getUsers(e.Presents)){
+            u.setScoreEvent(u.score-e.getScores().get(u.id));
+            lu.add(u);
+        }
+
+
         Collections.sort(lu);
         return (lu);
     }
@@ -554,16 +594,20 @@ public class Rest {
     @ApiMethod(name = "closeevent", httpMethod = ApiMethod.HttpMethod.GET, path = "closeevent")
     public Event closeevent(@Named("event") String event) {
         Event e=dao.findEvent(event);
-        e.dtEnd=System.currentTimeMillis();
-        e.addOrder("close");
 
         //Email de cloture de soirée pour l'ensemble des participants
-        for(User u:dao.getPresents(e)){
+        for(User u:dao.getUsers(e.close()))
             if(e.delPresents(u))
                 dao.save(u);
-        }
 
         dao.save(e);
         return e;
     }
+
+    @ApiMethod(name = "mailtosend", httpMethod = ApiMethod.HttpMethod.GET, path = "mailtosend")
+    public List<Mail> mailtosend(@Named("password") String password) {
+        if(!password.equalsIgnoreCase(PASSWORD_MAIL))return null;
+        return dao.getMailToSend();
+    }
+
 }

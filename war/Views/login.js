@@ -3,6 +3,7 @@
  */
 
 App.controller("loginCtrl", function($scope,Facebook,$state,$window){
+
     var userIsConnected = false;
     $scope.user = {};
 
@@ -28,6 +29,10 @@ App.controller("loginCtrl", function($scope,Facebook,$state,$window){
             userIsConnected = true;
             $scope.me();
         }
+        if (response.status == 'not_authorized') {
+            userIsConnected = false;
+            $scope.message="Shifumix need your email to recognize you";
+        }
     });
 
     $scope.login = function() {
@@ -36,6 +41,7 @@ App.controller("loginCtrl", function($scope,Facebook,$state,$window){
             $scope.me();
         },{scope:"public_profile,email,user_events"});
     };
+
 
     $scope.IntentLogin = function() {
         if(!userIsConnected) {
@@ -48,6 +54,7 @@ App.controller("loginCtrl", function($scope,Facebook,$state,$window){
     $scope.me = function() {
         var s=window.localStorage.getItem("user");
         if(s=="null"){
+            window.localStorage.setItem("user","encours");
             Facebook.api('/me',{fields:"locale,first_name,last_name,email,picture"}, function(response) {
                 response.picture=response.picture.data.url;
                 adduser(response,function(user){
@@ -56,7 +63,13 @@ App.controller("loginCtrl", function($scope,Facebook,$state,$window){
                 });
             });
             Facebook.api("/me/events", function (resp) {
-                localStorage.setItem("facebook_events",JSON.stringify(resp.data));
+                rc=[];
+                resp.data.forEach(function(evt){
+                    Facebook.api("/"+evt.id,function(resp_evt){
+                       rc.push(resp_evt);
+                    });
+                })
+                localStorage.setItem("facebook_events",JSON.stringify(rc));
             });
         }
     };

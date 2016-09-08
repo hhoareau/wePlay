@@ -1,4 +1,4 @@
-App.controller('ProfilCtrl', function ($scope,$state,$translate,$ionicPopup,$window) {
+App.controller('ProfilCtrl', function ($scope,$state,$translate,$ionicPopup,$window,$interval,$ionicModal) {
     initGlobal($translate);
 
     $scope.user = user;
@@ -37,10 +37,14 @@ App.controller('ProfilCtrl', function ($scope,$state,$translate,$ionicPopup,$win
         $scope.links.push(lk);
     });
 
+    $scope.updateAnonymous=function(){
+        senduser($scope.user, "anonymous", function (resp) {
+            localStorage.setItem("user",JSON.stringify(resp));
+        });
+    }
+
     $scope.quitEvent = function () {
-        quit(user.email, myevent.d, function (resp) {
-            user = resp.result;
-            window.localStorage.setItem("user", JSON.stringify(user));
+        leave(user.id,myevent.id,$interval,function(){
             $state.go("selEvent", {}, {reload: true});
         });
     }
@@ -59,18 +63,12 @@ App.controller('ProfilCtrl', function ($scope,$state,$translate,$ionicPopup,$win
         else
             window.open(url.url);
     }
-
-    $scope.$on("$ionicView.leave", function () {
-        senduser($scope.user, "anonymous", function () {
-            console.log("User save");
-        });
-    });
-
-    $scope.$on("$ionicView.enter", function () {
-        var delay=(new Date()-user.dtFirstConnexion)/(1000*60);
-        if(delay<DELAY_TUTO)
+    
+    $scope.$on("$ionicView.afterEnter", function () {
+        tuto(user,"profil",$ionicModal,$scope,"help_profil.svg",function(){
             showConfirm($ionicPopup, "Are you connected to an audio device ?", function () {
                 $window.open("Views/MusicPlayer.html?event=" + myevent.id);
             });
+        });
     });
 });

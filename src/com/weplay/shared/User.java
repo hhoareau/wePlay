@@ -36,8 +36,9 @@ import java.util.logging.Logger;
 @Cache
 public class User implements Comparable<User> {
 	protected static final Logger log = Logger.getLogger(User.class.getName());
-	
-	@Id public String id; 					//Id interne des Users (adresse email)
+    private static final Integer NEW_USER_SCORE = 10;
+
+    @Id public String id; 					//Id interne des Users (adresse email)
 
     public String email ="";
 
@@ -56,16 +57,19 @@ public class User implements Comparable<User> {
 
     //Position du user
 	public Double lng=null;
-	public Double lat=null;
+
+    public String history="";
+
+    public Double lat=null;
     public Double precision=1000000.0; //Precision de la position
 
-
     private ArrayList<Vote> votes=new ArrayList<Vote>();
-	//public ArrayList<Demande> demandes=new ArrayList<Demande>();
 
-	public Integer score=0;
+	public Integer score=NEW_USER_SCORE;
+    public Integer scoreEvent=0;
 
 	private Long dtLastPosition;
+    private Long dtLastConnexion=null;
     private String home;
     private String picture="";
     public String lang="en";
@@ -355,4 +359,33 @@ public class User implements Comparable<User> {
     public void setEmail(String email) {
         this.email = email;
     }
+
+    public Integer getScoreEvent() {
+        return scoreEvent;
+    }
+
+    public void setScoreEvent(Integer scoreEvent) {
+        this.scoreEvent = scoreEvent;
+    }
+
+    public String getHistory() {
+        return history;
+    }
+
+    public void setHistory(String history) {
+        this.history = history;
+    }
+
+    public void addHistory(String evt) {
+        if(this.history.indexOf(evt)==-1) this.history+=";"+evt;
+    }
+
+    public Long getDtLastConnexion() {
+        return dtLastConnexion;
+    }
+
+    public void setDtLastConnexion(Long dtLastConnexion) {
+        this.dtLastConnexion = dtLastConnexion;
+    }
 }
+

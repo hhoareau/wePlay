@@ -46,6 +46,12 @@ function getDuration(){
 }
 
 
+function playFile(src){
+    setVolume(100);
+    player.src=src;
+    player.play();
+}
+
 function fade(step,func){
     step=step/100;
     clearInterval(crossfadeTimer);

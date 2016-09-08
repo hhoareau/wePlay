@@ -5,8 +5,7 @@
 var target=null;
 var circle=null;
 
-
-App.controller("addEventCtrl", function($scope,$ionicPlatform,$state,$translate,$filter) {
+App.controller("addEventCtrl", function($scope,$ionicModal,$ionicPlatform,$state,$translate,$filter) {
     var canvas = null;
     initGlobal($translate);
 
@@ -82,6 +81,7 @@ App.controller("addEventCtrl", function($scope,$ionicPlatform,$state,$translate,
             return;
         }
 
+
         evt.dtStart=new Date(new Date($scope.event.dtStart).toDateString()+" "+evt.hour+":00").getTime();
         evt.dtEnd=new Date(evt.dtStart).getTime()+evt.duration*3600*1000;
         evt.owner=user;
@@ -145,11 +145,20 @@ App.controller("addEventCtrl", function($scope,$ionicPlatform,$state,$translate,
     }
 
     $scope.event={};
+    $scope.nsongs=10;
+    $scope.event.autoflyer=false;
+    $scope.event.duration=8;
+    $scope.event.maxonline=100;
+    $scope.event.minDistance=10000;
+    $scope.event.password="";
 
     if($state.params.facebook_event!=undefined){
+        $scope.event.id="facebookevent"+$state.params.facebook_event.id;
         $scope.event.title=$state.params.facebook_event.name;
         $scope.event.dtStart=new Date($state.params.facebook_event.start_time);
         $scope.event.hour=new Date($state.params.facebook_event.start_time).getHours();
+        if($state.params.facebook_event.end_time!=undefined)
+            $scope.event.duration=(new Date($state.params.facebook_event.end_time)-new Date($state.params.facebook_event.start_time))/(3600*1000);
         $scope.event.description=$state.params.facebook_event.description;
         $scope.event.address=$state.params.facebook_event.place.name;
         $scope.event.facebookid=$state.params.facebook_event.id;
@@ -158,12 +167,13 @@ App.controller("addEventCtrl", function($scope,$ionicPlatform,$state,$translate,
         $scope.event.title=user.firstname+"'s night";
         $scope.event.address="";
         $scope.event.hour=new Date().getHours()-1;
+        if($scope.event.hour<0)$scope.event.hour=0;
     }
 
-    $scope.nsongs=10;
-    $scope.event.autoflyer=false;
-    $scope.event.duration=8;
-    $scope.event.maxonline=100;
-    $scope.event.minDistance=10000;
+
+    $scope.$on("$ionicView.afterEnter", function(){
+        tuto(user,"addevent",$ionicModal,$scope,"help_addevent.svg");
+    });
 
 });
+

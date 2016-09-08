@@ -1,11 +1,8 @@
+var timerPhotos=null;
 
-
-
-
-App.controller('PhotosCtrl', function ($scope,$interval,$ionicPopup,$ionicLoading,$translate,$interval,$timeout) {
-   initGlobal($translate);
+App.controller('PhotosCtrl', function ($scope,$ionicPopup,$ionicModal,$ionicLoading,$translate,$interval,$timeout) {
+    initGlobal($translate);
     var photo_interval=5000;
-    var h=null;
 
     $scope.message="";
     $scope.event=myevent;
@@ -21,8 +18,6 @@ App.controller('PhotosCtrl', function ($scope,$interval,$ionicPopup,$ionicLoadin
         $scope.withMessage.checked = (s == "true");
     else
         $scope.withMessage.checked = false;
-
-
 
 
     function send(theFile, photo, success, failure) {
@@ -100,6 +95,10 @@ App.controller('PhotosCtrl', function ($scope,$interval,$ionicPopup,$ionicLoadin
     };
     */
 
+    $scope.updateWithMessage=function(){
+        localStorage.setItem("withMessage",$scope.withMessage.checked);
+    }
+
     refresh_photo=function(force) {
         if(isPresent("addphoto" || force))
             getLastPhoto(myevent.id, function (resp) {
@@ -114,13 +113,12 @@ App.controller('PhotosCtrl', function ($scope,$interval,$ionicPopup,$ionicLoadin
             });
     }
 
-    $scope.$on("$ionicView.beforeLeave", function () {
-        window.localStorage.setItem("withMessage", $scope.withMessage.checked);
-        $interval.cancel(h);
-    });
 
     $scope.$on("$ionicView.afterEnter", function(){
         refresh_photo(true);
-        h=$interval(refresh_photo,5000);
+        timerPhotos=$interval(refresh_photo,5000);
+
+        tuto(user,"photo",$ionicModal,$scope,"help_photo.svg");
+
     });
 });

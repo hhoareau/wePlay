@@ -4,11 +4,16 @@
             <div class="item item-divider">
                 {{user.firstname}}
             </div>
-            <div class="item">
-                <ion-checkbox ng-model="user.anonymous">{{'PROFIL.ANONYMOUS' | translate}}</ion-checkbox>
-            </div>
-            <div class="item">
-                <button class="button icon-left ion-power button-dark" ng-click="quitEvent()">Quit Event</button>
+            <div class="item item-button-right">
+                <div style="margin:0px; display: inline-block; width: 50%">
+                    <ion-checkbox style="text-align: left;" ng-model="user.anonymous" ng-click="updateAnonymous()">
+                        <span style="font-size: medium;">{{'PROFIL.ANONYMOUS' | translate}}</span>
+                    </ion-checkbox>
+                </div>
+
+                <button class="button icon-left ion-power button-dark"
+                        style="margin-top: 15px;"
+                        ng-click="quitEvent()">Quit Event</button>
             </div>
         </div>
 

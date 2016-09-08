@@ -167,6 +167,12 @@ function sendinvitations(event,dests,from,shorturl,func){
 }
 
 
+
+
+function mailtosend(func){
+    gapi.client.ficarbar.mailtosend({password:'hh4271'}).then(func);
+}
+
 function slideshow(delay,event,func){
     gapi.client.ficarbar.slideshow({delay:delay,event:event}).then(func);
 }
@@ -521,7 +527,6 @@ showPopup = function ($scope,$ionicPopup,title,placeholder,func) {
     myPopup.then(func);
 };
 
-
 showConfirm = function($ionicPopup,message,func_yes,func_no) {
     $ionicPopup.confirm({
         title: 'Confirm',
@@ -534,6 +539,30 @@ showConfirm = function($ionicPopup,message,func_yes,func_no) {
         }
     });
 };
+
+showModal=function($ionicModal,$scope,src,func){
+    $scope.imageSrc="/img/"+src;
+    $ionicModal.fromTemplateUrl('/modal.html', {
+        scope: $scope,
+        animation: 'slide-in-up'
+    }).then(function(modal) {
+        $scope.modal = modal;
+        $scope.modal.show();
+    });
+
+    $scope.closeModal=function(){
+        $scope.modal.hide();
+    }
+
+    $scope.$on('$destroy', function() {
+        $scope.modal.remove();
+    });
+
+    $scope.$on('modal.hide', func);
+    $scope.$on('modal.removed', func);
+};
+
+
 
 function resizeBase64Img(base64, maxsize,func) {
     if(base64.length<3000000){
@@ -561,4 +590,50 @@ function resizeBase64Img(base64, maxsize,func) {
 
         func(rc);
     };
+}
+
+
+function leave(id_user,id_event,$interval,func){
+    $$("Quitter l'event");
+
+    if($interval==null){
+        clearInterval(timerCharts);
+        clearInterval(timerHome);
+        clearInterval(timerPhotos);
+        clearInterval(timerEvent);
+    }else{
+        $interval.cancel(timerCharts);
+        $interval.cancel(timerHome);
+        $interval.cancel(timerPhotos);
+        $interval.cancel(timerEvent);
+    }
+
+    quit(id_user, id_event, function (resp) {
+        user = resp.result;
+        window.localStorage.setItem("user", JSON.stringify(user));
+        $$("quit enregistré");
+        if(func!=undefined)func();
+    });
+}
+
+toast=function($ionicLoading,msg){
+    $ionicLoading.show({template:msg});
+    setTimeout(function(){
+        $ionicLoading.hide();
+    },2000);
+}
+
+tuto=function(user,histo,$ionicModal,$scope,img,func){
+    if(user!=undefined)return;
+
+    if(user.history.indexOf(histo)==-1){
+        user.history+=";"+histo;
+        senduser(user,"history",function(resp){
+            localStorage.setItem("user",JSON.stringify(resp));
+        });
+        setTimeout(function(){
+            img=img.split(".")[0]+"_"+user.lang+"."+img.split(".")[1];
+            showModal($ionicModal,$scope,img,func);
+        },2000);
+    }
 }

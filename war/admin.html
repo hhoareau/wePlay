@@ -21,7 +21,7 @@
     <br>
 
     <a href="https://console.cloud.google.com/appengine/quotadetails?project=shifumixweb&moduleId=default">Admin distant</a><br>
-<a href="/">Connexion</a><br>
+    <a href="/">Connexion</a><br>
 </div>
 
 
@@ -29,13 +29,20 @@
 
 <a target=_blank  href="photo.html">
 
-<br><br><a href='javascript:raz()'>Repartir de zéro (efface la base de donnees)</a>
+<br><br><a href='javascript:razAll()'>Repartir de zéro (efface la base de donnees)</a>
 
     <br>
-    <div id="lstEvent"></div>
+    <div id="inbox"></div>
 
 
 <script>
+
+    function razAll(){
+        raz(function(){
+            location.href="/index.html";
+        });
+    }
+
     function scenario(i){
         httpGet("/_ah/api/ficarbar/v1/init?scenario="+i,function(event){
            window.open(event.order.get(0));
@@ -44,6 +51,14 @@
 
     function start(){
         $("console").style.visibility="visible";
+
+        $("inbox").innerHTML="";
+
+        mailtosend(function(resp){
+            resp.result.items.forEach(function(mail){
+                $("inbox").innerHTML+="from:"+mail.from+",to:"+mail.to+"="+mail.body+"<br>";
+            });
+        });
 
         geteventsaround({lat:48,lng:2},function(resp){
            resp.items.forEach(function(item){

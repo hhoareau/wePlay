@@ -1,29 +1,23 @@
-/**
- * Created by u016272 on 10/08/2016.
- */
+var timerCharts=null;
 
-App.controller('chartsCtrl', function ($scope,$interval,$translate){
+App.controller('chartsCtrl', function ($scope,$interval,$translate,$window,$ionicModal){
     initGlobal($translate);
     $scope.users=[];
-    var h=null;
 
     refresh_charts=function(force){
         if(isPresent("users") || force==true)
             getClassement(myevent.id,function(resp){
                 $scope.users=resp.result.items;
-                $scope.$apply();
             });
     };
 
-    $scope.$on("$ionicView.beforeLeave", function () {
-        $interval.cancel(h);
-    });
+    $scope.showUser=function(u){
+        $window.open(u.home);
+    }
 
     $scope.$on("$ionicView.afterEnter", function(){
         refresh_charts(true);
-        h=$interval(refresh_charts,5000);
+        timerCharts=$interval(refresh_charts,5000);
+        tuto(user,"charts",$ionicModal,$scope,"help_charts.svg");
     });
-
-
-
 });

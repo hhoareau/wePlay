@@ -48,6 +48,8 @@ public class DAO  {
             ObjectifyService.register(Photo.class);
             ObjectifyService.register(LocalFile.class);
             ObjectifyService.register(Blob.class);
+            ObjectifyService.register(Sondage.class);
+            ObjectifyService.register(Mail.class);
     }
 
 
@@ -86,7 +88,9 @@ public class DAO  {
         ofy().delete().keys(ofy().load().type(Event.class).keys().list());
         ofy().delete().keys(ofy().load().type(LocalFile.class).keys().list());
         ofy().delete().keys(ofy().load().type(Blob.class).keys().list());
-	}
+        ofy().delete().keys(ofy().load().type(Sondage.class).keys().list());
+        ofy().delete().keys(ofy().load().type(Mail.class).keys().list());
+    }
 	
 
 	public List<Message> findMessages(User user) {
@@ -101,7 +105,7 @@ public class DAO  {
 		try{
 			return ofy().load().type(User.class).id(u.id).now();
 		} catch (Exception e) {
-            e.printStackTrace();
+
             return null;
 		}
 	}
@@ -248,7 +252,7 @@ public class DAO  {
 	public List<Event> findEvents(Long dt,Double lat,Double lng) {
 		List<Event> le=new ArrayList<Event>();
 		if(lng==null || lat==null)return le;
-        for(Event e:ofy().load().type(Event.class).filter("dtStart <=", dt)	.list()){
+        for(Event e:ofy().load().type(Event.class).filter("dtEnd >", dt).list()){
             Double d=Tools.distance(lat,lng,e.lat,e.lng,'K')*1000;
             if(e.dtEnd!=null && e.minDistance!=null && e.dtEnd>dt && d<e.minDistance)le.add(e);
         }
@@ -406,5 +410,43 @@ public class DAO  {
 
     public void saveList(List<Blob> lb) {
         ofy().save().entities(lb);
+    }
+
+    public Collection<Event> getAllEvents() {
+        return ofy().load().type(Event.class).list();
+    }
+
+
+    public List<Mail> getMailToSend() {
+        List<Mail> rc=ofy().load().type(Mail.class).filter("dtSend",null).list();
+        for(Mail m:rc){
+            m.dtSend=System.currentTimeMillis();
+            ofy().save().entity(m);
+        }
+        return rc;
+    }
+
+
+
+    public static void sendMail(String dest,String from,String subject,String body){
+        /*
+        Properties props = new Properties();
+        Session session = Session.getDefaultInstance(props, null);
+        try {
+            javax.mail.Message msg = new MimeMessage(session);
+            msg.setFrom(new InternetAddress(from));
+            msg.addRecipient(MimeMessage.RecipientType.TO, new InternetAddress(dest));
+            msg.setSubject(subject);
+            msg.setText(body);
+            Transport.send(msg);
+        } catch (AddressException e) {
+            e.printStackTrace();
+        } catch (MessagingException e) {
+            e.printStackTrace();
+        }
+        */
+        Mail m=new Mail(body,subject,from,dest);
+        ofy().save().entity(m);
+
     }
 }

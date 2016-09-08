@@ -1,13 +1,14 @@
 <html>
 <head>
 <meta charset="ISO-8859-1">
-<link href='https://fonts.googleapis.com/css?family=Indie+Flower' rel='stylesheet' type='text/css'>
+    <link href="https://fonts.googleapis.com/css?family=Architects+Daughter" rel="stylesheet">
 <link rel="stylesheet" type="text/css" href="../Leficarbar.css">
     <script src="/js/Tools.js"></script>
     <script src="/js/Main.js"></script>
     <script src="/js/swipe.js"></script>
     <script src="/js/qrcode.js"></script>
     <script src="https://apis.google.com/js/client.js?onload=init"></script>
+
 
     <style type="text/css">
 h1 {
@@ -80,7 +81,7 @@ function RefreshSlideshow(){
             rep.result.items.forEach(function(message){
                 var newLI = document.createElement("div");
                 var code="<img style='height:90%;width=auto;border-style:solid;border-color:white;' src='"+message.photo+"'/>";
-                if(message.text!=null)code+="<h3>"+message.text+"</h3>";
+                if(message.text!=null)code+="<br><span style='font:20px Architects Daughter;color:#ffffff;'>"+message.text+"</span>";
                 newLI.innerHTML=code;
 
                 newLI.style.width=window.innerWidth-10;
@@ -112,7 +113,7 @@ function start(){
 	RefreshSlideshow();
 	setInterval(function(){
 		window.location.reload();
-	},40000);
+	},60000);
 	
  startFullScreen();
 }

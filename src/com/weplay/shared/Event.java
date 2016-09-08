@@ -22,17 +22,13 @@ import com.googlecode.objectify.annotation.Cache;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
+import com.weplay.server.DAO;
 
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
-import java.util.Properties;
+import java.util.Map;
 import java.util.logging.Logger;
 
 
@@ -70,6 +66,8 @@ public class Event implements Serializable {
 	private Integer maxOnline=50;
 	private String flyer="";
 
+    private Map<String,Integer> scores=new Hashtable<String,Integer>();
+    private Map<String,Long> lastUpdate=new Hashtable<String,Long>();
 
 	private List<String> playlist=new ArrayList<String>();
 	public List<String> Invites=new ArrayList<String>();				
@@ -91,7 +89,7 @@ public class Event implements Serializable {
     public Integer scoreInvite=5;
     private Integer scoreLikeSong=1;
     public Integer scorePostSong=-2;
-    public Integer scoreStart=10;
+    public Integer scoreStart=0;
     public Integer minScore=-20;
     public Integer scorePlaySong=2;
     private Integer playlistLimits=20;
@@ -167,40 +165,24 @@ public class Event implements Serializable {
         return d;
     }
 
-    public static void sendMail(String dest,String from,String subject,String body){
-        Properties props = new Properties();
-        Session session = Session.getDefaultInstance(props, null);
-        try {
-            javax.mail.Message msg = new MimeMessage(session);
-            msg.setFrom(new InternetAddress(from));
-            msg.addRecipient(MimeMessage.RecipientType.TO, new InternetAddress(dest));
-            msg.setSubject(subject);
-            msg.setText(body);
-            Transport.send(msg);
-        } catch (AddressException e) {
-            e.printStackTrace();
-        } catch (MessagingException e) {
-            e.printStackTrace();
-        }
-    }
 
     public void sendInvite(String dests,String from,String shorturl){
         for(String dest:dests.split(";")){
             if(shorturl==null)shorturl=Tools.DOMAIN+"/index.html?event="+this.getId()+"&from="+from;
-            sendMail(dest,Tools.ADMIN_EMAIL,"Invitation for " + this.title,"Dear, Open "+shorturl+" to join the event");
+            DAO.sendMail(dest, Tools.ADMIN_EMAIL, "Invitation for " + this.title, "Dear, Open " + shorturl + " to join the event");
         }
     }
 
     public void sendCloseMail() {
-        sendMail(this.owner.getEmail(),
+        DAO.sendMail(this.owner.getEmail(),
                 Tools.ADMIN_EMAIL,
-                this.title+" photos",
-                "Find all the photo with "+Tools.DOMAIN+"/Views/AllPhotos.html?event="+this.getId());
+                this.title + " photos",
+                "Find all the photo with " + Tools.DOMAIN + "/Views/AllPhotos.html?event=" + this.getId());
     }
 
     public void sendCloseMail(User u){
             String body="If you wan't to follow "+this.owner+ "for the next party, open this link :";
-            Event.sendMail(u.getEmail(),Tools.ADMIN_EMAIL,"End of the party",body);
+            DAO.sendMail(u.getEmail(),Tools.ADMIN_EMAIL,"End of the party",body);
     }
 	
 	
@@ -219,6 +201,8 @@ public class Event implements Serializable {
         }
             
         this.Presents.add(u.id);
+        scores.put(u.id,u.score);
+
         addOrder("adduser");
         u.currentEvent=this.Id;
         return true;
@@ -542,6 +526,30 @@ public class Event implements Serializable {
     public void setPlayerHasFocus(Boolean playerHasFocus) {
         this.playerHasFocus = playerHasFocus;
     }
+
+    public Map<String, Integer> getScores() {
+        return scores;
+    }
+
+    public void setScores(Map<String, Integer> scores) {
+        this.scores = scores;
+    }
+
+    public Map<String, Long> getLastUpdate() {
+        return lastUpdate;
+    }
+
+    public void setLastUpdate(Map<String, Long> lastUpdate) {
+        this.lastUpdate = lastUpdate;
+    }
+
+    public List<String> close() {
+        this.dtEnd=System.currentTimeMillis();
+        this.addOrder("close");
+        return this.getPresents();
+    }
+
+
 }
 
 

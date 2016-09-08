@@ -29,7 +29,6 @@
 
 <script>
 
-var date=0;
 var dateDemande=0;
 var photo_size=getParam()["photo_size"];
 var canvas = document.getElementById('myCanvas');
@@ -69,15 +68,12 @@ function resize(maxsize,data,onEnd){
 }
 
 
-
 function addImage(x,y,maxsize,data,onEnd){    
       resize(maxsize,data,function(imageObj,lx,ly){
     	  context.drawImage(imageObj, x, y,lx,ly);
     	  if(onEnd!=null)onEnd(imageObj.width,imageObj.height);
       });
 }
-
-
 
 
 function addPortrait(xx,yy,author,size,onEnd){
@@ -169,6 +165,7 @@ function getXY(canvas,func){
 function start(){
     window.canvas.width=window.innerWidth-100;
     window.canvas.height=window.innerHeight-50;
+    var date=0;
 
     setInterval(function(){
         var zone_text=document.getElementById("zone_text");
@@ -177,7 +174,7 @@ function start(){
             if(rep.status!=204){
                 photos=rep.result.items;
                 var i=0;
-                date=Date.parse(new Date());
+                date=new Date();
 
                 function show(index){
                     if(photos[index].dtMessage>date)date=photos[index].dtMessage;

@@ -7,7 +7,9 @@ App.controller('InviteCtlr', function ($scope,clipboard,$translate){
 
     $scope.email={};
 
-    shorturl(DOMAIN+"/index.html?from="+user.id+"&event="+myevent.id,function(url){
+    var url=DOMAIN+"/index.html?from="+user.id+"&event="+myevent.id;
+
+    shorturl(url,function(url){
         var qrcodjs=new QRCode("qrcode", {
             text: url.result.id,
             width: 150,
@@ -24,11 +26,16 @@ App.controller('InviteCtlr', function ($scope,clipboard,$translate){
     $scope.dests="";
 
     $scope.sendInvitations=function(){
-        sendinvitations(myevent.id,$scope.email.dests,user.email,$scope.url,function(resp){
-            if(resp.status==200)
-                $scope.message=$scope.email+" invited";
-            else
-                $scope.message="probleme to invite";
+
+        var inviteUrl=url;
+        if($scope.email.personal)inviteUrl+="&for="+$scope.email.dests;
+        shorturl(inviteUrl,function(url){
+            sendinvitations(myevent.id,$scope.email.dests,user.email,url.result.id,function(resp){
+                if(resp.status==200)
+                    $scope.message=$scope.email.dests+" invited";
+                else
+                    $scope.message="probleme to invite";
+            });
         });
         $scope.email.dests="";
     }

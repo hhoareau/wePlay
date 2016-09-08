@@ -3,7 +3,7 @@
  */
 var App = angular.module('App', ['ionic','pascalprecht.translate','ngCordova','angular-clipboard','facebook','ngStorage','ngMap']);
 
-App.config(function($stateProvider,$urlRouterProvider,FacebookProvider,$translateProvider) {
+App.config(function($stateProvider,$ionicConfigProvider,$urlRouterProvider,FacebookProvider,$translateProvider) {
 
     FacebookProvider.init({
         appId:FACEBOOK_ID,
@@ -12,12 +12,13 @@ App.config(function($stateProvider,$urlRouterProvider,FacebookProvider,$translat
 
     $translateProvider.translations('en',{
        'ADDEVENT.TITLE':'Title',
-        'ADDEVENT.START':'Start',
+        'ADDEVENT.ADDRESS':'Address of the event',
         'ADDEVENT.DURATION':'Duration',
         'ADDEVENT.SAVE':'Save my Event',
-        'SELEVENT.CREATE':'Create your Event',
+        'SELEVENT.CREATE':'Your Event',
         'SELEVENT.WELCOME':'Hello, Find an event !',
         'ADDEVENT.PASSWORD': "Password to enter (optional)",
+        'ADDEVENT.START': "Start",
         'SELEVENT.NOPOSITION': "You must authorize geolocalisation to select an event",
         'SELEVENT.USELASTPOSITION': "No geolocalisation, Last position used",
         'PROFIL.PLAYER':"To play the playlist on your audio system",
@@ -37,17 +38,21 @@ App.config(function($stateProvider,$urlRouterProvider,FacebookProvider,$translat
         'ADDEVENT.WEBSITE':"Web site of your event",
         'SELEVENT.LOGOUT':"Change profil",
         'INVITE.COPY':"Copy the link",
-        'INVITE.SEND':"Send invitation",
+        'INVITE.PERSONAL':"Personal",
+        'INVITE.DEST':"Email to invited",
+        'SELEVENT.LOCALISE': "Find me",
+        'INVITE.SEND':"Send",
         'PHOTO.DOWNLOAD':"Photos download",
-         'ADDEVENT.APARTIRDE':"at"
+         'ADDEVENT.APARTIRDE':"Start time"
     });
 
     $translateProvider.translations('fr',{
         'ADDEVENT.TITLE':'Titre',
-        'ADDEVENT.APARTIRDE':"à partir de",
-        'ADDEVENT.START':'Début',
+        'ADDEVENT.ADDRESS':"Adresse de l'évenement",
+        'ADDEVENT.APARTIRDE':"A partir de",
         'ADDEVENT.DURATION':'Durée',
         'ADDEVENT.SAVE':'Enregistrer',
+        'ADDEVENT.START': "Start",
         'SELEVENT.CREATE':'Créer un évenement',
         'SELEVENT.WELCOME':'Bonjour, Trouver un événement !',
         'ADDEVENT.PASSWORD': "Mot de passe",
@@ -56,9 +61,12 @@ App.config(function($stateProvider,$urlRouterProvider,FacebookProvider,$translat
         'ADDEVENT.SONGSBYDEFAULT': "Playlist de départ",
         'ADDEVENT.VISIBLE': "Evénement visible a",
         'HOME.ADDSONG':'Ajouter votre musique !',
+        'INVITE.PERSONAL':"Invitation personnelle",
+        'INVITE.DEST':"Email à inviter",
         'SELEVENT.USELASTPOSITION': "Localisation impossible, utilisation de la dernière position",
         'SELEVENT.JOINFAILED': "impossible de ce joindre à cet évenement",
         'SELEVENT.MYEVENTS': "Mes événements",
+        'SELEVENT.LOCALISE': "Me trouver",
         'PROFIL.CLOSE_EVENT': "Clore l'événement",
         'PROFIL.ANONYMOUS': "Anonyme",
         "PHOTO.TAKEPICTURE": "Partager une photo",
@@ -67,7 +75,7 @@ App.config(function($stateProvider,$urlRouterProvider,FacebookProvider,$translat
         'ADDEVENT.DESCRIPTION':"Teaser de l'événement",
         'ADDEVENT.WEBSITE':"Site web de l'événement",
         'INVITE.COPY':"Copier le lien",
-        'INVITE.SEND':"Envoyer l'invitation",
+        'INVITE.SEND':"Envoyer",
         'PHOTO.DOWNLOAD':"Télécharger mes photos"
 
     });
@@ -93,6 +101,7 @@ App.config(function($stateProvider,$urlRouterProvider,FacebookProvider,$translat
         .state('login', {
             url: '/login',
             templateUrl: 'Views/login.html',
+            cache: false,
             controller: 'loginCtrl'
         })
 
@@ -171,8 +180,9 @@ App.config(function($stateProvider,$urlRouterProvider,FacebookProvider,$translat
             }
         });
 
-    $urlRouterProvider
-        .otherwise('/start');
+    $ionicConfigProvider.views.maxCache(0);
+
+    $urlRouterProvider.otherwise('/start');
     });
 
 

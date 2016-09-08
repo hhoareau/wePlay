@@ -151,6 +151,10 @@ function analyseDirectory(finder, func) {
     });
 }
 
+window.onfocus=function(e){
+    $$("event "+JSON.stringify(e));
+}
+
 window.onbeforeunload=function (event) {
     $$("unload form");
     var idEvent=getParam()["event"];
@@ -193,6 +197,18 @@ function allPlayersAreReady(){
 
     if(rc){
         informe("All players are ready, you can push your music !");
+        var nplayer=findBestPlayer(LOCAL);
+        players[nplayer].player.playFile("/img/ready.mp3");
+        players[nplayer+1].player.playFile("/img/ready.mp3");
+
+        var nplayer=findBestPlayer(YOUTUBE);
+        players[nplayer].player.playFile("rwdUVjyxWrM");
+        players[nplayer+1].player.playFile("rwdUVjyxWrM");
+        setTimeout(function(){
+            players[nplayer].player.pause();
+            players[nplayer+1].player.pause();
+        },2000);
+
         playersReady=true;
     }
 

@@ -110,7 +110,15 @@ function play(song,delay,func,err_func) {
 }
 
 
-function start() {
+function playFile(src){
+    setVolume(0);
+    player.loadVideoById({videoId:src});
+    player.play();
+}
+
+
+
+    function start() {
     setTimeout(function(){
         player = new YT.Player('player',
                 {   height: '200',

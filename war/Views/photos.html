@@ -9,7 +9,10 @@
             {{"PHOTO.TAKEPICTURE" | translate}}
         </div>
 
-        <ion-toggle name="withMessage" ng-model="withMessage.checked" toggle-class="toggle-calm">Photos with message</ion-toggle>
+        <ion-toggle name="withMessage"
+                    ng-model="withMessage.checked"
+                    ng-click="updateWithMessage()"
+                    toggle-class="toggle-calm">Photos with message</ion-toggle>
         <br>
         <div style="text-align: center">
             <img download style="max-width:80%;max-height:400px" ng-src="{{lastphoto}}" ng-show="lastphoto!=null ">

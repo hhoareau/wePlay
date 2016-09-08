@@ -7,21 +7,34 @@
 
         <div class="item text-left item-button-right" style="font-size: large">
             {{url}}
-            <button class="button icon-left ion-ios-copy button-positive" ng-click="copy()">
+            <button class="button button-small icon-left ion-ios-copy button-positive"
+                    style="padding-top: 2px; padding-bottom: 2px;"
+                    ng-click="copy()">
                 <span style="font-size: small;">
-                    {{'INVITE.COPY' | translate}}
+
                 </span>
 
             </button>
         </div>
 
-        <div class="item text-left item-input item-button-right" focus-me>
-            <input type="email" ng-model="email.dests" name="email" placeholder="email to invite" my-enter="sendInvitations()">
-            <button class="button icon-left ion-android-send button-positive" ng-click="sendInvitations()">
-               <span style="font-size: small;">
-                    {{'INVITE.SEND' | translate}}
-                </span>
-            </button>
+        <div class="card">
+            <div class="item item-divider">Flyers</div>
+            <div class="item text-left item-input item-button-right">
+                    <input focus-me type="email" ng-model="email.dests" name="email" placeholder="{{'INVITE.DEST' | translate}}" my-enter="sendInvitations()">
+                    <button class="button button-small no-padding icon-left ion-android-send button-positive"
+                            ng-click="sendInvitations()">
+                                {{'INVITE.SEND' | translate}}
+                    </button>
+            </div>
+            <div class="item">
+                <ion-checkbox style="text-align: left;" ng-model="email.personal">
+                    {{'INVITE.PERSONAL' | translate}}
+                </ion-checkbox>
+            </div>
+        </div>
+        <br>
+        <div class="text-center">
+            {{message}}
         </div>
 
     </ion-content>
