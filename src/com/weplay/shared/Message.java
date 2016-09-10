@@ -46,6 +46,7 @@ public class Message implements Serializable,Cloneable {
 	String title="";
 
     String next=null;
+    public Long dtBackup=null; //Indique if there is a backup
 
     @Index
     Long type= Rest.TYPE_DEMANDE;
@@ -180,6 +181,12 @@ public class Message implements Serializable,Cloneable {
         this.next = next;
     }
 
+    public Long getDtBackup() {
+        return dtBackup;
+    }
 
+    public void setDtBackup(Long dtBackup) {
+        this.dtBackup = dtBackup;
+    }
 }
 

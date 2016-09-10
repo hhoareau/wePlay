@@ -486,6 +486,23 @@ public class Rest {
         return u;
     }
 
+    @ApiMethod(name = "backupphoto", httpMethod = ApiMethod.HttpMethod.GET, path = "backupphoto")
+    public List<Photo> backupphoto(@Named("password") String password,@Named("event") String idEvent) {
+        Event e=dao.findEvent(idEvent);
+        if(e!=null && password.equalsIgnoreCase(PASSWORD_MAIL)){
+            List<Photo> rc=new ArrayList<>();
+            for(Photo p:dao.getPhotosSince(e,0)){
+                if(p.getDtBackup()==null){
+                    p.setDtBackup(System.currentTimeMillis());
+                    dao.save(p);
+                    rc.add(p);
+                }
+            }
+            return rc;
+        }
+        return null;
+    }
+
     @ApiMethod(name = "slideshow", httpMethod = ApiMethod.HttpMethod.GET, path = "slideshow")
     public List<Photo> slideshow(@Nullable @Named("delay") Long delay,@Named("event") String idEvent){
         List<Photo> lPhoto=new ArrayList<>();
@@ -495,6 +512,8 @@ public class Rest {
         } else {
             lPhoto=dao.getPhoto(idEvent,0L, System.currentTimeMillis());
         }
+
+
 
         Collections.sort(lPhoto); //Les derniers messages en premier dans la liste
         return lPhoto;
