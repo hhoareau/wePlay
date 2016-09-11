@@ -1,0 +1,46 @@
+<ion-view view-title="Music">
+    <ion-nav-title align-title="left" side="left">
+        {{event.title}} Playlist
+    </ion-nav-title>
+    <ion-nav-buttons side="right">
+        <button ng-show="songs.length>4" class="button icon-left ion-music-note button-balanced" ng-click="addsong()">
+            {{'HOME.ADDSONG' | translate}}
+        </button>
+    </ion-nav-buttons>
+
+    <ion-content>
+        <div class="row" ng-show="currentsong!=null">
+            <div class="col">
+                <img width="30px" height="30px" src="img/vinyl.gif">
+            </div>
+            <div class="col col-80 text-left">
+                {{currentsong.title}}<br><span style="font-size: x-small">{{currentsong.author}}</span>
+            </div>
+        </div>
+
+        <div class="item" style="padding: 0px;margin: 0px;">
+            <div ng-repeat="song in songs" class="row" style="margin-left: 3px;">
+                <div class="col col-20 col-center text-left">
+                    <img width="30px" src="/img/disc.png" ng-show="song.vote">
+                    <div ng-hide="song.vote">
+                        <button class="button button-small ion-arrow-up-a"  ng-click="onSetScore(1,$index)"></button>
+                        <button class="button button-small ion-arrow-down-a" ng-click="onSetScore(-1,$index)"></button>
+                    </div>
+                </div>
+                <div class="col col-center item-text-wrap text-left">
+                    <span style="font-size: small">{{song.shortTitle}}</span>
+                    <span style="font-size: x-small" ng-hide="song.from.anonymous"> by {{song.from.firstname}}</span>
+                    <br><span style="font-size: x-small">{{song.author}}</span>
+                </div>
+                <div class="col col-10 col-center text-right" style="margin-right:3px;font-size:2em;">
+                    {{song.score}}
+                </div>
+            </div>
+        </div>
+
+        <div align="center">
+            <br>
+            <button class="button icon-left ion-music-note button-balanced" ng-click="addsong()">{{'HOME.ADDSONG' | translate}}</button>
+        </div>
+    </ion-content>
+</ion-view>
