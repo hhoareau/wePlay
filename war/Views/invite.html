@@ -2,18 +2,13 @@
     <ion-content>
 
         <div class="item text-center">
-            <div style="display:inline-block; width:200px;" id="qrcode"></div>
+            <div style="display:inline-block; width:200px;" id="qrcode" ng-click="copy(false)"></div>
         </div>
 
-        <div class="item text-left item-button-right" style="font-size: large">
+        <div class="item text-left item-button-right">
             {{url}}
-            <button class="button button-small icon-left ion-ios-copy button-positive"
-                    style="padding-top: 2px; padding-bottom: 2px;"
-                    ng-click="copy()">
-                <span style="font-size: small;">
-
-                </span>
-
+            <button class="button icon-left ion-ios-copy button-positive" style="margin-bottom: 6px;" ng-click="copy(true)">
+                    {{'INVITE.COPY' | translate}}
             </button>
         </div>
 
@@ -21,8 +16,7 @@
             <div class="item item-divider">Flyers</div>
             <div class="item text-left item-input item-button-right">
                     <input focus-me type="email" ng-model="email.dests" name="email" placeholder="{{'INVITE.DEST' | translate}}" my-enter="sendInvitations()">
-                    <button class="button button-small no-padding icon-left ion-android-send button-positive"
-                            ng-click="sendInvitations()">
+                    <button class="button icon-left ion-android-send button-positive" ng-click="sendInvitations()">
                                 {{'INVITE.SEND' | translate}}
                     </button>
             </div>

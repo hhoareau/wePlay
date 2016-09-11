@@ -342,7 +342,7 @@ App.directive('camera', function ($q, ExifRestorer) {
 });
 
 
-App.directive('imgfiles', function ($q, ExifRestorer) {
+App.directive('imgfiles', function ($q, $ionicLoading,ExifRestorer) {
     // Fix for chrome
     //noinspection JSUnresolvedVariable
     window.URL = window.URL || window.webkitURL;
@@ -372,6 +372,7 @@ App.directive('imgfiles', function ($q, ExifRestorer) {
 
         var memImg = new Image();
         memImg.onload = function () {
+
             var imgCanvas = document.createElement("canvas"),
                 imgContext = imgCanvas.getContext("2d");
 
@@ -390,13 +391,18 @@ App.directive('imgfiles', function ($q, ExifRestorer) {
             memImg = null;
             imgCanvas = null;
             imgContext = null;
+
+
         };
 
+
+        $ionicLoading.show({template:'Loading flyer image'});
 
         // Read image for exif
         var binaryReader = new FileReader();
         binaryReader.onloadend = function (e) {
             binaryReaderDefer.resolve(e.target.result);
+            $ionicLoading.hide();
         };
 
         //noinspection JSUnresolvedFunction
@@ -424,7 +430,7 @@ App.directive('imgfiles', function ($q, ExifRestorer) {
         restrict: 'E',
         template: '<input type="file" accept="image/*" id="camera" style="visibility: hidden;" />' +
         '<img>' +
-        '<img style="max-width:40px;padding: 0px;margin: 0px;" src="img/files.png" ng-click="takePhoto()">',
+        '<img style="display:inline-block;max-width:40px;padding: 0px;margin: 0px;" src="img/camera.png" ng-click="takePhoto()">',
         scope: {
             onSelect: '&'
         },

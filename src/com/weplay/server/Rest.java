@@ -212,7 +212,7 @@ public class Rest {
                     u.currentEvent = e.getId();
                     User f = dao.findUser(from);
                     if (f != null) {
-                        f.score += e.scoreInvite;
+                        if(e.addInvited(u))f.score += e.scoreInvite;
                         dao.save(f);
                         e.addOrder("users");
                     }

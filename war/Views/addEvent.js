@@ -5,7 +5,7 @@
 var target=null;
 var circle=null;
 
-App.controller("addEventCtrl", function($scope,$ionicModal,$ionicPlatform,$state,$translate,$filter) {
+App.controller("addEventCtrl", function($scope,$ionicModal,$ionicPlatform,$state,$translate,$filter,$ionicLoading,$timeout) {
     var canvas = null;
     initGlobal($translate);
 
@@ -123,20 +123,25 @@ App.controller("addEventCtrl", function($scope,$ionicModal,$ionicPlatform,$state
             canvas.width=300;
             canvas.height=canvas.width/ratio;
 
-            var gps="";
-            if(target!=null)gps="#GPS:"+target.position.lat().toFixed(3)+","+target.position.lng().toFixed(3);
+            var address="";
+            if($scope.event.address.length==0)
+                address="#GPS:"+target.position.lat().toFixed(3)+","+target.position.lng().toFixed(3);
+            else
+                address=$scope.event.address;
+
 
             ctx.drawImage(i,0,0,canvas.width,canvas.height);
 
             var dtEnd=Date.parse($scope.event.dtStart)+$scope.event.duration*1000*3600;
             var sDate="Le "+$filter('date')($scope.event.dtStart,'dd/MM/yyyy')+
-                " de "+$filter('date')($scope.event.dtStart,'h')+" a "+
-                $filter('date')(dtEnd,'h')+"H";
+                " de "+$filter('date')($scope.event.dtStart,'hh')+" a "+
+                $filter('date')(dtEnd,'hh')+"H";
+
 
             if($scope.event.autoflyer){
-                addText(ctx,100,canvas.height-40,"white",13,sDate,null,300);
                 addText(ctx,20,20,"white",20,$scope.event.title,null,200);
-                //addText(ctx,150,canvas.height-20,"white",15,gps,null,200);
+                addText(ctx,20,30,"white",13,address,null,300);
+                addText(ctx,canvas.width-textWidth(ctx,18,sDate)-30,canvas.height-40,"white",18,sDate,null,300);
             }
 
             $scope.event.flyer=canvas.toDataURL("image/jpeg");

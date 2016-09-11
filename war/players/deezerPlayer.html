@@ -54,6 +54,7 @@
 
     function Quit(){
         DZ.logout();
+        init();
     }
 
     function pause(){
@@ -78,6 +79,40 @@
     }
 
 
+    function init(){
+        $$("Deezer initialisation");
+
+        domain=getParam()["domain"].replace("http://localhost:8080","https://shifumixweb.appspot.com");
+        domain="https://shifumixweb.appspot.com";
+
+        appid=getParam()["appid"];
+
+        DZ.init({
+            appId  : appid,
+            channelUrl : domain+'/channel.html',
+            player: {
+                container: 'player',
+                width : 800,
+                height : 300,
+                onload : function(){
+
+                    DZ.login(function(response) {
+                        $$("login ok"+JSON.stringify(response));
+                        if (response.authResponse) {
+                            $$('Welcome!  Fetching your information.... ');
+                            DZ.api('/user/me', function(response) {
+                                $$('Good to see you, ' + response.name);
+                            });
+                        } else {
+                            $$('User cancelled login or did not fully authorize.');
+                        }
+                    }, {perms: 'basic_access'});
+                }
+
+            }
+        });
+    }
+
     function play(song,delay,func){
         if(delay==undefined)delay=0;
 
@@ -101,36 +136,7 @@
         return DZ.player.isPlaying();
     }
 
-    window.dzAsyncInit = function() {
-        domain=getParam()["domain"].replace("http://localhost:8080","https://shifumixweb.appspot.com");
-        domain="https://shifumixweb.appspot.com";
-
-        appid=getParam()["appid"];
-        DZ.init({
-            appId  : appid,
-            channelUrl : domain+'/channel.html',
-            player: {
-                container: 'player',
-                width : 800,
-                height : 300,
-                onload : function(){
-
-                    DZ.login(function(response) {
-                        if (response.authResponse) {
-                            console.log('Welcome!  Fetching your information.... ');
-                            DZ.api('/user/me', function(response) {
-                                console.log('Good to see you, ' + response.name + '.');
-                                //ready=true;
-                            });
-                        } else {
-                            console.log('User cancelled login or did not fully authorize.');
-                        }
-                    }, {perms: 'basic_access'});
-                }
-
-            }
-        })
-    };
+    window.dzAsyncInit = init;
 
     function start(){
         DZ.ready(function(sdk_options){

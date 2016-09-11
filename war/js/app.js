@@ -180,7 +180,7 @@ App.config(function($stateProvider,$ionicConfigProvider,$urlRouterProvider,Faceb
             }
         });
 
-    $ionicConfigProvider.views.maxCache(0);
+    //$ionicConfigProvider.views.maxCache(0);
 
     $urlRouterProvider.otherwise('/start');
     });

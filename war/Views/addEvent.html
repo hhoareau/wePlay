@@ -48,10 +48,13 @@
             </label>
 
 
-
-
             <div class="card">
-                <div class="item item-divider">Flyer</div>
+                <div class="item item-divider">
+                    <span class="text text-left">Flyer</span>
+                    <div style="display: inline;text-align: right;">
+                        <imgfiles on-select="getFlyer(photo)"></imgfiles>
+                    </div>
+                </div>
                 <div class="item" ng-show="event.flyer.length>0">
                     <img style="margin-top:10px;max-width: 300px;max-height: 300px;" ng-src="{{event.flyer}}"></img>
                 </div>
@@ -59,8 +62,6 @@
                     <ion-checkbox class="text-left"
                                   ng-model="event.autoflyer"
                                   ng-change="onChangePicture()">Auto</ion-checkbox>
-
-                    <imgfiles on-select="getFlyer(photo)"></imgfiles>
                 </div>
             </div>
 

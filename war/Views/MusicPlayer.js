@@ -35,7 +35,7 @@ function torrentload() {
                 getmagnets(song.text, function (res) {
                     client.add(res.result.items[0], function (torrent) {
                         // Got torrent metadata!
-                        console.log('Client is downloading:', torrent.infoHash);
+                        $$('Client is downloading:', torrent.infoHash);
                         torrent.files.forEach(function (file) {
                             // Display the file by appending it to the DOM. Supports video, audio, images, and
                             // more. Specify a container element (CSS selector or reference to DOM node).
@@ -260,9 +260,9 @@ function playNextSong() {
                 //Start the song to the new player
                 players[r.new].player.play(idSong, 2, function () {
                     if(song.from!=undefined){
-                        $("djname").innerHTML="<span style='color: black;'>"+song.from.firstname+"</span>";
-                        $("djname").left=$("djlogo").left+$("djlogo").width/2-$("djname").width/2;
-                        $("djname").top=$("djlogo").top+100;
+                        var djname=song.from.firstname;
+                        if(djname.length>15)djname=djname.substr(0,15);
+                        $("djname").innerHTML="<span style='font-size:x-large; color: #ffffff;'>"+djname+"</span>";
                     }
 
                     $$("Duree actuel du titre : "+song.duration);
@@ -322,7 +322,7 @@ function chkCompatibility() {
 
 function logoutDeezer(){
     players.forEach(function(player){
-       if(player.origin==DEEZER);
+       if(player.origin==DEEZER)
             player.player.Quit();
     });
 }

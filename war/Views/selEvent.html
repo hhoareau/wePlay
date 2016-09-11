@@ -44,7 +44,7 @@
             </button>
         </div>
 
-            <div class="card">
+            <div class="card" ng-show="preview.title.length>0">
                 <div class="item item-divider">
                     {{preview.title}}
                 </div>
@@ -57,15 +57,21 @@
                 </div>
             </div>
 
-        <div class="card" ng-show="events.length>0">
+        <div class="card">
             <div class="item item-divider">
                 {{'SELEVENT.MYEVENTS' | translate}}
             </div>
-            <div class="item">
-                <ion-item ng-repeat="evt in myevents" ng-click="setEvent(evt,false)">
+            <ion-list show-delete="shouldShowDelete">
+                <ion-item ng-repeat="evt in myevents" class="item-thumbnail-left">>
                     {{evt.title}}
+
+                    <ion-delete-button
+                            class="ion-minus-circled"
+                            ng-click="delEvent(evt)">
+                    </ion-delete-button>
+
                 </ion-item>
-            </div>
+            </ion-list>>
         </div>
 
 

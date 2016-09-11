@@ -9,6 +9,14 @@ App.controller('InviteCtlr', function ($scope,clipboard,$translate){
 
     var url=DOMAIN+"/index.html?from="+user.id+"&event="+myevent.id;
 
+    $scope.copy = function (withText) {
+        if(withText)
+            clipboard.copyText("ouvrez "+$scope.url);
+        else
+            clipboard.copyText($scope.url);
+    };
+
+
     shorturl(url,function(url){
         var qrcodjs=new QRCode("qrcode", {
             text: url.result.id,
@@ -17,9 +25,8 @@ App.controller('InviteCtlr', function ($scope,clipboard,$translate){
             correctLevel : QRCode.CorrectLevel.H
         });
         $scope.url=url.result.id;
-        $scope.copy = function () {
-            clipboard.copyText("ouvrez "+url.result.id);
-        };
+
+
         $scope.$apply();
     });
 

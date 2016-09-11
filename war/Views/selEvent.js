@@ -232,6 +232,7 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
     $scope.preview={};
     $scope.user=user;
     $scope.facebook_events=[];
+    $scope.shouldShowDelete=true;
 
     JSON.parse(localStorage.getItem("facebook_events")).forEach(function(e){
         if(new Date(e.end_time).getTime()>new Date().getTime() ||
@@ -260,7 +261,7 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
         var _for=window.localStorage.getItem("for");
 
         if(inviteEvent!=undefined && inviteEvent.indexOf("event")==0 &&
-            (_for==user.email || _for==undefined)){
+            (_for==user.email || _for=="undefined")){
             $$("transfert à l'invitation");
             getevent(inviteEvent,null,function(resp){
                 $scope.joinEvent(resp.result);

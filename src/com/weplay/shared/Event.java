@@ -186,11 +186,13 @@ public class Event implements Serializable {
     }
 	
 	
-	public void addInvited(User u) {
+	public Boolean addInvited(User u) {
 		if(!this.Invites.contains(u.id)){
             addOrder("addinvited");
             this.Invites.add(u.id);
+            return true;
         }
+        return false;
 	}
 
     //Add a new user
