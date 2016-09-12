@@ -1,10 +1,7 @@
 
 var timerHome=null;
 
-App.controller('HomeCtrl', function ($scope,$interval,$state,$translate){
-    initGlobal($translate);
-
-    $scope.event=myevent;
+App.controller('HomeCtrl', function ($scope,$interval,$state,$translate,$window,$ionicModal){
 
     $scope.addsong=function(){
         $state.go("search");
@@ -18,7 +15,7 @@ App.controller('HomeCtrl', function ($scope,$interval,$state,$translate){
         });
     }
 
-    function refresh_playlist(force){
+    function refresh_playlist(force,func){
         if(isPresent("playlist") || isPresent("join") || force==true)
             getplaylist(myevent.id,function(resp) {
                 $scope.songs=[];
@@ -38,12 +35,20 @@ App.controller('HomeCtrl', function ($scope,$interval,$state,$translate){
                             ($scope.songs[i].votants.indexOf(user.id+"-1")>-1);
                         }
                 }
+
+                func();
             });
     }
 
     $scope.$on("$ionicView.afterEnter",function() {
-        refresh_playlist(true);
-        timerHome=$interval(refresh_playlist,5000);
+        refresh_playlist(true,function(){
+            timerHome=$interval(refresh_playlist,5000);
+            if(user.connexions.length<2 && $scope.songs.length>0) {
+                tuto(user,"player",$ionicModal,$scope,"help_player.svg",function(){
+                    $window.open("/Views/musicPlayer.html?event="+myevent.id+"&showTuto=true");
+                });
+            }
+        });
     });
 
     $scope.$on("$ionicView.beforeLeave",function(){
@@ -54,5 +59,15 @@ App.controller('HomeCtrl', function ($scope,$interval,$state,$translate){
         initGlobal();
         leave(user.id,myevent.id);
     });
+
+    $scope.$on("$ionicView.loaded",function(event,data){
+        initGlobal($translate);
+        $scope.event=myevent;
+
+        if(user.connexions.length<2){
+            tuto(user,"pushmusic",$ionicModal,$scope,"help_home.svg");
+        }
+    });
+
 
 });

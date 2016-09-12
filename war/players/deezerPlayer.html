@@ -99,8 +99,8 @@
                         $$("login ok"+JSON.stringify(response));
                         if (response.authResponse) {
                             $$('Welcome!  Fetching your information.... ');
-                            DZ.api('/user/me', function(response) {
-                                $$('Good to see you, ' + response.name);
+                            DZ.api('/user/me', function(usr) {
+                                $$('Good to see you, ' + usr.name);
                             });
                         } else {
                             $$('User cancelled login or did not fully authorize.');

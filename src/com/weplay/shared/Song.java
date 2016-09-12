@@ -189,4 +189,9 @@ public class Song extends Message implements Serializable,Comparable<Song> {
     public void setShortTitle() {
         this.shortTitle=this.title.substring(0,Math.min(MAXLEN_SHORT_TITLE,this.title.length()));
     }
+
+    public String getHTML(){
+        String code=this.title+" by "+this.getAuthor()+"<br>";
+        return code;
+    }
 }

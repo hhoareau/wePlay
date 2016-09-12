@@ -24,6 +24,7 @@ import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Logger;
 
 /**
@@ -50,7 +51,7 @@ public class User implements Comparable<User> {
 	public String photo=null;
 	private String state="";
     public Boolean anonymous=false;
-    public Long dtFirstConnexion=System.currentTimeMillis();
+    public List<Long> connexions=new ArrayList<>();
 	public String message="";
 
 	public String currentEvent="";
@@ -302,12 +303,12 @@ public class User implements Comparable<User> {
         this.anonymous = anonymous;
     }
 
-    public Long getDtFirstConnexion() {
-        return dtFirstConnexion;
+    public List<Long> getConnexions() {
+        return connexions;
     }
 
-    public void setDtFirstConnexion(Long dtFirstConnexion) {
-        this.dtFirstConnexion = dtFirstConnexion;
+    public void setConnexions(List<Long> connexions) {
+        this.connexions = connexions;
     }
 
     public String getLang() {
@@ -386,6 +387,11 @@ public class User implements Comparable<User> {
 
     public void setDtLastConnexion(Long dtLastConnexion) {
         this.dtLastConnexion = dtLastConnexion;
+    }
+
+    public String getHTML() {
+        String code="<table><tr><td><img src='"+this.photo+"'></td><td>"+this.firstname+"</td></tr></table><br>";
+        return code;
     }
 }
 

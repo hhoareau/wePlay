@@ -54,7 +54,7 @@
 
         $("inbox").innerHTML="";
 
-        mailtosend(function(resp){
+        mailtosend(true,function(resp){
             resp.result.items.forEach(function(mail){
                 $("inbox").innerHTML+="from:"+mail.from+",to:"+mail.to+"="+mail.body+"<br>";
             });

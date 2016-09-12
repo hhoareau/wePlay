@@ -226,7 +226,7 @@ App.factory('ExifRestorer', function () {
     return ExifRestorer;
 });
 
-App.directive('camera', function ($q, ExifRestorer) {
+App.directive('camera', function ($q, $ionicLoading,ExifRestorer) {
     // Fix for chrome
     //noinspection JSUnresolvedVariable
     window.URL = window.URL || window.webkitURL;
@@ -284,7 +284,10 @@ App.directive('camera', function ($q, ExifRestorer) {
             memImg = null;
             imgCanvas = null;
             imgContext = null;
+            $ionicLoading.hide();
         };
+
+        $ionicLoading.show({template:'Photo sending'});
 
 
         // Read image for exif

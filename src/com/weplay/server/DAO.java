@@ -75,7 +75,7 @@ public class DAO  {
 	
 	
 	public void save(Message m) {
-		ofy().save().entity(m);
+        ofy().save().entity(m).now();
 	}
 	
 
@@ -205,7 +205,7 @@ public class DAO  {
 
 	public void save(Event event) {
         event.lastSave=System.currentTimeMillis();
-		ofy().save().entities(event);
+		ofy().save().entities(event).now();
 	}
 
     public Event getFirstEvent() {
@@ -276,7 +276,7 @@ public class DAO  {
 	}
 
 	public void save(Vote vote) {
-		ofy().save().entities(vote);
+		ofy().save().entities(vote).now();
 	}
 
 	public List<User> getUsers(List<String> presents) {
@@ -360,6 +360,15 @@ public class DAO  {
         return rc;
     }
 
+
+    public List<Event> getFuturEventsFrom(User u) {
+        List<Event> rc=new ArrayList<>();
+        for(Event e:ofy().load().type(Event.class).filter("dtStart >",System.currentTimeMillis()).list())
+            if(e.getOwner().id.equals(u.id))
+                rc.add(e);
+        return rc;
+    }
+
     public void saveFiles(List<LocalFile> lf) {
         ofy().save().entities(lf);
     }
@@ -417,12 +426,13 @@ public class DAO  {
     }
 
 
-    public List<Mail> getMailToSend() {
+    public List<Mail> getMailToSend(Boolean readOnly) {
         List<Mail> rc=ofy().load().type(Mail.class).filter("dtSend",null).list();
-        for(Mail m:rc){
-            m.dtSend=System.currentTimeMillis();
-            ofy().save().entity(m);
-        }
+        if(!readOnly)
+            for(Mail m:rc){
+                m.dtSend=System.currentTimeMillis();
+                ofy().save().entity(m);
+            }
         return rc;
     }
 
@@ -448,5 +458,9 @@ public class DAO  {
         Mail m=new Mail(body,subject,from,dest);
         ofy().save().entity(m);
 
+    }
+
+    public void delete(Event e) {
+        ofy().delete().entity(e).now();
     }
 }

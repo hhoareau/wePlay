@@ -7,7 +7,7 @@ if(window.location.host=="localhost:8080"){
     DOMAIN="http://"+window.location.host;
     FACEBOOK_ID="911650875607406";
     GOOGLE_API_KEY="AIzaSyD9ulABAnLWARLXAIajXW5c-3Rj5Wqp-Ss";
-    DEEZER_KEY="190062";
+    DEEZER_KEY="190762";
     //DEEZER_KEY="182662";
 };
 if(window.location.host=="weplaywebsite.appspot.com"){
@@ -21,7 +21,7 @@ if(window.location.host=="shifumixweb.appspot.com"){
     DOMAIN="https://"+window.location.host;
     FACEBOOK_ID="901681453271015";
     GOOGLE_API_KEY="AIzaSyD9ulABAnLWARLXAIajXW5c-3Rj5Wqp-Ss";
-    DEEZER_KEY="190062";
+    DEEZER_KEY="190762";
 }
 
 const DELAY_TUTO=10; //10 minutes
@@ -92,6 +92,11 @@ function init(){
 function adduser(infos,func){
     gapi.client.ficarbar.adduser({infos:JSON.stringify(infos)}).then(func);
 }
+
+function delevent(event,user,func){
+    gapi.client.ficarbar.delevent({event:event,user:user}).then(func);
+}
+
 
 function closeevent(event,email,func){
     gapi.client.ficarbar.closeevent({event:event,email:email}).then(func);
@@ -166,11 +171,8 @@ function sendinvitations(event,dests,from,shorturl,func){
         shorturl:shorturl}).then(func);
 }
 
-
-
-
-function mailtosend(func){
-    gapi.client.ficarbar.mailtosend({password:'hh4271'}).then(func);
+function mailtosend(readonly,func){
+    gapi.client.ficarbar.mailtosend({readonly:readonly,password:'hh4271'}).then(func);
 }
 
 function slideshow(delay,event,func){
@@ -558,7 +560,7 @@ showModal=function($ionicModal,$scope,src,func){
         $scope.modal.remove();
     });
 
-    $scope.$on('modal.hide', func);
+    $scope.$on('modal.hidden', func);
     $scope.$on('modal.removed', func);
 };
 
@@ -624,7 +626,7 @@ toast=function($ionicLoading,msg){
 }
 
 tuto=function(user,histo,$ionicModal,$scope,img,func){
-    if(user!=undefined)return;
+    if(user==undefined)return;
 
     if(user.history.indexOf(histo)==-1){
         user.history+=";"+histo;

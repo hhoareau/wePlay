@@ -45,6 +45,9 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
 
         var center=$scope.map.getCenter();
 
+        markers.forEach(function(marker){marker.setMap(null);});
+        markers=[];
+
         $$("recherche des evenements autour de "+JSON.stringify(center));
         geteventsaround({lat:center.lat(),lng:center.lng()},function(resp){
             if(resp.hasOwnProperty("length")){
@@ -96,11 +99,8 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
             if(rep.result.currentEvent!=undefined && rep.result.currentEvent.length>0) {
                 window.localStorage.setItem("lastorder",0);
 
-                markers.forEach(function(marker){marker.setMap(null);});
-                markers=[];
-
                 $ionicHistory.clearCache().then(function(){
-                    if(evt.owner.id==user.id)
+                    if(evt.owner.id==user.id && user.connexions.length>1)
                         $state.go("tabs.profil",{},{reload:true});
                     else
                         $state.go("tabs.home",{},{reload:true});
@@ -115,44 +115,39 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
     };
 
     $scope.centerOnLoc=function(){
-        $scope.getPos(function(){
-            var pos={lat:user.lat,lng:user.lng};
-            $$("recentrage de la carte sur la geoloc "+JSON.stringify(pos));
-            if($scope.map!=undefined)$scope.map.setCenter(pos);
-        });
+        var pos={lat:user.lat,lng:user.lng};
+        $$("recentrage de la carte sur la geoloc "+JSON.stringify(pos));
+        if($scope.map!=undefined)$scope.map.setCenter(pos);
     };
 
-    $scope.getPos=function(func_success,func_abort){
+    localize=function(func_success,func_abort){
         $$("Déclenchement de la Localisation");
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(function (position) {
-                $$("position identifiée "+JSON.stringify(position));
-                var d=distance(user.lat,user.lng,position.coords.latitude,position.coords.longitude);
-                if(d>50){
-                    $$("mise a jour de la position");
-                    user.lat=position.coords.latitude;
-                    user.lng=position.coords.longitude;
-                    user.dtLastPosition=position.timestamp;
-                    user.precision=position.coords.accuracy;
+                user.lat=position.coords.latitude;
+                user.lng=position.coords.longitude;
+                user.dtLastPosition=position.timestamp;
+                user.precision=position.coords.accuracy;
 
-                    if(myposition==null)
-                        myposition=new google.maps.Marker({
-                            position: {lat:user.lat,lng:user.lng},
-                            title : user.firstname,
-                            caption:user.firstname,
-                            animation: google.maps.Animation.DROP,
-                            zIndex: -1,
-                            icon: "/img/me.png",
-                            map: $scope.map
-                        });
-                    else
-                        myposition.setPosition({lat:user.lat,lng:user.lng});
+                $$("position identifiée "+JSON.stringify(position.coords));
 
-                    window.localStorage.setItem("user",JSON.stringify(user));
-                    senduser(user,null,function(rep){
-                        console.log(rep);
+                if(myposition==null)
+                    myposition=new google.maps.Marker({
+                        position: {lat:user.lat,lng:user.lng},
+                        title : user.firstname,
+                        caption:user.firstname,
+                        animation: google.maps.Animation.DROP,
+                        zIndex: -1,
+                        icon: "/img/me.png",
+                        map: $scope.map
                     });
-                }
+                else
+                    myposition.setPosition({lat:user.lat,lng:user.lng});
+
+                $$("Enregistrement de la position");
+                window.localStorage.setItem("user",JSON.stringify(user));
+                senduser(user,null,function(rep){$$(rep);});
+
                 if(func_success!=undefined)func_success();
 
             },function(){
@@ -188,74 +183,54 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
             clickableIcons:false
         });
 
-        /*
-        if(user.pos!=undefined){
-            $scope.message=$translate.instant('SELEVENT.USELASTPOSITION');
-            $scope.map.setCenter({lat:user.pos.latitude,lng:user.pos.longitude});
-        }
-        */
-
-        $scope.map.addListener("center_changed",function(event){
+        $scope.map.addListener("idle",function(event){
             var pos=$scope.map.getCenter();
             if(lastPos==undefined){
                 showEventsOnMap();
                 lastPos=pos;
                 return;
             }
+
             var d=distance(pos.lat(),pos.lng(),lastPos.lat(),lastPos.lng());
-            if(d>1)
+            if(d>0.2)
                 showEventsOnMap();
 
             lastPos=pos;
-
         });
-
-        $timeout(function(){
-            $$("déclenchement de la loc");
-            user.lat=0;
-            user.lng=0;
-            $scope.getPos(function(){
-                $timeout(function(){
-                    $scope.centerOnLoc();
-                },500);
-            },function(){
-                $timeout(function(){
-                    $window.close();
-                },1000);
-            });
-        },1000);
 
     });
 
     $scope.events=[];
-    $scope.myevents=[];
     $scope.preview={};
     $scope.user=user;
     $scope.facebook_events=[];
-    $scope.shouldShowDelete=true;
+    $scope.shouldShowDelete =true;
 
-    JSON.parse(localStorage.getItem("facebook_events")).forEach(function(e){
-        if(new Date(e.end_time).getTime()>new Date().getTime() ||
-            new Date(e.start_time).getTime()>new Date().getTime())
-            $scope.facebook_events.push(e);
-    });
+    $scope.deleteEvent=function(index){
+        delevent($scope.myevents[index].id,user.id,function(resp){
+            $scope.myevents=resp.result.items;
+            $scope.$apply();
+            showEventsOnMap();
+        });
+    };
+
+    initGlobal($translate);
+
 
     $scope.$on("$ionicView.loaded",function(){
+        $$("ionicView.loaded");
+
         window.localStorage.setItem("event",null);
+
+        JSON.parse(localStorage.getItem("facebook_events")).forEach(function(e){
+            if(new Date(e.end_time).getTime()>new Date().getTime() ||
+                new Date(e.start_time).getTime()>new Date().getTime())
+                $scope.facebook_events.push(e);
+        });
 
         geteventsfrom(user.id, function (evts) {
             $scope.myevents=evts;
         });
-
-        /*
-        if(user.currentEvent!=null && user.currentEvent.length>0){
-            $$("reconnexion avec l'evenement courant");
-            getevent(user.currentEvent,null,function(resp){
-                if(resp.status===200 && resp.result.dtEnd<new Date())
-                    $scope.joinEvent(resp.result,false);
-            });
-        }
-        */
 
         var inviteEvent=window.localStorage.getItem("inviteEvent");
         var _for=window.localStorage.getItem("for");
@@ -269,10 +244,19 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
             });
         }
 
+        $timeout(function(){
+            $$("déclenchement de la loc");
+            user.lat=0;
+            user.lng=0;
+            localize(
+                function(){$scope.centerOnLoc();},
+                function(){$window.close();}
+            );
+        },1000);
+
         tuto(user,"selevent",$ionicModal,$scope,"help_selevent.svg");
     });
 
 
-    initGlobal($translate);
 
 });

@@ -5,7 +5,7 @@
 App.controller('InviteCtlr', function ($scope,clipboard,$translate){
     initGlobal($translate);
 
-    $scope.email={};
+    $scope.email={dest:"",personal:true,from:user.email};
 
     var url=DOMAIN+"/index.html?from="+user.id+"&event="+myevent.id;
 
@@ -16,7 +16,6 @@ App.controller('InviteCtlr', function ($scope,clipboard,$translate){
             clipboard.copyText($scope.url);
     };
 
-
     shorturl(url,function(url){
         var qrcodjs=new QRCode("qrcode", {
             text: url.result.id,
@@ -25,27 +24,26 @@ App.controller('InviteCtlr', function ($scope,clipboard,$translate){
             correctLevel : QRCode.CorrectLevel.H
         });
         $scope.url=url.result.id;
-
-
-        $scope.$apply();
+        //$scope.$apply();
     });
 
-    $scope.dests="";
-
     $scope.sendInvitations=function(){
-
         var inviteUrl=url;
-        if($scope.email.personal)inviteUrl+="&for="+$scope.email.dests;
+        if($scope.email.personal)inviteUrl+="&for="+$scope.dest;
+        if($scope.email.dest==$scope.email.from){
+            $scope.message="you can't invite yourself";
+            return;
+        }
+
         shorturl(inviteUrl,function(url){
-            sendinvitations(myevent.id,$scope.email.dests,user.email,url.result.id,function(resp){
-                if(resp.status==200)
-                    $scope.message=$scope.email.dests+" invited";
-                else
+            sendinvitations(myevent.id,$scope.email.dest,$scope.email.from,url.result.id,function(resp) {
+                if (resp.status == 200) {
+                    $scope.message = $scope.email.dest + " invited";
+                    $scope.email.dest = "";
+                }else
                     $scope.message="probleme to invite";
             });
         });
-        $scope.email.dests="";
-    }
 
-
+    };
 });

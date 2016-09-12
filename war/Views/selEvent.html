@@ -57,23 +57,22 @@
                 </div>
             </div>
 
-        <div class="card">
+        <div class="card" ng-show="myevents.length>0">
+
             <div class="item item-divider">
                 {{'SELEVENT.MYEVENTS' | translate}}
             </div>
+
+
             <ion-list show-delete="shouldShowDelete">
-                <ion-item ng-repeat="evt in myevents" class="item-thumbnail-left">>
-                    {{evt.title}}
-
-                    <ion-delete-button
-                            class="ion-minus-circled"
-                            ng-click="delEvent(evt)">
+                <ion-item ng-repeat="evt in myevents">
+                    {{evt.title}}&nbsp;le&nbsp;{{evt.dtStart | date : "dd/M/yy"}}
+                    <ion-delete-button class="black ion-trash-b" ng-click="deleteEvent($index)">
                     </ion-delete-button>
-
                 </ion-item>
-            </ion-list>>
-        </div>
+            </ion-list>
 
+        </div>
 
     </ion-content>
 </ion-view>

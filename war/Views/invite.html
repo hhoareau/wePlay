@@ -15,8 +15,15 @@
         <div class="card">
             <div class="item item-divider">Flyers</div>
             <div class="item text-left item-input item-button-right">
-                    <input focus-me type="email" ng-model="email.dests" name="email" placeholder="{{'INVITE.DEST' | translate}}" my-enter="sendInvitations()">
-                    <button class="button icon-left ion-android-send button-positive" ng-click="sendInvitations()">
+                    <input focus-me
+                           type="email"
+                           name="email"
+                           ng-model="email.dest"
+                           placeholder="{{'INVITE.DEST' | translate}}"
+                           my-enter="sendInvitations()"/>
+
+                    <button class="button icon-left ion-android-send button-positive"
+                            ng-click="sendInvitations()">
                                 {{'INVITE.SEND' | translate}}
                     </button>
             </div>

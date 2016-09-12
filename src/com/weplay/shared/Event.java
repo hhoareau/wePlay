@@ -169,7 +169,8 @@ public class Event implements Serializable {
     public void sendInvite(String dests,String from,String shorturl){
         for(String dest:dests.split(";")){
             if(shorturl==null)shorturl=Tools.DOMAIN+"/index.html?event="+this.getId()+"&from="+from;
-            DAO.sendMail(dest, Tools.ADMIN_EMAIL, "Invitation for " + this.title, "Dear, Open " + shorturl + " to join the event");
+            if(dest.length()>0)
+                DAO.sendMail(dest, Tools.ADMIN_EMAIL, "Invitation for " + this.title, "Dear, Open this " + shorturl + " to join the event.");
         }
     }
 
@@ -177,11 +178,12 @@ public class Event implements Serializable {
         DAO.sendMail(this.owner.getEmail(),
                 Tools.ADMIN_EMAIL,
                 this.title + " photos",
-                "Find all the photo with " + Tools.DOMAIN + "/Views/AllPhotos.html?event=" + this.getId());
+                "The event is now closed. As master of ceremony, you can find all photos with this link " + Tools.DOMAIN + "/Views/AllPhotos.html?event=" + this.getId());
     }
 
-    public void sendCloseMail(User u){
-            String body="If you wan't to follow "+this.owner+ "for the next party, open this link :";
+    public void sendCloseMail(User u,DAO dao){
+            String body="If you wan't to follow "+this.owner.getFirstname()+ "for the next party, open this link.";
+            body+=this.getHTML(dao);
             DAO.sendMail(u.getEmail(),Tools.ADMIN_EMAIL,"End of the party",body);
     }
 	
@@ -230,7 +232,6 @@ public class Event implements Serializable {
 		if(this.Presents.contains(u.id)){
 			this.Presents.remove(u.id);
 			u.currentEvent=null;
-            this.sendCloseMail(u);
 			return true;
 		}
 		
@@ -551,7 +552,28 @@ public class Event implements Serializable {
         return this.getPresents();
     }
 
+    public long getDtOrder(String order) {
+        for(String s:this.orders){
+            if(s.indexOf(order)>0)
+                return Long.parseLong(s.split("dtOrder\":")[1].split(",")[0]);
+        }
+        return 0;
+    }
 
+    public String getHTML(DAO dao){
+        String code=this.title+"<br><br><img src='"+this.flyer+"'><br><br>";
+        for(String idSong:this.playlist){
+            Song s=dao.getSong(idSong);
+            code+=s.getHTML();
+        }
+
+        for(String idUser:this.getPresents()){
+            User u=dao.findUser(idUser);
+            code+=u.getHTML();
+        }
+
+        return code;
+    }
 }
 
 

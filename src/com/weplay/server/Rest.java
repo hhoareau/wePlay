@@ -41,7 +41,7 @@ public class Rest {
     @ApiMethod(name = "geteventsfrom", httpMethod = ApiMethod.HttpMethod.GET, path = "geteventsfrom")
     public List<Event> geteventsfrom(@Named("user") String user) {
         User u=dao.findUser(user);
-        return dao.findActifEventsFrom(u);
+        return dao.getFuturEventsFrom(u);
     }
 
 
@@ -50,8 +50,10 @@ public class Rest {
         //for(User u:dao.getAllUser())
         for(Event e:dao.getAllEvents()){
             for(User u:dao.getUsers(e.getPresents()))
-                if((System.currentTimeMillis()-u.getDtLastConnexion())>(DELAY_DECONNEXION*1000L*60L))
+                if((System.currentTimeMillis()-u.getDtLastConnexion())>(DELAY_DECONNEXION*1000L*60L)){
+                    e.sendCloseMail(u,dao);
                     e.delPresents(u);
+                }
 
             if(e.getPresents().size()==0)
                 e.close();
@@ -116,7 +118,11 @@ public class Rest {
                     u.setLat(lat);
                     dao.save(u);
                 }
+
         }
+
+        Long delay=System.currentTimeMillis()-e.getDtOrder("playlist");
+        if(delay>60*1000*5) e.musicPlayer=null;
 
         return e;
     }
@@ -134,8 +140,10 @@ public class Rest {
         if (u == null) {
             u = new User(infos);
             u.addHistory("create");
-            dao.save(u);
         }
+
+        u.getConnexions().add(System.currentTimeMillis());
+        dao.save(u);
         return u;
     }
 
@@ -324,6 +332,17 @@ public class Rest {
         }
     }
 
+    @ApiMethod(name = "delevent", httpMethod = ApiMethod.HttpMethod.GET, path = "delevent")
+    public List<Event> delevent(@Named("user") String user,@Named("event") String event) {
+        User u=dao.findUser(user);
+        Event e=dao.findEvent(event);
+        if(e!=null && e.dtStart>System.currentTimeMillis() && e.getOwner().id.equals(u.id))
+            dao.delete(e);
+
+        return dao.getFuturEventsFrom(u);
+    }
+
+
     @ApiMethod(name = "setorder", httpMethod = ApiMethod.HttpMethod.GET, path = "setorder")
     public void setorder(@Named("event") String event,@Named("order") String order) {
         Event e=dao.findEvent(event);
@@ -347,6 +366,7 @@ public class Rest {
             User u=dao.findUser(s.from.id);
             if(u!=null){
                 u.score+=e.scorePlaySong;
+                e.addOrder("users");
                 dao.save(u);
             }
 
@@ -478,6 +498,7 @@ public class Rest {
 
         if(u!=null && e!=null) {
             if(e.delPresents(u)){
+                e.sendCloseMail(u,dao);
                 e.addOrder("users");
                 dao.save(e);
                 dao.save(u);
@@ -595,7 +616,7 @@ public class Rest {
     }
 
     @ApiMethod(name = "getclassement", httpMethod = ApiMethod.HttpMethod.GET, path = "getclassement")
-      public List<User> getclassement(@Named("event") String id) {
+    public List<User> getclassement(@Named("event") String id) {
         Event e = dao.findEvent(id);
         if (e == null) return null;
 
@@ -604,7 +625,6 @@ public class Rest {
             u.setScoreEvent(u.score-e.getScores().get(u.id));
             lu.add(u);
         }
-
 
         Collections.sort(lu);
         return (lu);
@@ -616,17 +636,19 @@ public class Rest {
 
         //Email de cloture de soirée pour l'ensemble des participants
         for(User u:dao.getUsers(e.close()))
-            if(e.delPresents(u))
+            if(e.delPresents(u)){
+                e.sendCloseMail(u,dao);
                 dao.save(u);
+            }
 
         dao.save(e);
         return e;
     }
 
     @ApiMethod(name = "mailtosend", httpMethod = ApiMethod.HttpMethod.GET, path = "mailtosend")
-    public List<Mail> mailtosend(@Named("password") String password) {
+    public List<Mail> mailtosend(@Named("password") String password,@Named("readonly") Boolean readOnly) {
         if(!password.equalsIgnoreCase(PASSWORD_MAIL))return null;
-        return dao.getMailToSend();
+        return dao.getMailToSend(readOnly);
     }
 
 }
