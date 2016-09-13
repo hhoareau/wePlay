@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="com.google.appengine:appengine-local-endpoints:1.8.5" type="repository">
+    <properties maven-id="com.google.appengine:appengine-local-endpoints:1.8.5" />
+    <CLASSES>
+      <root url="jar://$MAVEN_REPOSITORY$/com/google/appengine/appengine-local-endpoints/1.8.5/appengine-local-endpoints-1.8.5.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/google/appengine/appengine-tools-sdk/1.8.5/appengine-tools-sdk-1.8.5.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/google/appengine/appengine-endpoints/1.8.5/appengine-endpoints-1.8.5.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/com/google/appengine/appengine-api-1.0-sdk/1.8.5/appengine-api-1.0-sdk-1.8.5.jar!/" />
+      <root url="jar://$MAVEN_REPOSITORY$/javax/servlet/servlet-api/2.5/servlet-api-2.5.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>

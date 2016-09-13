@@ -71,7 +71,7 @@ public class Event implements Serializable {
 
 	private List<String> playlist=new ArrayList<String>();
 	public List<String> Invites=new ArrayList<String>();				
-	public List<String> Presents=new ArrayList<String>();
+	public List<User> Presents=new ArrayList<User>();
 
     public Double sponsor=0.0; //Versement réaliser pour faire remonter l'appli à la une
 
@@ -109,7 +109,7 @@ public class Event implements Serializable {
 	 * @param duration 
 	 * @param owner
 	 */
-	public Event(String title,String password,Lieu place,Long dtStart,int duration,User owner,String typeDemandes,Double lat,Double lng){
+	public Event(String title,String password,Long dtStart,int duration,User owner,String typeDemandes,Double lat,Double lng){
 		this.dtStart=dtStart;
 		this.dtEnd=this.dtStart+duration*3600*1000;
 		this.title=title;
@@ -200,12 +200,17 @@ public class Event implements Serializable {
     //Add a new user
 	public boolean addPresents(User u) {
         if(distanceFrom(u)>this.minDistance) {
-            u.message = "you are not close to the event";
+            u.message = "SELEVENT.TOFAR";
             return false;
         }
-            
-        this.Presents.add(u.id);
-        scores.put(u.id,u.score);
+
+        if(this.getPresents().contains(u)){
+            u.message="SELEVENT.ALREADYPRESENT";
+            return false;
+        }
+
+        this.Presents.add(u);
+        scores.put(u.id,u.score);  //Enregistre le score de l'utilisateur à son entré dans la soirée
 
         addOrder("adduser");
         u.currentEvent=this.Id;
@@ -229,8 +234,8 @@ public class Event implements Serializable {
     }
 
     public boolean delPresents(User u) {
-		if(this.Presents.contains(u.id)){
-			this.Presents.remove(u.id);
+		if(this.Presents.contains(u)){
+			this.Presents.remove(u);
 			u.currentEvent=null;
 			return true;
 		}
@@ -359,11 +364,11 @@ public class Event implements Serializable {
         Invites = invites;
     }
 
-    public List<String> getPresents() {
+    public List<User> getPresents() {
         return Presents;
     }
 
-    public void setPresents(List<String> presents) {
+    public void setPresents(List<User> presents) {
         Presents = presents;
     }
 
@@ -546,10 +551,10 @@ public class Event implements Serializable {
         this.lastUpdate = lastUpdate;
     }
 
-    public List<String> close() {
+    public void close() {
         this.dtEnd=System.currentTimeMillis();
         this.addOrder("close");
-        return this.getPresents();
+        this.setPresents(new ArrayList<User>());
     }
 
     public long getDtOrder(String order) {
@@ -562,16 +567,8 @@ public class Event implements Serializable {
 
     public String getHTML(DAO dao){
         String code=this.title+"<br><br><img src='"+this.flyer+"'><br><br>";
-        for(String idSong:this.playlist){
-            Song s=dao.getSong(idSong);
-            code+=s.getHTML();
-        }
-
-        for(String idUser:this.getPresents()){
-            User u=dao.findUser(idUser);
-            code+=u.getHTML();
-        }
-
+        for(Song s:dao.getPlayedSongs(this))code+=s.getHTML();
+        for(User u:this.getPresents()) code+="<br>"+u.getHTML();
         return code;
     }
 }

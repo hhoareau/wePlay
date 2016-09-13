@@ -1,10 +1,9 @@
-App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$interval,$timeout,$ionicPopup,$ionicHistory,$translate,$window){
+var markers;
+var lastPos;
+var myposition;
 
-    var mapRefresh=false;
-    var markers=[];
-    var timer;
-    var lastPos;
-    var myposition=null;
+
+App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$interval,$timeout,$ionicPopup,$ionicHistory,$translate,$window){
 
     //see: https://blog.brunoscopelliti.com/facebook-authentication-in-your-angularjs-web-app/
     /*
@@ -92,7 +91,6 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
 
     $scope.setEvent=function(evt,password){
         window.localStorage.setItem("event",JSON.stringify(evt));
-
         join(evt.id,user.id,password,window.localStorage.getItem("from"),function(rep){
             user=rep.result;
             window.localStorage.setItem("user", JSON.stringify(user));
@@ -117,7 +115,8 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
     $scope.centerOnLoc=function(){
         var pos={lat:user.lat,lng:user.lng};
         $$("recentrage de la carte sur la geoloc "+JSON.stringify(pos));
-        if($scope.map!=undefined)$scope.map.setCenter(pos);
+        $scope.map.setCenter(pos);
+        showEventsOnMap();
     };
 
     localize=function(func_success,func_abort){
@@ -164,15 +163,15 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
 
             },{
                 enableHighAccuracy: true,
-                timeout: 50000,
-                maximumAge: 20000
             });
+
         }
     }
 
     $scope.$on('mapInitialized', function(event, map) {
         $$("initialisation de la carte");
         zoom = 15;
+        event.stopPropagation();
 
         $scope.map = map;
 
@@ -183,28 +182,25 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
             clickableIcons:false
         });
 
-        $scope.map.addListener("idle",function(event){
+        $scope.map.addListener("mouseup",function(event){
+            $$("map change");
             var pos=$scope.map.getCenter();
-            if(lastPos==undefined){
-                showEventsOnMap();
-                lastPos=pos;
-                return;
-            }
-
-            var d=distance(pos.lat(),pos.lng(),lastPos.lat(),lastPos.lng());
-            if(d>0.2)
-                showEventsOnMap();
-
-            lastPos=pos;
+            showEventsOnMap();
         });
+
+        $$("déclenchement de la loc");
+        user.lat=0;
+        user.lng=0;
+        localize(
+            function(){
+                checkInvitation();
+                $scope.centerOnLoc();
+            },
+            function(){$window.close();}
+        );
 
     });
 
-    $scope.events=[];
-    $scope.preview={};
-    $scope.user=user;
-    $scope.facebook_events=[];
-    $scope.shouldShowDelete =true;
 
     $scope.deleteEvent=function(index){
         delevent($scope.myevents[index].id,user.id,function(resp){
@@ -214,11 +210,45 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
         });
     };
 
-    initGlobal($translate);
+    checkInvitation=function(){
+        var inviteEvent=window.localStorage.getItem("inviteEvent");
+        var _for=window.localStorage.getItem("for");
+        if(inviteEvent!=undefined && inviteEvent.indexOf("event")==0 &&
+            (_for==user.email || _for=="undefined")){
+            $$("Réception d'une invitation");
+            getevent(inviteEvent,null,function(resp){
+                if(resp.status==200){
+                    window.localStorage.setItem("inviteEvent",null);
+                    window.localStorage.setItem("for",null);
+                    $scope.joinEvent(resp.result);
+                }else{
+                    $scope.message="Event don't existe";
+                }
+            });
+        }
+    }
 
 
-    $scope.$on("$ionicView.loaded",function(){
-        $$("ionicView.loaded");
+    $scope.$on("$ionicView.beforeLeave",function(event){
+        $$("Sortie de la form, raz des markers");
+        maposition.setMap(null);
+        markers.forEach(function(marker){marker.setMap(null);});
+    });
+
+
+    $scope.$on("$ionicView.loaded",function(event){
+        $$("ionicView.loaded.",event);
+        event.stopPropagation();
+
+        initGlobal($translate);
+
+        markers=[];
+        myposition=null;
+
+        $scope.events=[];
+        $scope.preview={};
+        $scope.user=user;
+        $scope.facebook_events=[];
 
         window.localStorage.setItem("event",null);
 
@@ -232,29 +262,8 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
             $scope.myevents=evts;
         });
 
-        var inviteEvent=window.localStorage.getItem("inviteEvent");
-        var _for=window.localStorage.getItem("for");
-
-        if(inviteEvent!=undefined && inviteEvent.indexOf("event")==0 &&
-            (_for==user.email || _for=="undefined")){
-            $$("transfert à l'invitation");
-            getevent(inviteEvent,null,function(resp){
-                $scope.joinEvent(resp.result);
-                window.localStorage.setItem("inviteEvent",undefined);
-            });
-        }
-
-        $timeout(function(){
-            $$("déclenchement de la loc");
-            user.lat=0;
-            user.lng=0;
-            localize(
-                function(){$scope.centerOnLoc();},
-                function(){$window.close();}
-            );
-        },1000);
-
         tuto(user,"selevent",$ionicModal,$scope,"help_selevent.svg");
+
     });
 
 

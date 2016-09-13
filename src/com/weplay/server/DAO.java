@@ -44,7 +44,7 @@ public class DAO  {
 			ObjectifyService.register(User.class);
 			ObjectifyService.register(Message.class);	
 			ObjectifyService.register(Event.class);
-			ObjectifyService.register(Lieu.class);
+
             ObjectifyService.register(Photo.class);
             ObjectifyService.register(LocalFile.class);
             ObjectifyService.register(Blob.class);
@@ -84,7 +84,7 @@ public class DAO  {
         ofy().delete().keys(ofy().load().type(Song.class).keys().list());
         ofy().delete().keys(ofy().load().type(User.class).keys().list());
         ofy().delete().keys(ofy().load().type(Vote.class).keys().list());
-        ofy().delete().keys(ofy().load().type(Lieu.class).keys().list());
+
         ofy().delete().keys(ofy().load().type(Event.class).keys().list());
         ofy().delete().keys(ofy().load().type(LocalFile.class).keys().list());
         ofy().delete().keys(ofy().load().type(Blob.class).keys().list());
@@ -176,7 +176,7 @@ public class DAO  {
 	
 
 	public Collection<User> getPresents(Event e){
-        List<String> presents=e.getPresents();
+        List<User> presents=e.getPresents();
         Collection<User> rc=ofy().load().type(User.class).ids(presents).values();
 		return rc;
 	}
@@ -190,8 +190,13 @@ public class DAO  {
         return ofy().load().type(Song.class).filter("idEvent", e.Id).filter("dtPlay",null).list();
 	}
 
+    public List<Song> getPlayedSongs(Event e){
+        return ofy().load().type(Song.class).filter("idEvent", e.Id).filter("dtPlay >",0).list();
+    }
 
-	public User findUser(String from) {
+
+
+    public User findUser(String from) {
 		if(from==null)return null;
 		try{
 			return ofy().load().type(User.class).id(from).now();
@@ -224,21 +229,7 @@ public class DAO  {
 		}
 	}
 
-	/**
-	 * Recherche d'un evenement par proximit�
-	 * @return
-	 */
-	public Lieu findLieu(double gps_long, double gps_lat) {
-		Lieu rc=null;
-		Double d=(double) 1000000;
-		for(Lieu e:ofy().load().type(Lieu.class).list()){
-			if(distance(e.lng,e.lat,gps_long,gps_lat)<d){
-				d=distance(e.lng,e.lat,gps_long,gps_lat);
-				rc = e;
-			}
-		}
-		return rc;
-	}
+
 
 	private Double distance(Double lg1, Double lat1, double lg2,double lat2) {
 		return Math.acos(Math.sin(lg1)*Math.sin(lg2)+Math.cos(lat1)*Math.cos(lat2))*6371;
@@ -289,30 +280,7 @@ public class DAO  {
 
 
 	
-	/**
-	 * 
-	 * @param name
-	 * @return
-	 */
-	public List<Lieu> findLieuByName(String name) {
-		if(name==null)return null;
-		return ofy().load().type(Lieu.class).filter("name",name).list();
-	}
 
-	public void save(Lieu l){
-		ofy().save().entities(l);
-	}
-
-
-    public void save(LocalFile l){
-        ofy().save().entity(l);
-    }
-
-	public Lieu findLieu(String number, String street, String cp) {
-		for(Lieu l:ofy().load().type(Lieu.class).filter("CP", cp).list())
-			if(l.number.equals(number) && l.street.equals(street))return l;
-		return null;
-	}
 
 	public void delete(User u) {
 		ofy().delete().entity(u);
@@ -463,4 +431,5 @@ public class DAO  {
     public void delete(Event e) {
         ofy().delete().entity(e).now();
     }
+
 }

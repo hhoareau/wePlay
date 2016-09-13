@@ -3,7 +3,7 @@
   <component name="FacetManager">
     <facet type="google-app-engine" name="Google App Engine">
       <configuration>
-        <sdk-home-path>C:/TEMP/appengine-java-sdk-1.9.38</sdk-home-path>
+        <sdk-home-path>C:/TEMP/appengine-java-sdk-1.9.42/appengine-java-sdk-1.9.42</sdk-home-path>
         <run-enhancer-on-make>true</run-enhancer-on-make>
         <files-to-enhance>
           <file path="$MODULE_DIR$/src" />
@@ -37,9 +37,11 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="com.googlecode.objectify:objectify:5.1.13" level="project" />
-    <orderEntry type="library" name="com.google.appengine:appengine-local-endpoints:1.9.38" level="project" />
-    <orderEntry type="library" name="com.google.appengine:appengine-api-1.0-sdk:1.9.38" level="project" />
-    <orderEntry type="library" name="com.google.appengine:appengine-api-labs:1.9.38" level="project" />
-    <orderEntry type="library" name="com.google.api-ads:ads-lib-appengine:1.38.0" level="project" />
+    <orderEntry type="library" name="com.google.appengine:appengine-endpoints:1.9.42" level="project" />
+    <orderEntry type="library" name="com.google.guava:guava:19.0" level="application" />
+    <orderEntry type="library" name="com.googlecode.objectify:objectify:5.1.131" level="application" />
+    <orderEntry type="library" name="com.google.appengine:appengine-local-endpoints:1.9.42" level="project" />
+    <orderEntry type="library" name="com.google.appengine:appengine-api-labs:1.9.42" level="application" />
+    <orderEntry type="library" name="com.google.appengine:appengine-api-1.0-sdk:1.9.42" level="project" />
   </component>
 </module>

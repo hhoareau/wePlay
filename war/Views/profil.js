@@ -44,16 +44,12 @@ App.controller('ProfilCtrl', function ($scope,$state,$translate,$ionicPopup,$win
     }
 
     $scope.quitEvent = function () {
-        leave(user.id,myevent.id,$interval,function(){
-            $state.go("selEvent", {}, {reload: true});
-        });
+        leave(user.id,myevent.id,$interval);
     }
 
     $scope.closeEvent = function () {
         showConfirm($ionicPopup, "Close the event ?", function () {
-            closeevent(myevent.id, user.email, function () {
-                $state.go("selEvent", null, {reload: true});
-            });
+            closeevent(myevent.id, user.email);
         });
     }
 
@@ -65,10 +61,6 @@ App.controller('ProfilCtrl', function ($scope,$state,$translate,$ionicPopup,$win
     }
     
     $scope.$on("$ionicView.afterEnter", function () {
-        tuto(user,"profil",$ionicModal,$scope,"help_profil.svg",function(){
-            showConfirm($ionicPopup, "Are you connected to an audio device ?", function () {
-                $window.open("Views/MusicPlayer.html?event=" + myevent.id);
-            });
-        });
+        tuto(user,"profil",$ionicModal,$scope,"help_profil.svg");
     });
 });

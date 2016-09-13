@@ -220,7 +220,14 @@ function $(id){
     return document.getElementById(id);
 }
 
-function $$(s){
+function $$(s,obj){
+    if(obj!=undefined){
+        try{
+            s=s+JSON.stringify(obj);
+        }catch(e){
+
+        }
+    }
     console.log(s);
 }
 

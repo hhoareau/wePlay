@@ -2,6 +2,7 @@
 //const DOMAIN="https://weplaywebsite.appspot.com";FACEBOOK_ID="604761063026010";GOOGLE_API_KEY="AIzaSyCl46r3eXdyJlj6siZoCoF2WMifESqZo_0";
 //const DOMAIN="https://shifumixwww.appspot.com";FACEBOOK_ID="901681453271015";GOOGLE_API_KEY="AIzaSyD9ulABAnLWARLXAIajXW5c-3Rj5Wqp-Ss";
 
+var ADMIN_PASSWORD="hh4271";
 
 if(window.location.host=="localhost:8080"){
     DOMAIN="http://"+window.location.host;
@@ -99,6 +100,7 @@ function delevent(event,user,func){
 
 
 function closeevent(event,email,func){
+    $$("Fermeture de l'event à la demande de "+email);
     gapi.client.ficarbar.closeevent({event:event,email:email}).then(func);
 }
 
@@ -192,8 +194,8 @@ function sendevent(event,func){
     }).then(func);
 }
 
-function quit(email,event,func){
-    gapi.client.ficarbar.quit({user:email,event:event}).then(func);
+function quit(iduser,event,func){
+    gapi.client.ficarbar.quit({user:iduser,event:event}).then(func);
 }
 
 function updateevent(event,field,value,func){
@@ -216,6 +218,11 @@ function razlocalfile(event,func){
 
 function setscore(email,event,id,step,func){
     gapi.client.ficarbar.setscore({user:email,event:event,song:id,step:step}).then(func);
+}
+
+
+function sanity(func){
+    gapi.client.ficarbar.sanity({password:ADMIN_PASSWORD}).then(func);
 }
 
 function geteventsaround(pos,func){
@@ -483,6 +490,13 @@ function getInvite(idEvent,size){
 }
 
 
+function contain(user,l_user){
+    for(var i=0;i<l_user.length;i++)
+       if(l_user[i].id==user.id)return true;
+
+    return false;
+}
+
 function refresh_event(idevent,func,func_quit,func_error){
     getevent(idevent,user,function(resp) {
         if(resp.status!=200)
@@ -596,24 +610,11 @@ function resizeBase64Img(base64, maxsize,func) {
 
 
 function leave(id_user,id_event,$interval,func){
-    $$("Quitter l'event");
-
-    if($interval==null){
-        clearInterval(timerCharts);
-        clearInterval(timerHome);
-        clearInterval(timerPhotos);
-        clearInterval(timerEvent);
-    }else{
-        $interval.cancel(timerCharts);
-        $interval.cancel(timerHome);
-        $interval.cancel(timerPhotos);
-        $interval.cancel(timerEvent);
-    }
-
+    $$(user.email+" quitte l'event");
     quit(id_user, id_event, function (resp) {
         user = resp.result;
         window.localStorage.setItem("user", JSON.stringify(user));
-        $$("quit enregistré");
+        $$("départ enregistré");
         if(func!=undefined)func();
     });
 }
@@ -636,6 +637,6 @@ tuto=function(user,histo,$ionicModal,$scope,img,func){
         setTimeout(function(){
             img=img.split(".")[0]+"_"+user.lang+"."+img.split(".")[1];
             showModal($ionicModal,$scope,img,func);
-        },2000);
+        },1000);
     }
 }

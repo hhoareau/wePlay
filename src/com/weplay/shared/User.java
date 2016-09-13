@@ -393,5 +393,22 @@ public class User implements Comparable<User> {
         String code="<table><tr><td><img src='"+this.photo+"'></td><td>"+this.firstname+"</td></tr></table><br>";
         return code;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof User)) return false;
+
+        User user = (User) o;
+
+        if (!id.equals(user.id)) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
 }
 

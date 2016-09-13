@@ -4,9 +4,9 @@ import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.Named;
 import com.google.api.server.spi.config.Nullable;
-import com.google.appengine.labs.repackaged.com.google.common.io.BaseEncoding;
 import com.google.appengine.labs.repackaged.org.json.JSONException;
 import com.google.appengine.labs.repackaged.org.json.JSONObject;
+import com.google.appengine.repackaged.com.google.common.io.BaseEncoding;
 import com.google.appengine.repackaged.com.google.gson.Gson;
 import com.weplay.shared.*;
 
@@ -27,7 +27,7 @@ public class Rest {
     public static final Long TYPE_DEMANDE = 4L;
     private static final int MAX_QUOTA = 1000000;
     private static final String PASSWORD_MAIL = "hh4271";
-    private static final Long DELAY_DECONNEXION = 60L; //en minute
+    private static final Long DELAY_DECONNEXION = 3L; //en minute
 
 
     private static DAO dao = DAO.getInstance();
@@ -46,14 +46,19 @@ public class Rest {
 
 
     @ApiMethod(name = "sanity", httpMethod = ApiMethod.HttpMethod.GET, path = "sanity")
-    public void sanity(@Named("param") String param) {
+    public void sanity(@Named("password") String password) {
+        if(!password.equals(PASSWORD_MAIL))return;
         //for(User u:dao.getAllUser())
         for(Event e:dao.getAllEvents()){
-            for(User u:dao.getUsers(e.getPresents()))
-                if((System.currentTimeMillis()-u.getDtLastConnexion())>(DELAY_DECONNEXION*1000L*60L)){
+            for(String id:e.getLastUpdate().keySet()){
+                Long delay=System.currentTimeMillis()-e.getLastUpdate().get(id);
+                if(delay>(DELAY_DECONNEXION*1000L*60L)){
+                    User u=dao.findUser(id);
                     e.sendCloseMail(u,dao);
                     e.delPresents(u);
                 }
+            }
+
 
             if(e.getPresents().size()==0)
                 e.close();
@@ -621,7 +626,7 @@ public class Rest {
         if (e == null) return null;
 
         List<User> lu = new ArrayList<>();
-        for(User u:dao.getUsers(e.Presents)){
+        for(User u:e.Presents){
             u.setScoreEvent(u.score-e.getScores().get(u.id));
             lu.add(u);
         }
@@ -635,11 +640,14 @@ public class Rest {
         Event e=dao.findEvent(event);
 
         //Email de cloture de soirée pour l'ensemble des participants
-        for(User u:dao.getUsers(e.close()))
-            if(e.delPresents(u)){
-                e.sendCloseMail(u,dao);
-                dao.save(u);
-            }
+
+        for(User u:e.getPresents()){
+            e.sendCloseMail(u,dao);
+            u.currentEvent=null;
+            dao.save(u);
+        }
+
+        e.close();
 
         dao.save(e);
         return e;

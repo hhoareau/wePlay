@@ -1,6 +1,6 @@
 package com.weplay.shared;
 
-import com.google.appengine.labs.repackaged.com.google.common.io.BaseEncoding;
+import com.google.appengine.repackaged.com.google.common.io.BaseEncoding;
 import com.googlecode.objectify.annotation.Cache;
 import com.googlecode.objectify.annotation.Index;
 import com.googlecode.objectify.annotation.Subclass;
@@ -36,7 +36,7 @@ public class Song extends Message implements Serializable,Comparable<Song> {
         super();
         this.title=title;
         this.shortTitle=this.title.substring(0,Math.min(MAXLEN_SHORT_TITLE,this.title.length()));
-        this.Id=this.Id+BaseEncoding.base64().encode(title.getBytes()).replace("+","_");
+        this.Id=this.Id+ BaseEncoding.base64().encode(title.getBytes()).replace("+","_");
         this.text=htag;
         this.duration=duration;
     }

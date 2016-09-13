@@ -10,9 +10,9 @@
            <button class="button button-positive" ng-click="viewCharts()">Charts</button>
        </ion-nav-buttons>
 
-       <div class="item item-input-inset" focus-me>
+       <div class="item item-input">
            <label class="item-input-wrapper">
-               <input type="search" ng-model="query.value" placeholder="Search artist, song title"
+               <input focus-me type="search" ng-model="query.value" placeholder="Search artist, song title"
                       ng-change="clearSearch()" focus-me my-enter="search()">
            </label>
 

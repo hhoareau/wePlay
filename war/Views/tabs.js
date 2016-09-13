@@ -3,37 +3,70 @@ var timerEvent=null;
 
 App.controller("tabsCtrl", function($scope,$state,$interval,$ionicHistory) {
 
+    function quitEvent(){
+        $$("RAZ des timers")
+        if($interval==null){
+            clearInterval(timerCharts);
+            clearInterval(timerHome);
+            clearInterval(timerPhotos);
+            clearInterval(timerEvent);
+        }else{
+            $interval.cancel(timerCharts);
+            $interval.cancel(timerHome);
+            $interval.cancel(timerPhotos);
+            $interval.cancel(timerEvent);
+        }
 
-    $scope.$on("$ionicView.loaded",function(event) {
+        $state.go("selEvent", {}, {reload: true})
+
+    }
+
+
+    $scope.$on("$ionicView.loaded", function (event) {
+        $$("tabsCtrl loaded");
+        event.stopPropagation()
         $interval.cancel(timerEvent);
-        hEvent = $interval(function () {
+        timerEvent = $interval(function () {
+
+            $$("Analyse de l'event");
+
             if (myevent == null)
                 $interval.cancel(hEvent);
             else {
-                var currentView=$ionicHistory.currentView().stateName;
-                if(currentView!="tabs.charts" && timerCharts!=null){
+                var currentView = $ionicHistory.currentView().stateName;
+                if (currentView != "tabs.charts" && timerCharts != null) {
                     $interval.cancel(timerCharts);
-                    timerCharts=null;
+                    timerCharts = null;
                 }
-                if(currentView!="tabs.home" && timerHome!=null){
+                if (currentView != "tabs.home" && timerHome != null) {
                     $interval.cancel(timerHome);
-                    timerHome=null;
+                    timerHome = null;
                 }
-                if(currentView!="tabs.photos" && timerPhotos!=null){
+                if (currentView != "tabs.photos" && timerPhotos != null) {
                     $interval.cancel(timerPhotos);
-                    timerPhotos=null;
-                 }
+                    timerPhotos = null;
+                }
 
 
-                refresh_event(myevent.id,function () {},
+                refresh_event(myevent.id,
+                    function () {
+                        if (
+                            myevent.Presents == undefined ||
+                            !contain(user, myevent.Presents) ||
+                            myevent.dtEnd<new Date()
+                        ) quitEvent();
+
+                    },
                     function () {
                         $$("RefreshEvent: l'event n'existe plus");
-                        leave(user.id,myevent.id,$interval,function(){
-                            $state.go("selEvent", {}, {reload: true});
-                        });
+                        leave(user.id, myevent.id, $interval, quitEvent);
                     });
             }
-        },3000);
+        }, 3000);
+    });
+
+    $scope.$on("$ionicView.beforeUnload", function (event) {
+        $interval.cancel(timerEvent);
     });
 
 });

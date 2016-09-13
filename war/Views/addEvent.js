@@ -17,6 +17,7 @@ App.controller("addEventCtrl", function($scope,$ionicModal,$ionicPlatform,$state
 
     $scope.$on('mapInitialized', function(event, map) {
         $scope.map2 = map;
+        event.stopPropagation();
 
         $scope.map2.addListener("mousedown",function(evt){
             $scope.event.address="";
@@ -95,13 +96,10 @@ App.controller("addEventCtrl", function($scope,$ionicModal,$ionicPlatform,$state
 
         addevent(user.id,evt,parseInt($scope.nsongs),function(resp){
             if(resp.status==200){
-                if(evt.dtStart<new Date())
-                    window.localStorage.setItem("currentevent",resp.id);
-                $state.reload();
                 $state.go("selEvent",{},{reload: true});
             }
             else
-                console.log("Add error");
+                $$("Add Event error"+JSON.stringify(resp));
         });
     };
 
