@@ -3,16 +3,14 @@
 
         {{message}}<br>
 
-            <div class="item item-input-inset">
-                <label class="item-input-wrapper" focus-me>
-                    <input placeholder="{{ 'ADDEVENT.TITLE' | translate }}"
-                           type="text" style="text-align:left;"
+            <div class="item item-input">
+                    <span class="input-label">{{ 'ADDEVENT.TITLE' | translate }}</span>
+                    <input type="text" style="text-align:left;font-size: x-large;"
                            ng-model="event.title" autofocus
                            ng-change="onChangePicture()">
-                </label>
 
-                <button class="button button-small icon-left ion-save button-positive"
-                        style="margin-top: 4px;" ng-click="sendEvent()">
+                <button class="button icon-left ion-checkmark button-positive"
+                        style="margin-top: 4px;margin-right: 15px;" ng-click="sendEvent()">
                     {{'ADDEVENT.SAVE' | translate}}
                 </button>
             </div>
@@ -106,7 +104,8 @@
             </ion-item>
             <br>
 
-            <button class="button icon-left ion-save button-positive" ng-click="sendEvent()">
+            <button class="button icon-left ion-checkmark button-positive"
+                    style="margin-top: 4px;" ng-click="sendEvent()">
                 {{'ADDEVENT.SAVE' | translate}}
             </button>
 

@@ -59,7 +59,6 @@ public class Rest {
                 }
             }
 
-
             if(e.getPresents().size()==0)
                 e.close();
             dao.save(e);
@@ -197,6 +196,8 @@ public class Rest {
         return u;
     }
 
+
+
     @ApiMethod(name = "join", httpMethod = ApiMethod.HttpMethod.GET, path = "join")
     public User join(@Named("event") String id,
                      @Named("user") String user,
@@ -212,12 +213,12 @@ public class Rest {
             }
 
             if(e.dtStart>System.currentTimeMillis()){
-                u.message="Event not already start";
+                u.message="SELEVENT.NOTSTART";
                 return u;
             }
 
             if (e.Presents.contains(u.id)) {
-                u.message = "already present";
+                u.message = "SELEVENT.ALREADY";
             } else {
                 if (e.addPresents(u)) {
                     u.score+=e.scoreStart;
@@ -631,6 +632,7 @@ public class Rest {
 
         List<User> lu = new ArrayList<>();
         for(User u:e.Presents){
+            u=dao.findUser(u.id);
             u.setScoreEvent(u.score-e.getScores().get(u.id)); //Le score de l'event est le score du user - son score à l'entree dans l'event
             lu.add(u);
         }
@@ -646,6 +648,7 @@ public class Rest {
         //Email de cloture de soirée pour l'ensemble des participants
 
         for(User u:e.getPresents()){
+            u=dao.findUser(u);
             e.sendCloseMail(u,dao);
             u.currentEvent=null;
             dao.save(u);

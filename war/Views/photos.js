@@ -118,7 +118,7 @@ App.controller('PhotosCtrl', function ($scope,$ionicPopup,$ionicModal,$ionicLoad
         refresh_photo(true);
         timerPhotos=$interval(refresh_photo,5000);
 
-        tuto(user,"photo",$ionicModal,$scope,"help_photo.svg");
+        tuto(user,"help_photo",$ionicModal,$scope);
 
     });
 });

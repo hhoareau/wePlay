@@ -14,7 +14,7 @@ App.config(function($stateProvider,$ionicConfigProvider,$urlRouterProvider,Faceb
        'ADDEVENT.TITLE':'Title',
         'ADDEVENT.ADDRESS':'Address of the event',
         'ADDEVENT.DURATION':'Duration',
-        'ADDEVENT.SAVE':'Save my Event',
+        'ADDEVENT.SAVE':'Save',
         'SELEVENT.CREATE':'Your Event',
         'SELEVENT.WELCOME':'Hello, Find an event !',
         'ADDEVENT.PASSWORD': "Password to enter (optional)",
@@ -37,6 +37,7 @@ App.config(function($stateProvider,$ionicConfigProvider,$urlRouterProvider,Faceb
         'ADDEVENT.DESCRIPTION': "Teaser of your event",
         'ADDEVENT.WEBSITE':"Web site of your event",
         'SELEVENT.LOGOUT':"Change profil",
+        'SELEVENT.TITREPROFIL':"Your profil",
         'INVITE.COPY':"Copy the link",
         'INVITE.PERSONAL':"Personal",
         'INVITE.DEST':"Email to invited",
@@ -48,6 +49,7 @@ App.config(function($stateProvider,$ionicConfigProvider,$urlRouterProvider,Faceb
 
     $translateProvider.translations('fr',{
         'ADDEVENT.TITLE':'Titre',
+        'SELEVENT.TITREPROFIL':"Mon profil",
         'ADDEVENT.ADDRESS':"Adresse de l'évenement",
         'ADDEVENT.APARTIRDE':"A partir de",
         'ADDEVENT.DURATION':'Durée',

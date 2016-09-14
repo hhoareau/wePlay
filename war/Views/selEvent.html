@@ -8,7 +8,7 @@
     <ion-content>
         <div class="card">
             <div class="item item-divider item-button-right">
-                Profil
+                {{'SELEVENT.TITREPROFIL' | translate}}
                 <button class="button button-icon ion-power"
                         style="padding-bottom: 15px;"
                         ng-click="logout()">
@@ -21,14 +21,16 @@
                 <img ng-src="{{user.picture}}" ng-click="openfacebook()">
                 <span style="font-size: large;">{{user.firstname}}&nbsp;</span><br>
                 <span style="font-size: small">{{user.score}}&nbsp;pts</span>
-                <button class="button button-positive" style="margin-top: 10px;" ng-click="addEvent()">
+                <button class="button icon-left ion-hammer button-positive"
+                        style="margin-top: 10px;"
+                        ng-click="addEvent()">
                     {{'SELEVENT.CREATE' | translate}}
                 </button>
             </div>
         </div>
         <div class="card" ng-show="facebook_events.length>0">
             <div class="item item-divider">
-                Your facebook events<br>
+                {{'SELEVENT.FACEBOOKEVENTS' | translate}}<br>
             </div>
 
             <ion-item ng-repeat="evt in facebook_events" ng-click="createFacebookEvent(evt)">
@@ -44,6 +46,8 @@
             </button>
         </div>
 
+        <div class="item" style="color:red" ng-show="message.length>0">{{message}}</div>
+
             <div class="card" ng-show="preview.title.length>0">
                 <div class="item item-divider">
                     {{preview.title}}
@@ -51,28 +55,37 @@
                 <div class="item item-button-right" style="text-align: center">
                     <img style="max-width: 150px;" ng-src="{{preview.flyer}}" ng-show="preview.flyer.length>0"><br>
                     {{preview.description}}
-                    {{message}}
-                    <button class="button button-small button-positive" ng-show="preview.title!=null" ng-click="joinEvent(preview)">Join !</button>
-
+                    <button class="button button-small button-positive"
+                            ng-show="preview.title!=null"
+                            ng-click="joinEvent(preview)">
+                        {{'SELEVENT.JOIN' | translate}}
+                    </button>
                 </div>
             </div>
 
-        <div class="card" ng-show="myevents.length>0">
+            <div class="card" ng-show="myevents.length>0">
+                <div class="item item-divider">
+                    {{'SELEVENT.MYEVENTS' | translate}}
+                </div>
 
-            <div class="item item-divider">
-                {{'SELEVENT.MYEVENTS' | translate}}
+                <ion-list>
+                    <ion-item ng-repeat="evt in myevents">
+                        <ion-delete-button
+                                ng-show="evt.dtStart>now"
+                                class="black ion-trash-b"
+                                ng-click="deleteEvent($index)">
+                        </ion-delete-button>
+
+                        <img src="/img/add.png"
+                             style="max-width: 20px;"
+                             ng-show="evt.dtStart<now"
+                             ng-click="joinEvent(evt)">
+
+                        {{evt.title}}&nbsp;le&nbsp;{{evt.dtStart | date : "dd/M/yy"}}
+
+                    </ion-item>
+                </ion-list>
             </div>
-
-
-            <ion-list show-delete="shouldShowDelete">
-                <ion-item ng-repeat="evt in myevents">
-                    {{evt.title}}&nbsp;le&nbsp;{{evt.dtStart | date : "dd/M/yy"}}
-                    <ion-delete-button class="black ion-trash-b" ng-click="deleteEvent($index)">
-                    </ion-delete-button>
-                </ion-item>
-            </ion-list>
-
-        </div>
 
     </ion-content>
 </ion-view>

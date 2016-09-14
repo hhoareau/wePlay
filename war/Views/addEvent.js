@@ -175,7 +175,7 @@ App.controller("addEventCtrl", function($scope,$ionicModal,$ionicPlatform,$state
 
 
     $scope.$on("$ionicView.afterEnter", function(){
-        tuto(user,"addevent",$ionicModal,$scope,"help_addevent.svg");
+        tuto(user,"help_addevent",$ionicModal,$scope);
     });
 
 });

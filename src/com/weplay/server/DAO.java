@@ -105,7 +105,6 @@ public class DAO  {
 		try{
 			return ofy().load().type(User.class).id(u.id).now();
 		} catch (Exception e) {
-
             return null;
 		}
 	}
@@ -331,9 +330,10 @@ public class DAO  {
 
     public List<Event> getFuturEventsFrom(User u) {
         List<Event> rc=new ArrayList<>();
-        for(Event e:ofy().load().type(Event.class).filter("dtStart >",System.currentTimeMillis()).list())
+        for(Event e:ofy().load().type(Event.class).filter("dtEnd > ",System.currentTimeMillis()).list())
             if(e.getOwner().id.equals(u.id))
                 rc.add(e);
+
         return rc;
     }
 

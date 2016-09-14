@@ -639,11 +639,15 @@ toast=function($ionicLoading,msg){
     },2000);
 }
 
-tuto=function(user,histo,$ionicModal,$scope,img,func){
+//Permet l'affichage d'un ecran de tuto dont le nom du fichier est dans img
+tuto=function(user,img,$ionicModal,$scope,func){
+    $$("Affichage du tuto "+img);
     if(user==undefined)return;
+    if(img.indexOf(".")==-1)img+=".svg";
 
-    if(user.history.indexOf(histo)==-1){
-        user.history+=";"+histo;
+    if(user.history.indexOf(img)==-1){
+        user.history+=";"+img;
+        $$("Mise a jour du user",user);
         senduser(user,"history",function(resp){
             localStorage.setItem("user",JSON.stringify(resp));
         });

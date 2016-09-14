@@ -61,6 +61,6 @@ App.controller('ProfilCtrl', function ($scope,$state,$translate,$ionicPopup,$win
     }
     
     $scope.$on("$ionicView.afterEnter", function () {
-        tuto(user,"profil",$ionicModal,$scope,"help_profil.svg");
+        tuto(user,"help_profil",$ionicModal,$scope);
     });
 });

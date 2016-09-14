@@ -89,7 +89,7 @@ public class Event implements Serializable {
     public Integer scoreInvite=5;
     private Integer scoreLikeSong=1;
     private Integer scoreVotantlikeSong=1;
-    public Integer scorePostSong=-2;
+    public Integer scorePostSong=-1;
     public Integer scoreStart=0;
     public Integer minScore=-20;
     public Integer scorePlaySong=2;

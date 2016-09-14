@@ -30,7 +30,7 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
 
     $scope.joinEvent=function(evt){
         if(evt.password.length>0)
-            showPopup($scope,$ionicPopup,"This event is protected","password",function(password){
+            showPopup($scope,$ionicPopup,"SELEVENT.PRIVATE","password",function(password){
                $scope.setEvent(evt,password);
             });
         else
@@ -79,6 +79,7 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
                     markers[markers.length-1].addListener("mouseover",function(){
                         $scope.preview=this.evt;
                         $scope.$apply();
+                        tuto(user,"joinevent",$ionicModal,$scope);
                     });
 
                     markers[markers.length-1].addListener("dblclick",function(){
@@ -260,10 +261,11 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
 
         geteventsfrom(user.id, function (evts) {
             $scope.myevents=evts;
+            $scope.now=new Date().getTime();
+            $scope.$apply();
         });
 
-        tuto(user,"selevent",$ionicModal,$scope,"help_selevent.svg");
-
+        tuto(user,"selevent",$ionicModal,$scope);
     });
 
 
