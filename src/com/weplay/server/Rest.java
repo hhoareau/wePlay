@@ -391,18 +391,22 @@ public class Rest {
     public Song setScore(@Named("song") String idsong, @Named("event") String event, @Named("user") String id,@Named("step") Integer step){
         Song s=dao.getSong(idsong);
         Event e=dao.findEvent(event);
+        User user=dao.findUser(id);
 
         if(s!=null && e!=null){
             User prop=dao.findUser(s.from.id);
+
             if(!prop.id.equals(id)){ //On ne vote pas pour ses propres titres
                 if(!s.addVote(id,step))
                     return null;
                 else{
-                    prop.score+=e.getScoreLikeSong()*step;
+                    user.score+=e.getScoreVotantlikeSong()*step; //Voter modifie le score de celui qui vote
+                    prop.score+=e.getScoreLikeSong()*step;      //Voter modifie le score de celui qui a proposé le titre
+                    dao.save(user);
                     dao.save(prop);
                     dao.save(s);
-                    e.addOrder("playlist");
-                    e.addOrder("users");
+                    e.addOrder("playlist");                     //demande la mise a jour de la playlist
+                    e.addOrder("users");                        //demande la mise a jour du chart
                     dao.save(e);
                     return s;
                 }
@@ -627,7 +631,7 @@ public class Rest {
 
         List<User> lu = new ArrayList<>();
         for(User u:e.Presents){
-            u.setScoreEvent(u.score-e.getScores().get(u.id));
+            u.setScoreEvent(u.score-e.getScores().get(u.id)); //Le score de l'event est le score du user - son score à l'entree dans l'event
             lu.add(u);
         }
 

@@ -3,24 +3,55 @@
 <meta charset="ISO-8859-1">
 <meta name="viewport" content="width=340">
 
-    <script src="../js/Tools.js"></script>
-    <script src="../js/Main.js"></script>
+    <script src="/js/Tools.js"></script>
+    <script src="/js/Main.js"></script>
     <script src="https://apis.google.com/js/client.js?onload=init"></script>
 
     <title>Classement</title>
 </head>
-<body>
 
+<body style="background-color:black;border-color: black;color: white;">
 
-<div id="zone"></div>
+<div style="text-align: center;width: 100%">
+    <div id="clock" style="font-size: xx-large"></div>
+    <div id="zone"></div>
+</div>
 
 <script>
-var idEvent=getParameters()["event"];
-var users=null;
+
+
+function showClassement(idEvent,zone){
+    getClassement(idEvent,function(rep){
+        if(rep.result.items.length>0){
+            var rc="<table style='width:100%;margin: 10px;padding: 10px;'>";
+            rep.result.items.forEach(function(user) {
+                var profil="><br>"+user.firstname+"</div>";
+                rc += "<tr><td><img style='border-color: white;border-style: solid;' src='"+user.picture+"'></td>";
+                rc += "<td><span style='font-size: x-large'>"+user.firstname+"</span></td>";
+                rc += "<td><span style='font-size: xx-large;'>" + user.scoreEvent + "</span> pts<br></td>";
+                rc += "</tr>";
+            });
+            zone.innerHTML=rc+"</table>";
+        }
+    });
+}
+
 
 function start(){
-	 showClassement(document.getElementById("zone"));
-        setInterval(function(){showClassement();},20000);
+    var idEvent=getParam()["event"];
+    initGlobal();
+    showClassement(idEvent,$("zone"));
+
+    setInterval(function(){
+        showClassement(idEvent,$("zone"));
+    },20000);
+
+    setInterval(function(){
+        var delay=myevent.dtEnd-new Date();
+        if(delay<0)location.href="/Views/winners.html?event="+idEvent;
+        var affichage =new Date(delay).toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
+        $("clock").innerHTML=affichage;
+    },1000);
 }
 
 </script>

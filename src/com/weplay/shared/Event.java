@@ -88,6 +88,7 @@ public class Event implements Serializable {
 
     public Integer scoreInvite=5;
     private Integer scoreLikeSong=1;
+    private Integer scoreVotantlikeSong=1;
     public Integer scorePostSong=-2;
     public Integer scoreStart=0;
     public Integer minScore=-20;
@@ -503,6 +504,14 @@ public class Event implements Serializable {
         this.playlist = playlist;
     }
 
+    public Integer getScoreVotantlikeSong() {
+        return scoreVotantlikeSong;
+    }
+
+    public void setScoreVotantlikeSong(Integer scoreVotantlikeSong) {
+        this.scoreVotantlikeSong = scoreVotantlikeSong;
+    }
+
     public String getWebsite() {
         return website;
     }
@@ -550,6 +559,7 @@ public class Event implements Serializable {
     public void setLastUpdate(Map<String, Long> lastUpdate) {
         this.lastUpdate = lastUpdate;
     }
+
 
     public void close() {
         this.dtEnd=System.currentTimeMillis();

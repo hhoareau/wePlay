@@ -152,11 +152,20 @@ function getMessage(event,dt,func){
 }
 
 function getClassement(event,func){
-    gapi.client.ficarbar.getclassement({event:event}).then(func);
+    try{
+        gapi.client.ficarbar.getclassement({event:event}).then(func);
+
+    } catch (e){
+        httpGet("getclassement?event="+event,func);
+    }
 }
 
 function getLastPhoto(event,func){
-    gapi.client.ficarbar.lastphoto({event:event}).then(func);
+    try{
+        gapi.client.ficarbar.lastphoto({event:event}).then(func);
+    } catch (e){
+        httpGet("lastphoto?event="+event,func);
+    }
 }
 
 
@@ -178,7 +187,11 @@ function mailtosend(readonly,func){
 }
 
 function slideshow(delay,event,func){
-    gapi.client.ficarbar.slideshow({delay:delay,event:event}).then(func);
+    try{
+        gapi.client.ficarbar.slideshow({delay:delay,event:event}).then(func);
+    } catch (e){
+        httpGet("slideshow?event="+event+"&delay="+delay,func);
+    }
 }
 
 function stopcurrentsong(event,func){

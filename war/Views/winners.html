@@ -1,0 +1,53 @@
+<html>
+<head>
+<meta charset="ISO-8859-1">
+<meta name="viewport" content="width=340">
+
+    <script src="/js/Tools.js"></script>
+    <script src="/js/Main.js"></script>
+    <script src="https://apis.google.com/js/client.js?onload=init"></script>
+
+    <title>Classement</title>
+    <style>
+        .playerCard{
+            width:100px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body style="background-color:black;
+                border-color: black;
+                color: white;">
+
+<div style="text-align: center;width: 100%">
+    <div class="playerCard" id="zone0"></div>
+    <br>
+    <table style="width:300px">
+        <tr>
+            <td><div class="playerCard" id="zone1"></div></td>
+            <td style="width: 100px;"></td>
+            <td><div class="playerCard" id="zone2"></div></td>
+        </tr>
+    </table>
+</div>
+
+<script>
+
+    function showProfil(u,zone){
+        zone.innerHTML="<img style='border-color: white;border-style: solid;' src='"+u.picture+"'>"+
+                "<br><span style='font-size: x-large'>"+u.firstname+"</span> ("+u.scoreEvent+" pts)" ;
+    }
+
+    function start(){
+        getClassement(getParam()["event"],function(rep) {
+            users = rep.result.items;
+            for (var i = 0; i < 3; i++)
+                showProfil(users[i], $("zone" + i));
+        });
+    }
+
+</script>
+
+</body>
+</html>

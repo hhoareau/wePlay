@@ -43,10 +43,11 @@ App.controller('HomeCtrl', function ($scope,$interval,$state,$translate,$window,
     $scope.$on("$ionicView.afterEnter",function() {
         refresh_playlist(true,function(){
             timerHome=$interval(refresh_playlist,5000);
-            if(user.connexions.length<2 && $scope.songs.length>0) {
-                tuto(user,"player",$ionicModal,$scope,"help_player.svg",function(){
-                    $window.open("/Views/musicPlayer.html?event="+myevent.id+"&showTuto=true");
-                });
+            if(user.connexions.length<2 && $scope.songs.length>0 &&
+                user.id==myevent.owner.id && myevent.musicPlayer==null) {
+                    tuto(user,"player",$ionicModal,$scope,"help_player.svg",function(){
+                        $window.open("/Views/musicPlayer.html?event="+myevent.id+"&showTuto=true");
+                    });
             }
         });
     });

@@ -126,28 +126,6 @@ function showLastPhoto(eventid,elt,func){
     });
 }
 
-function showClassement(idEvent,zone,bPts){
-    getClassement(idEvent,function(rep){
-        if(rep.result.items.length>0){
-            var rc="<table style='width:100%'>";
-            rep.result.items.forEach(function(user) {
-                if (user.photo == undefined || user.photo.length == 0) {
-                    var profil=user.firstname;
-                    if(!user.anonymous)profil="<a href='https://www.facebook.com/"+user.facebookid+"'>"+profil+"</a>";
-                    rc += "<tr><td>" + profil + "</td>";
-                    if (bPts)rc += "<td>" + user.score + " pts</td>";
-                    rc += "</tr>";
-                } else {
-                    rc += "<tr><td><img width='200px' src='" + user.photo + "'></td>";
-                    if (bPts)rc += "<td>" + user.score + " pts</td>";
-                    rc += "</tr>";
-                }
-            });
-            zone.innerHTML=rc+"</table>";
-        }
-    });
-}
-
 
 function getParam(param) {
     var vars = {};
