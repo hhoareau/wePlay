@@ -70,18 +70,15 @@ App.controller("addEventCtrl", function($scope,$ionicModal,$ionicPlatform,$state
                     lng:infos[0].geometry.location.lng()
                 });
         });
-
     };
-
 
     $scope.sendEvent=function(){
         var evt=$scope.event;
 
         if(target==null){
-            $scope.message="You must set a position for the event";
+            $scope.message=$translate.instant("ADDEVENT.NEEDLOC")
             return;
         }
-
 
         evt.dtStart=new Date(new Date($scope.event.dtStart).toDateString()+" "+evt.hour+":00").getTime();
         evt.dtEnd=new Date(evt.dtStart).getTime()+evt.duration*3600*1000;
@@ -109,6 +106,10 @@ App.controller("addEventCtrl", function($scope,$ionicModal,$ionicPlatform,$state
             $scope.onChangePicture();
         });
     };
+
+    $scope.showTutoValidate=function(){
+        tuto(user,"addevent_validate",$ionicModal,$scope);
+    }
 
     $scope.onChangePicture=function(){
         var i=new Image();

@@ -37,9 +37,10 @@ App.controller("loginCtrl", function($scope,Facebook,$state,$window){
 
     $scope.login = function() {
         // From now on you can use the Facebook service just as Facebook api says
+        $scope.message="Connexion ...";
         Facebook.login(function(response) {
             $scope.me();
-        },{scope:"public_profile,email,user_events"});
+        },{scope:"public_profile,user_friends,email,user_events",return_scopes: true,enable_profile_selector:true});
     };
 
 
@@ -52,6 +53,7 @@ App.controller("loginCtrl", function($scope,Facebook,$state,$window){
 
 
     $scope.me = function() {
+        $scope.message="Connexion ...";
         var s=window.localStorage.getItem("user");
         if(s=="null"){
             window.localStorage.setItem("user","encours");

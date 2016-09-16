@@ -1,0 +1,15 @@
+Notice :
+
+Ajouter une langue :
+3 fichiers de ressources
+    - les mails types pour l'application shifumixcmd
+    - les fichiers images du tutoriel
+    - les phrases de l'interface référencées dans le fichier
+
+
+Backup
+    Régulièrement, un backup de la base doit être réalisé https://console.cloud.google.com/iam-admin/settings/project?project=shifumixweb
+    Les photos sont régulièrement récupéré par le sanity check
+
+
+Sécurité

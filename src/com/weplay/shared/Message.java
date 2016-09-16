@@ -45,11 +45,15 @@ public class Message implements Serializable,Cloneable {
 	public User from=null;
 	String title="";
 
+    @Index
+    Boolean validate=false;
+
     String next=null;
     public Long dtBackup=null; //Indique if there is a backup
 
     @Index
     Long type= Rest.TYPE_DEMANDE;
+
     @Index
     public String idEvent="";
 
@@ -187,6 +191,14 @@ public class Message implements Serializable,Cloneable {
 
     public void setDtBackup(Long dtBackup) {
         this.dtBackup = dtBackup;
+    }
+
+    public Boolean getValidate() {
+        return validate;
+    }
+
+    public void setValidate(Boolean validate) {
+        this.validate = validate;
     }
 }
 

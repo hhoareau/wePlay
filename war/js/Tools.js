@@ -116,8 +116,8 @@ function URLEncode(url) {
 	}
 
 
-function showLastPhoto(eventid,elt,func){
-    getLastPhoto(myEvent.Id,function(photo){
+function showLastPhoto(eventid,validate,elt,func){
+    getLastPhoto(myEvent.Id,validate,function(photo){
         if(photo.status==200){
             elt.style.visibility="visible";
             elt.src=photo.result.photo;

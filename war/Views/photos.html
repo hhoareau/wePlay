@@ -14,8 +14,28 @@
                     ng-click="updateWithMessage()"
                     toggle-class="toggle-calm">Photos with message</ion-toggle>
         <br>
+
+        <div ng-show="tovalidate==true && lastphoto.photo.length>0">
+            <div class="item text-center">
+                <button
+                        class="button icon-left ion-android-delete button-assertive"
+                        ng-click="delphoto()">{{'PROFIL.DELPHOTO' | translate}}
+                </button>
+
+                <button
+                        class="button icon-left ion-checkmark button-assertive"
+                        ng-click="validatephoto()">{{'PROFIL.VALIDATE' | translate}}
+                </button>
+
+                <button
+                        class="button icon-left ion-android-alert button-assertive"
+                        ng-click="blacklist()">{{'PROFIL.BLACKLIST' | translate}}
+                </button>
+                </div>
+        </div>
+
         <div style="text-align: center">
-            <img download style="max-width:80%;max-height:400px" ng-src="{{lastphoto}}" ng-show="lastphoto!=null ">
+            <img download style="max-width:80%;max-height:400px" ng-src="{{lastphoto.photo}}" ng-show="lastphoto.photo.length>0">
             <br>
             <div ng-show="lastphoto.anonymous==false">by {{from.firstname}}</div>
             <br>{{message}}

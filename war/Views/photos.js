@@ -35,11 +35,11 @@ App.controller('PhotosCtrl', function ($scope,$ionicPopup,$ionicModal,$ionicLoad
 
                     function () {
                         if(success!=undefined)success();
-                        $scope.message="Photo sended";
+                        $scope.message=$translate.instant("PHOTO.SENDED");
                         promise=$interval(refresh_photo, photo_interval);
                     },
                     function () {
-                        $scope.message="Photo not sended";
+                        $scope.message=$translate.instant("PHOTO.NOTSENDED");
                         failure();
                         promise=$interval(refresh_photo, photo_interval);
                     },
@@ -65,7 +65,7 @@ App.controller('PhotosCtrl', function ($scope,$ionicPopup,$ionicModal,$ionicLoad
             photo.from = email;
 
             if ($scope.withMessage.checked != null && $scope.withMessage.checked)
-                showPopup($scope,$ionicPopup,"Enter your message","your message here",function (res) {
+                showPopup($scope,$ionicPopup,$translate.instant("PHOTO.ENTERMESSAGE"),"message",function (res) {
                     if (res != undefined)photo.text = res;
                     send(theFile, photo);
                 });
@@ -100,25 +100,49 @@ App.controller('PhotosCtrl', function ($scope,$ionicPopup,$ionicModal,$ionicLoad
     }
 
     refresh_photo=function(force) {
-        if(isPresent("addphoto" || force))
-            getLastPhoto(myevent.id, function (resp) {
+        if(isPresent("addphoto") || force){
+            $scope.tovalidate=false;
+            if(user.id==myevent.owner.id && myevent.needValidate==true)$scope.tovalidate=true;
+
+            getLastPhoto(myevent.id, !$scope.tovalidate, function (resp) {
                 if(resp.status!=204){
-                    $scope.lastphoto = resp.result.photo;
+                    $scope.lastphoto = resp.result;
                     if(!resp.result.anonymous)
                         getuser(resp.result.from,function(r){
-                           $scope.from= r.result;
+                            $scope.from= r.result;
                         });
                     $scope.$apply();
+                } else{
+                    $scope.lastphoto=null;
                 }
             });
+        }
+
     }
+
+    $scope.delphoto=function(){
+        delmessage($scope.lastphoto.id,refresh_photo);
+    }
+
+    $scope.validatephoto=function(){
+        validatemessage($scope.lastphoto.id,refresh_photo);
+    }
+
+    $scope.blacklist=function(){
+        blacklist($scope.lastphoto.from);
+    }
+
 
 
     $scope.$on("$ionicView.afterEnter", function(){
         refresh_photo(true);
-        timerPhotos=$interval(refresh_photo,5000);
+        timerPhotos=$interval(function(){
+            refresh_photo(false);
+        },5000);
 
-        tuto(user,"help_photo",$ionicModal,$scope);
-
+        if(user.id==myevent.owner.id && myevent.needValidate==true)
+            tuto(user,"photo_admin",$ionicModal,$scope);
+        else
+            tuto(user,"photo",$ionicModal,$scope);
     });
 });

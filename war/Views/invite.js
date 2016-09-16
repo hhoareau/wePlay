@@ -31,17 +31,17 @@ App.controller('InviteCtlr', function ($scope,clipboard,$translate){
         var inviteUrl=url;
         if($scope.email.personal)inviteUrl+="&for="+$scope.dest;
         if($scope.email.dest==$scope.email.from){
-            $scope.message="you can't invite yourself";
+            $scope.message=$translate.instant("INVITE.YOURSELF");
             return;
         }
 
         shorturl(inviteUrl,function(url){
-            sendinvitations(myevent.id,$scope.email.dest,$scope.email.from,url.result.id,function(resp) {
+            sendinvitations(myevent.id,$scope.email.dest,user.id,url.result.id,function(resp) {
                 if (resp.status == 200) {
-                    $scope.message = $scope.email.dest + " invited";
+                    $scope.message = $scope.email.dest + $translate.instant("INVITE.CONFIRM");
                     $scope.email.dest = "";
                 }else
-                    $scope.message="probleme to invite";
+                    $scope.message=$translate.instant("INVITE.CANCEL");
             });
         });
 

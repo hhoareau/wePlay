@@ -16,6 +16,7 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
     */
     $scope.logout = function() {
         Facebook.logout(function(){
+            localStorage.setItem("user",null);
             $state.go("login",{},{reload:true});
         });
     };
@@ -73,7 +74,7 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
                         icon: icon,
                         map: $scope.map,
                         id:evt.Id,
-                        max_size:20
+                        max_size:new google.maps.Size(30,30)
                     }));
 
                     markers[markers.length-1].addListener("mouseover",function(){
@@ -108,7 +109,9 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
             else
                 $scope.message=$translate.instant(user.message);
         });
-    }
+    };
+
+
     $scope.addEvent=function(){
         $state.go("addEvent",{},{reload:true});
     };
@@ -165,9 +168,8 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
             },{
                 enableHighAccuracy: true,
             });
-
         }
-    }
+    };
 
     $scope.$on('mapInitialized', function(event, map) {
         $$("initialisation de la carte");
@@ -199,9 +201,7 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
             },
             function(){$window.close();}
         );
-
     });
-
 
     $scope.deleteEvent=function(index){
         delevent($scope.myevents[index].id,user.id,function(resp){
@@ -227,8 +227,7 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
                 }
             });
         }
-    }
-
+    };
 
     $scope.$on("$ionicView.beforeLeave",function(event){
         $$("Sortie de la form, raz des markers");
@@ -267,7 +266,4 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
 
         tuto(user,"selevent",$ionicModal,$scope);
     });
-
-
-
 });

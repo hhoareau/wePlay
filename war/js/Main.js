@@ -151,6 +151,19 @@ function getMessage(event,dt,func){
     gapi.client.ficarbar.getmessage({event:event,date:dt}).then(func);
 }
 
+
+function delmessage(id,func){
+    gapi.client.ficarbar.delmessage({message:id}).then(func);
+}
+
+function validatemessage(id,func){
+    gapi.client.ficarbar.validatemessage({message:id}).then(func);
+}
+
+function blacklist(user,func){
+    gapi.client.ficarbar.blacklist({user:user}).then(func);
+}
+
 function getClassement(event,func){
     try{
         gapi.client.ficarbar.getclassement({event:event}).then(func);
@@ -160,9 +173,9 @@ function getClassement(event,func){
     }
 }
 
-function getLastPhoto(event,func){
+function getLastPhoto(event,validate,func){
     try{
-        gapi.client.ficarbar.lastphoto({event:event}).then(func);
+        gapi.client.ficarbar.lastphoto({validate:validate,event:event}).then(func);
     } catch (e){
         httpGet("lastphoto?event="+event,func);
     }

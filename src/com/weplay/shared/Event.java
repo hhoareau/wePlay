@@ -25,10 +25,7 @@ import com.googlecode.objectify.annotation.Index;
 import com.weplay.server.DAO;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Logger;
 
 
@@ -78,6 +75,7 @@ public class Event implements Serializable {
     public Song currentSong=null;
     public String musicPlayer=null; //Information about the music player
     public Boolean playerHasFocus=false;
+    public Boolean needValidate=false;
 
 	public Long lastSave=0L;	//Date du dernier message post�
 
@@ -138,6 +136,8 @@ public class Event implements Serializable {
 			if(s!=null && s.equals(song.text))return false;
 
 		this.playlist.add(song.text);
+        if(!this.needValidate)song.setValidate(true);
+
         addOrder("playlist");
 		return true;
 	}
@@ -167,25 +167,28 @@ public class Event implements Serializable {
     }
 
 
-    public void sendInvite(String dests,String from,String shorturl){
+    public void sendInvite(String dests,User from,String shorturl){
         for(String dest:dests.split(";")){
-            if(shorturl==null)shorturl=Tools.DOMAIN+"/index.html?event="+this.getId()+"&from="+from;
+            if(shorturl==null)shorturl=Tools.DOMAIN+"/index.html?event="+this.getId()+"&from="+from.email;
             if(dest.length()>0)
-                DAO.sendMail(dest, Tools.ADMIN_EMAIL, "Invitation for " + this.title, "Dear, Open this " + shorturl + " to join the event.");
+                DAO.sendMail(dest, from.lang, Tools.ADMIN_EMAIL, "Invitation for " + this.title,
+                        "#join_mail.html", Arrays.asList(shorturl,"<img src='"+this.flyer+"'>")
+                );
         }
     }
 
     public void sendCloseMail() {
-        DAO.sendMail(this.owner.getEmail(),
+        DAO.sendMail(this.owner.getEmail(), this.owner.lang,
                 Tools.ADMIN_EMAIL,
-                this.title + " photos",
-                "The event is now closed. As master of ceremony, you can find all photos with this link " + Tools.DOMAIN + "/Views/AllPhotos.html?event=" + this.getId());
+                this.title + " is closed. Retreive all the photos",
+                "#end_mail.html",Arrays.asList(Tools.DOMAIN + "/Views/AllPhotos.html?event=" + this.getId())
+        );
     }
 
     public void sendCloseMail(User u,DAO dao){
-            String body="If you wan't to follow "+this.owner.getFirstname()+ "for the next party, open this link.";
-            body+=this.getHTML(dao);
-            DAO.sendMail(u.getEmail(),Tools.ADMIN_EMAIL,"End of the party",body);
+            DAO.sendMail(u.getEmail(),u.lang,Tools.ADMIN_EMAIL,
+                    "You quit the event","#quit_mail.html",
+                    Arrays.asList(this.owner.getFirstname(),this.getHTML(dao)));
     }
 	
 	
@@ -200,7 +203,7 @@ public class Event implements Serializable {
 
     //Add a new user
 	public boolean addPresents(User u) {
-        if(distanceFrom(u)>this.minDistance) {
+        if(distanceFrom(u)>this.minDistance && !u.getId().equals(this.getOwner().id)) {
             u.message = "SELEVENT.TOFAR";
             return false;
         }
@@ -270,6 +273,14 @@ public class Event implements Serializable {
 
     public boolean isOpened() {
         return opened;
+    }
+
+    public Boolean getNeedValidate() {
+        return needValidate;
+    }
+
+    public void setNeedValidate(Boolean needValidate) {
+        this.needValidate = needValidate;
     }
 
     public void setOpened(boolean opened) {
@@ -580,6 +591,10 @@ public class Event implements Serializable {
         for(Song s:dao.getPlayedSongs(this))code+=s.getHTML();
         for(User u:this.getPresents()) code+="<br>"+u.getHTML();
         return code;
+    }
+
+    public void addBlacklist(User u) {
+        //TODO: gérer les blacklist
     }
 }
 

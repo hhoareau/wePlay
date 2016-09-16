@@ -59,8 +59,9 @@ App.controller('ProfilCtrl', function ($scope,$state,$translate,$ionicPopup,$win
         else
             window.open(url.url);
     }
-    
+
+
     $scope.$on("$ionicView.afterEnter", function () {
-        tuto(user,"help_profil",$ionicModal,$scope);
+        tuto(user, "help_profil", $ionicModal, $scope);
     });
 });

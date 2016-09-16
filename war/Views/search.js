@@ -35,23 +35,25 @@ App.controller('SearchCtrl',function($scope,$state,$ionicHistory,$translate,$ion
         s.Id=s.idEvent+"_"+song.id;
         s.duration=song.duration;
 
+        $$("Add song",s);
+
         var id=myevent.id;
 
         addsong(id,s,function(rep){
             if(rep.status!=200)
-                console.log("Song not added : ");
+                $$("Song not added",rep);
 
             $state.go("tabs.home");
 
         },function(err){
-            console.log("Song not added : "+err);
+            $$("Song not added : ",err);
         });
     }
 
     $scope.search=function(){
         var q=$scope.query.value;
         if(q.length>2){
-            $ionicLoading.show({template:'Searching'});
+            $ionicLoading.show({template:$translate.instant("SEARCH.WAITING")});
             if($scope.songs.length>0)$scope.songs.clear();
 
             window.localStorage.setItem("last_search",q);
@@ -69,6 +71,7 @@ App.controller('SearchCtrl',function($scope,$state,$ionicHistory,$translate,$ion
                 }
 
                 DZ.api('/search/?q='+q, function(response){
+                    $$("Deezer respons:",response);
                     $ionicLoading.hide();
                     for(var i=0;i<response.data.length;i++){
                         var s=response.data[i];
@@ -82,6 +85,7 @@ App.controller('SearchCtrl',function($scope,$state,$ionicHistory,$translate,$ion
                 });
 
                 searchvideo(q,10,function(resp){
+                    $$("Youtube response :",resp);
                     $ionicLoading.hide();
                     var k=0;
                     resp.forEach(function(item){

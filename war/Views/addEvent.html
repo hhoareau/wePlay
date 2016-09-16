@@ -45,6 +45,10 @@
                 <input placeholder="{{'ADDEVENT.PASSWORD' | translate}}" ng-model="event.password" type="text">
             </label>
 
+            <ion-checkbox ng-model="event.needValidate" ng-click="showTutoValidate()">
+                {{'ADDEVENT.NEEDVALIDATE' | translate}}
+            </ion-checkbox>
+
 
             <div class="card">
                 <div class="item item-divider">
@@ -62,6 +66,8 @@
                                   ng-change="onChangePicture()">Auto</ion-checkbox>
                 </div>
             </div>
+
+
 
 
             <ion-item>
@@ -93,6 +99,8 @@
                     <input ng-model="event.maxOnline" type="range" min="0" max="500" step="1">&nbsp;{{event.maxOnline}}&nbsp;personnes
                 </div>
             </ion-item>
+
+
 
             <ion-item>
                 <ion-title>Sources</ion-title>

@@ -38,6 +38,38 @@ public class Rest {
         return dao.findEvents(System.currentTimeMillis(),lat,lng);
     }
 
+
+    @ApiMethod(name = "validatemessage", httpMethod = ApiMethod.HttpMethod.GET, path = "validatemessage")
+    public void validatemessage(@Named("message") String id) {
+        Message m=dao.findMessage(id);
+        Event e=dao.findEvent(m.idEvent);
+        e.addOrder("addphoto");
+        m.setValidate(true);
+        dao.save(m);
+        dao.save(e);
+    }
+
+    @ApiMethod(name = "delmessage", httpMethod = ApiMethod.HttpMethod.GET, path = "delmessage")
+    public void delmessage(@Named("message") String id) {
+        Message m=dao.findMessage(id);
+        User u=dao.findUser(m.from);
+        dao.delete(m);
+        u.score-=10;
+        dao.save(u);
+    }
+
+
+    @ApiMethod(name = "blacklist", httpMethod = ApiMethod.HttpMethod.GET, path = "blacklist")
+    public void blacklist(@Named("user") String id) {
+        User u=dao.findUser(id);
+        Event e=dao.findEvent(u.currentEvent);
+        e.addBlacklist(u);
+        u.score-=20;
+        dao.save(e);
+        dao.save(u);
+    }
+
+
     @ApiMethod(name = "geteventsfrom", httpMethod = ApiMethod.HttpMethod.GET, path = "geteventsfrom")
     public List<Event> geteventsfrom(@Named("user") String user) {
         User u=dao.findUser(user);
@@ -114,7 +146,6 @@ public class Rest {
                 dao.save(e);
             }
 
-
             User u=dao.findUser(user);
             if(u!=null)
                 if(Tools.distance(lat,lng,u.getLat(),u.getLng())>500){ //Si l'utilisateur à beaucoup bouger on met a jour sa position
@@ -122,7 +153,6 @@ public class Rest {
                     u.setLat(lat);
                     dao.save(u);
                 }
-
         }
 
         Long delay=System.currentTimeMillis()-e.getDtOrder("playlist");
@@ -197,7 +227,6 @@ public class Rest {
     }
 
 
-
     @ApiMethod(name = "join", httpMethod = ApiMethod.HttpMethod.GET, path = "join")
     public User join(@Named("event") String id,
                      @Named("user") String user,
@@ -256,7 +285,6 @@ public class Rest {
         Event e=dao.findEvent(event);
         if(e==null)return;
         dao.razlocalfile(event);
-
         //TODO: suppression des chansons locales dans la playlist
     }
 
@@ -425,7 +453,7 @@ public class Rest {
 
         List<Photo> rc = new ArrayList<Photo>();
 
-        for (Photo m : dao.getPhotosSince(e, date)) {
+        for (Photo m : dao.getPhotosSince(e, date,true)) {
             if (from==null || m.getAuthor().equals(from))
                 if (m.photo != null || m.getText() != null) {
                     m.user=dao.findUser(m.from);
@@ -522,7 +550,7 @@ public class Rest {
         Event e=dao.findEvent(idEvent);
         if(e!=null && password.equalsIgnoreCase(PASSWORD_MAIL)){
             List<Photo> rc=new ArrayList<>();
-            for(Photo p:dao.getPhotosSince(e,0)){
+            for(Photo p:dao.getPhotosSince(e,0,true)){
                 if(p.getDtBackup()==null){
                     p.setDtBackup(System.currentTimeMillis());
                     dao.save(p);
@@ -551,8 +579,8 @@ public class Rest {
     }
 
     @ApiMethod(name = "lastphoto", httpMethod = ApiMethod.HttpMethod.GET, path = "lastphoto")
-    public Photo lastphoto(@Named("event") String id) {
-        return dao.getLastPhoto(id);
+    public Photo lastphoto(@Named("event") String id,@Named("validate") Boolean validate) {
+        return dao.getLastPhoto(id,validate);
     }
 
 
@@ -620,7 +648,7 @@ public class Rest {
     public Event sendinvite(@Named("event") String id,@Named("dests") String dests,@Named("from") String from,@Named("shorturl") String shorturl) {
         Event e = dao.findEvent(id);
         if (e != null) {
-            e.sendInvite(dests, from,shorturl);
+            e.sendInvite(dests,dao.findUser(from),shorturl);
         }
         return(e);
     }

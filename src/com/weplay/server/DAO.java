@@ -84,7 +84,6 @@ public class DAO  {
         ofy().delete().keys(ofy().load().type(Song.class).keys().list());
         ofy().delete().keys(ofy().load().type(User.class).keys().list());
         ofy().delete().keys(ofy().load().type(Vote.class).keys().list());
-
         ofy().delete().keys(ofy().load().type(Event.class).keys().list());
         ofy().delete().keys(ofy().load().type(LocalFile.class).keys().list());
         ofy().delete().keys(ofy().load().type(Blob.class).keys().list());
@@ -129,32 +128,14 @@ public class DAO  {
         return lp;
     }
 
-	public List<Photo> getPhotosSince(Event e,long dt) {
+	public List<Photo> getPhotosSince(Event e,long dt,Boolean validate) {
         return join(ofy().load().type(Photo.class)
                 .filter("dtCreate >", dt)
+                .filter("validate", validate)
                 .filter("idEvent", e.Id)
                 .list());
     }
 
-	/**
-	 * Retrouve l'evenement d'un message
-	 * @param
-	 * @return
-
-	public Event findEvents(Message m){
-		for(Event e:ofy().load().type(Event.class).filter("dtStart <", m.dtMessage)
-								.filter("dtEnd >", m.dtMessage).list()){
-			
-			Collection<Event> lu=ofy().load().type(Event.class).ids(e.Presents).values();
-			User u=ofy().load().type(User.class).id(m.from).now();
-			
-			if(lu.contains(u))return(e);
-		}
-		
-		return null;
-	}
-     */
-	
 	/**
 	 * Donne les message depuis x heure
 	 * @param delay nombre de d'heure
@@ -162,7 +143,7 @@ public class DAO  {
 	 */
 	public List<Photo> getMessagesFrom(Event e,Long delay) {
 		Long dt=System.currentTimeMillis()-3600*delay*1000;
-		return getPhotosSince(e,dt);
+		return getPhotosSince(e,dt,true);
 	}
 	
 
@@ -304,15 +285,24 @@ public class DAO  {
 
     public List<Photo> getPhoto(String event, long dtStart, long dtEnd) {
         List<Photo> rc=new ArrayList<Photo>();
-        for(Photo p:ofy().load().type(Photo.class).filter("idEvent", event).filter("dtCreate >",dtStart).list())
+        for(Photo p:ofy().load().type(Photo.class)
+                .filter("idEvent", event)
+                .filter("validate",true)
+                .filter("dtCreate >", dtStart).list())
             if(p.dtCreate<dtEnd)rc.add(join(p));
 
         return rc;
     }
 
 
-    public Photo getLastPhoto(String idevent) {
-        List<Photo> rc=ofy().load().type(Photo.class).filter("idEvent", idevent).order("dtCreate").list();
+    public Photo getLastPhoto(String idevent,Boolean validate) {
+        List<Photo> rc=ofy()
+                .load().type(Photo.class)
+                .filter("idEvent", idevent)
+                .filter("validate", validate)
+                .order("dtCreate")
+                .list();
+
         if(rc.size()>0)
             return join(rc.get(rc.size()-1));
         else
@@ -406,7 +396,7 @@ public class DAO  {
 
 
 
-    public static void sendMail(String dest,String from,String subject,String body){
+    public static void sendMail(String dest,String country,String from,String subject,String body,List<String> params){
         /*
         Properties props = new Properties();
         Session session = Session.getDefaultInstance(props, null);
@@ -423,6 +413,19 @@ public class DAO  {
             e.printStackTrace();
         }
         */
+        if(body.startsWith("#")){
+            String file=body.substring(1);
+            file=file.replace(".htm","_"+country+".htm");
+
+            body="{\"file\":\""+file+"\"";
+            if(params!=null && params.size()>0)
+                for(int i=0;i<params.size();i++){
+                    body+=",\"param"+i+"\":\""+params.get(i).replaceAll("\"","'")+"\"";
+                }
+            body+="}";
+        }
+
+
         Mail m=new Mail(body,subject,from,dest);
         ofy().save().entity(m);
 
@@ -432,4 +435,7 @@ public class DAO  {
         ofy().delete().entity(e).now();
     }
 
+    public void delete(Message m) {
+        ofy().delete().entity(m);
+    }
 }

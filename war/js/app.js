@@ -44,7 +44,18 @@ App.config(function($stateProvider,$ionicConfigProvider,$urlRouterProvider,Faceb
         'SELEVENT.LOCALISE': "Find me",
         'INVITE.SEND':"Send",
         'PHOTO.DOWNLOAD':"Photos download",
-         'ADDEVENT.APARTIRDE':"Start time"
+        'ADDEVENT.APARTIRDE':"Start time",
+        'INVITE.CANCEL':"probleme to invite",
+        'INVITE.YOURSELF':"you can't invite yourself",
+        'INVITE.CONFIRM':" receive invite in 2 minutes",
+        'SEARCH.WAITING':"Searching",
+        'PROFIL.DELPHOTO':"Block !",
+        'PROFIL.VALIDATE':"Right !",
+        'PROFIL.BLACKLIST':"Blacklist",
+        'PHOTO.ENTERMESSAGE':"Enter the message",
+        'PHOTO.SENDED':"Photo sended",
+        'PHOTO.NOTSENDED':"Photo not sended",
+        'ADDEVENT.NEEDLOC':"You must set a position for the event"
     });
 
     $translateProvider.translations('fr',{
@@ -78,8 +89,18 @@ App.config(function($stateProvider,$ionicConfigProvider,$urlRouterProvider,Faceb
         'ADDEVENT.WEBSITE':"Site web de l'événement",
         'INVITE.COPY':"Copier le lien",
         'INVITE.SEND':"Envoyer",
-        'PHOTO.DOWNLOAD':"Télécharger mes photos"
-
+        'PHOTO.DOWNLOAD':"Télécharger mes photos",
+        'INVITE.CANCEL':"Probleme pour envoyer l'invitation",
+        'INVITE.YOURSELF':"Vous ne pouvez pas vous inviter vous même",
+        'INVITE.CONFIRM':" recevra l'invitation dans 2 minutes",
+        'SEARCH.WAITING':"Recherche",
+        'PROFIL.DELPHOTO':"Bloquer !",
+        'PROFIL.VALIDATE':"Valider !",
+        'PROFIL.BLACKLIST':"Blacklister",
+        'PHOTO.ENTERMESSAGE':"Entrer votre message",
+        'PHOTO.SENDED':"Photo envoyée",
+        'PHOTO.NOTSENDED':"Photo non envoyée",
+        'ADDEVENT.NEEDLOC':"Vous devez préciser une position pour créer un événement"
     });
 
     $translateProvider.preferredLanguage('en');

@@ -18,7 +18,6 @@ App.controller("tabsCtrl", function($scope,$state,$interval,$ionicHistory) {
         }
 
         $state.go("selEvent", {}, {reload: true})
-
     }
 
 
@@ -47,7 +46,6 @@ App.controller("tabsCtrl", function($scope,$state,$interval,$ionicHistory) {
                     timerPhotos = null;
                 }
 
-
                 refresh_event(myevent.id,
                     function () {
                         if (
@@ -55,8 +53,8 @@ App.controller("tabsCtrl", function($scope,$state,$interval,$ionicHistory) {
                             !contain(user, myevent.Presents) ||
                             myevent.dtEnd<new Date()
                         ) quitEvent();
-
                     },
+
                     function () {
                         $$("RefreshEvent: l'event n'existe plus");
                         leave(user.id, myevent.id, $interval, quitEvent);
