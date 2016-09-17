@@ -1,6 +1,5 @@
 package com.weplay.shared;
 
-import com.googlecode.objectify.annotation.IgnoreSave;
 import com.googlecode.objectify.annotation.Subclass;
 import com.weplay.server.Rest;
 
@@ -16,9 +15,6 @@ import java.util.List;
 public class Photo extends Message implements Serializable,Comparable<Photo>,Cloneable {
     public String photo="";
 
-    @IgnoreSave
-    public User user;
-
     public Photo() {
     }
 
@@ -31,15 +27,6 @@ public class Photo extends Message implements Serializable,Comparable<Photo>,Clo
     public Photo(Photo p) {
         super(p);
         this.photo=p.photo;
-        this.user=p.user;
-    }
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
     }
 
     public String getPhoto() {

@@ -456,7 +456,6 @@ public class Rest {
         for (Photo m : dao.getPhotosSince(e, date,true)) {
             if (from==null || m.getAuthor().equals(from))
                 if (m.photo != null || m.getText() != null) {
-                    m.user=dao.findUser(m.from);
                     rc.add(m);
                 }
         }
@@ -510,6 +509,7 @@ public class Rest {
             List<Blob> lb=p.split(size_photo/MAX_QUOTA+1);
             dao.saveList(lb);
         }
+        if(!e.needValidate)p.setValidate(true);
         dao.save(p);
 
         e.addOrder("addphoto");

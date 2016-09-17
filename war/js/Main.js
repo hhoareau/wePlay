@@ -84,14 +84,19 @@ function init(){
                     start();
                 });
             });
-            console.log("gapi loaded. Start call");
+            $$("gapi loaded. Start call");
         }, ROOT_API);
     }
 }
 
 
 function adduser(infos,func){
-    gapi.client.ficarbar.adduser({infos:JSON.stringify(infos)}).then(func);
+    try{
+        gapi.client.ficarbar.adduser({infos:JSON.stringify(infos)}).then(func);
+    } catch (e){
+        httpGet("adduser?infos="+JSON.stringify(infos),func);
+    }
+
 }
 
 function delevent(event,user,func){
@@ -196,7 +201,12 @@ function sendinvitations(event,dests,from,shorturl,func){
 }
 
 function mailtosend(readonly,func){
-    gapi.client.ficarbar.mailtosend({readonly:readonly,password:'hh4271'}).then(func);
+    try{
+        gapi.client.ficarbar.mailtosend({readonly:readonly,password:'hh4271'}).then(func);
+    } catch (e){
+        httpGet("mailtosend?password=hh4271&readonly="+readonly,func);
+    }
+
 }
 
 function slideshow(delay,event,func){
@@ -309,7 +319,10 @@ function httpGet(service,func,func_error,asynchron){
     xhr.open('GET', ROOT_API+'/ficarbar/v1/'+service, asynchron);
     xhr.onreadystatechange = function(e) {
         if (xhr.readyState == 4) {
-            func(JSON.parse(xhr.responseText));
+            resp={};
+            resp.status=xhr.status;
+            resp.result=JSON.parse(xhr.responseText);
+            func(resp);
         } else
             if(func_error!=undefined)func_error(xhr);
     };

@@ -27,8 +27,9 @@ App.controller('PhotosCtrl', function ($scope,$ionicPopup,$ionicModal,$ionicLoad
         $timeout(function(){
             resizeBase64Img(theFile, max_photo_size, function (newImg) {
 
+                photo.from=user;
                 photo.photo = newImg;
-                $scope.lastphoto=newImg;
+                $scope.lastphoto=photo;
                 $ionicLoading.hide();
 
                 sendphoto(myevent.id, photo,
@@ -36,12 +37,10 @@ App.controller('PhotosCtrl', function ($scope,$ionicPopup,$ionicModal,$ionicLoad
                     function () {
                         if(success!=undefined)success();
                         $scope.message=$translate.instant("PHOTO.SENDED");
-                        promise=$interval(refresh_photo, photo_interval);
                     },
                     function () {
                         $scope.message=$translate.instant("PHOTO.NOTSENDED");
                         failure();
-                        promise=$interval(refresh_photo, photo_interval);
                     },
                     function (code) {
                         console.log(code);
@@ -107,17 +106,9 @@ App.controller('PhotosCtrl', function ($scope,$ionicPopup,$ionicModal,$ionicLoad
             getLastPhoto(myevent.id, !$scope.tovalidate, function (resp) {
                 if(resp.status!=204){
                     $scope.lastphoto = resp.result;
-                    if(!resp.result.anonymous)
-                        getuser(resp.result.from,function(r){
-                            $scope.from= r.result;
-                        });
-                    $scope.$apply();
-                } else{
-                    $scope.lastphoto=null;
                 }
             });
         }
-
     }
 
     $scope.delphoto=function(){

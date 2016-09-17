@@ -106,8 +106,7 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
                         $state.go("tabs.home",{},{reload:true});
                 });
             }
-            else
-                $scope.message=$translate.instant(user.message);
+            else $scope.message=$translate.instant(user.message);
         });
     };
 

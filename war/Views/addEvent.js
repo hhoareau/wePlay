@@ -139,7 +139,7 @@ App.controller("addEventCtrl", function($scope,$ionicModal,$ionicPlatform,$state
 
             if($scope.event.autoflyer){
                 addText(ctx,20,20,"white",20,$scope.event.title,null,200);
-                addText(ctx,20,30,"white",13,address,null,300);
+                addText(ctx,20,40,"white",13,address,null,300);
                 addText(ctx,canvas.width-textWidth(ctx,18,sDate)-30,canvas.height-40,"white",18,sDate,null,300);
             }
 

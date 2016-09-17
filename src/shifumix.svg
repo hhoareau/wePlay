@@ -24,9 +24,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.9899495"
+     inkscape:zoom="0.65"
      inkscape:cx="320.75119"
-     inkscape:cy="783.51322"
+     inkscape:cy="466.69732"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -448,5 +448,47 @@
            x="99.869499"
            y="283.35153" /></text>
     </g>
+    <path
+       style="opacity:1;fill:#008000;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:3.09772015;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0"
+       d="M 41.855469 589.36328 C 37.304336 589.36328 33.640625 593.02699 33.640625 597.57812 L 33.640625 711.07422 C 33.640625 715.62535 37.304336 719.28906 41.855469 719.28906 L 137.22852 719.28906 A 260 50 0 0 1 375.38477 689.28516 A 260 50 0 0 1 613.3418 719.28906 L 701.31445 719.28906 C 705.86559 719.28906 709.5293 715.62535 709.5293 711.07422 L 709.5293 597.57812 C 709.5293 593.02699 705.86559 589.36328 701.31445 589.36328 L 41.855469 589.36328 z "
+       id="rect4237"
+       inkscape:export-filename="D:\Users\U016272\workspace\wePlay\war\entete_mail.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90" />
+    <g
+       id="g4239"
+       transform="matrix(1.5848229,0,0,1.3912824,-9.4109148,256.28193)"
+       inkscape:export-filename="D:\Users\U016272\workspace\wePlay\war\entete_mail.png"
+       inkscape:export-xdpi="90"
+       inkscape:export-ydpi="90"
+       style="fill:#ffffff">
+      <text
+         transform="scale(0.96895524,1.0320394)"
+         sodipodi:linespacing="125%"
+         id="text4241"
+         y="284.44604"
+         x="37.264881"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:50.69146729px;line-height:125%;font-family:'Arial Rounded MT Bold';-inkscape-font-specification:'Arial Rounded MT Bold, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+         xml:space="preserve"><tspan
+           y="284.44604"
+           x="37.264881"
+           id="tspan4243"
+           sodipodi:role="line">ShifumiX</tspan></text>
+    </g>
+    <text
+       inkscape:export-ydpi="90"
+       inkscape:export-xdpi="90"
+       inkscape:export-filename="D:\Users\U016272\workspace\wePlay\war\entete_mail.png"
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:23.17667198px;line-height:125%;font-family:'Arial Rounded MT Bold';-inkscape-font-specification:'Arial Rounded MT Bold, Normal';text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:1px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       x="494.47787"
+       y="677.56097"
+       id="text4245"
+       sodipodi:linespacing="125%"
+       transform="scale(1.0859959,0.92081379)"><tspan
+         sodipodi:role="line"
+         id="tspan4247"
+         x="494.47787"
+         y="677.56097">Social DJing</tspan></text>
   </g>
 </svg>

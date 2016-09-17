@@ -12,7 +12,7 @@
     <script src="MusicPlayer.js"></script>
     <script src="https://apis.google.com/js/client.js?onload=init"></script>
 
-    <title>Players</title>
+    <title>Shifumix music player</title>
 </head>
 
 <body>
@@ -32,9 +32,9 @@
     <div id="lblMessage"></div>
     <br>
     <div style="width; 100%;text-align: center;">
-        <div id="dj" style="display: inline-block; max-width: 300px;">
+        <div id="dj" style="display: inline-block; max-width: 300px;"> <!-- border-color: red; border-style: solid;"> -->
             <img id="djlogo" src="/img/dj.png">
-            <div id="djname" style="position:absolute;left:43%;top:25%;"></div>
+            <div id="djname" style="z-index:3;display:block;position:fixed;width:100px;"></div>
         </div>
         <br>
         <div id="players" style="display:inline-block;text-align:center;">
@@ -50,12 +50,20 @@
         <div style="display: inline-block;">
             <table>
                 <tr>
-                    <td><a class="mobilebutton" href="javascript:logoutDeezer()">Deezer Account</a></td>
-                    <td><a class="mobilebutton" href="javascript:playNextSong()">Next Song</a></td>
                     <td>
+                        Account to <div style="display:inline" id="labelDeezerAccount"></div><br>
+                        <a class="mobilebutton" href="javascript:logoutDeezer()">Change account</a>
+                    </td>
+                    <td>
+                        Next Song:<br>
+                        <a class="mobilebutton" href="javascript:playNextSong()">Next Song</a>
+                    </td>
+                    <td>
+
+                        <div style="display:inline" id="labelSongLoaded">0</div>&nbsp;song loaded<br>
                         <div class="image-upload">
                             <label for="fileselector">
-                                <a class="mobilebutton">My songs</a>
+                                <a class="mobilebutton">Load songs</a>
                                 <!-- <img src="/img/home.png" style="width:40px"> -->
                             </label>
 

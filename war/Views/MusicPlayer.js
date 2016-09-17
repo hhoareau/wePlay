@@ -142,6 +142,7 @@ function analyseDirectory(finder, func) {
             informe("Directory uploading ...",true);
             uploadfiles({files: lst}, function () {
                 informe(lst.length + " songs loaded");
+                $("labelSongLoaded").innerHTML=lst.length;
             });
         }
         else
@@ -262,7 +263,10 @@ function playNextSong() {
                     if(song.from!=undefined){
                         var djname=song.from.firstname;
                         if(djname.length>15)djname=djname.substr(0,15);
-                        $("djname").innerHTML="<span style='font-size:x-large; color: #ffffff;'>"+djname+"</span>";
+                        $("djname").innerHTML="<span style='font-size:large; color: white;'>"+djname+"</span>";
+                        var dj_zone=$("dj");
+                        $("djname").style.top=dj_zone.offsetTop+130;
+                        $("djname").style.left=dj_zone.offsetLeft+dj_zone.clientWidth/2-$("djname").clientWidth/2;
                     }
 
                     $$("Duree actuel du titre : "+song.duration);
