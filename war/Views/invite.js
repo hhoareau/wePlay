@@ -2,7 +2,7 @@
  * Created by u016272 on 04/08/2016.
  */
 
-App.controller('InviteCtlr', function ($scope,clipboard,$translate){
+App.controller('InviteCtlr', function ($scope,clipboard,$translate,$ionicModal){
     initGlobal($translate);
 
     $scope.email={dest:"",personal:true,from:user.email};

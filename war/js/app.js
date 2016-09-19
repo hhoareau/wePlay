@@ -72,7 +72,8 @@ App.config(function($stateProvider,$ionicConfigProvider,$urlRouterProvider,Faceb
         'PROFIL.TUTO':"Passez en anonyme ne pas divulguer votre identité dans les photos et musique proposée",
         'SELEVENT.TUTOJOIN':"Un événement est sélectionné, vous pouvez en faire partie un cliquant sur 'rejoindre'",
         'SEARCH.TUTO':"Rechercher un artist ou un titre parmis le catalogue de Deezer, YouTube ou votre propres titres",
-        'SEARCH.TUTOSEL':"Cliquer sur le titre que vous souhaitez ajouter à la playlist"
+        'SEARCH.TUTOSEL':"Cliquer sur le titre que vous souhaitez ajouter à la playlist",
+        'CHARTS.TUTO':"Retrouver la liste des participants, avec leur score général et leur score de l'événement"
 
     });
 
@@ -136,6 +137,7 @@ App.config(function($stateProvider,$ionicConfigProvider,$urlRouterProvider,Faceb
         'PROFIL.TUTO':"Passez en anonyme ne pas divulguer votre identité dans les photos et musique proposée",
         'SEARCH.TUTO':"Rechercher un artist ou un titre parmis le catalogue de Deezer, YouTube ou votre propres titres",
         'SELEVENT.TUTOJOIN':"Un événement est sélectionné, vous pouvez en faire partie un cliquant sur 'rejoindre'",
+        'CHARTS.TUTO':"Retrouver la liste des participants, avec leur score général et leur score de l'événement",
         'SEARCH.TUTOSEL':"Cliquer sur le titre que vous souhaitez ajouter à la playlist"
     });
 

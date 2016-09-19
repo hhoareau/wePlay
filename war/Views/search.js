@@ -1,4 +1,4 @@
-App.controller('SearchCtrl',function($scope,$state,$ionicHistory,$translate,$ionicLoading,$window){
+App.controller('SearchCtrl',function($scope,$state,$ionicModal,$ionicHistory,$translate,$ionicLoading,$window){
     initGlobal($translate);
 
     $scope.viewCharts = function () {
@@ -127,10 +127,9 @@ App.controller('SearchCtrl',function($scope,$state,$ionicHistory,$translate,$ion
         $ionicHistory.goBack();
     }
 
-    $scope.$on("$ionicView.afterEnter", function(){
+    $scope.$on("$ionicView.loaded", function(){
         $scope.search();
         tuto(user,"SEARCH.TUTO",$ionicModal,$scope,$translate,function(){
-
         });
     });
 
