@@ -15,7 +15,7 @@ App.config(function($stateProvider,$ionicConfigProvider,$urlRouterProvider,Faceb
         'ADDEVENT.ADDRESS':'Address of the event',
         'ADDEVENT.DURATION':'Duration',
         'ADDEVENT.SAVE':'Save',
-        'SELEVENT.CREATE':'Your Event',
+        'SELEVENT.CREATE':'Make Your Event',
         'SELEVENT.WELCOME':'Hello, Find an event !',
         'ADDEVENT.PASSWORD': "Password to enter (optional)",
         'ADDEVENT.START': "Start",
@@ -55,7 +55,25 @@ App.config(function($stateProvider,$ionicConfigProvider,$urlRouterProvider,Faceb
         'PHOTO.ENTERMESSAGE':"Enter the message",
         'PHOTO.SENDED':"Photo sended",
         'PHOTO.NOTSENDED':"Photo not sended",
-        'ADDEVENT.NEEDLOC':"You must set a position for the event"
+        'ADDEVENT.NEEDLOC':"You must set a position for the event",
+        'ADDEVENT.NEEDVALIDATE':"Moderation needed to publish",
+        'SELEVENT.JOIN':"Join the event",
+
+        //Les tutos
+        'SELEVENT.TUTO':"Sélectionner un événement sur la carte ou fabriquez en un",
+        'ADDEVENT.TUTO':"Pour créer votre événement, donner au moins un titre et une date de début",
+        'ADDEVENT.TUTO_VALIDATE':"Toutes les photos devront être validé par vous avant d'être diffusées",
+        'HOME.TUTO':"Ajouter votre propre musique dans la playlist de l'événement",
+        'HOME.TUTOWITHMUSIC':"Voter pour ou contre les titres de la playlist pour changer l'ordre de passage",
+        'PHOTO.TUTO':"Prenez une photo depuis votre téléphone, ajoutez un commentaire et partagez la avec tous les parcipants",
+        'PHOTO.TUTOADMIN':"Partager vos photos mais surtout validez les photos des participants avant leur diffusion",
+        'INVITE.TUTO':"Vous amis peuvent flasher le code pour rentrer directement dans la soirée. Vous pouvez également envoyer des invitations par directement par mail",
+        'PROFIL.TUTOADMIN':"Contrôler la soirée et lancer les écrans de partage de photo ou le DJ automatique",
+        'PROFIL.TUTO':"Passez en anonyme ne pas divulguer votre identité dans les photos et musique proposée",
+        'SELEVENT.TUTOJOIN':"Un événement est sélectionné, vous pouvez en faire partie un cliquant sur 'rejoindre'",
+        'SEARCH.TUTO':"Rechercher un artist ou un titre parmis le catalogue de Deezer, YouTube ou votre propres titres",
+        'SEARCH.TUTOSEL':"Cliquer sur le titre que vous souhaitez ajouter à la playlist"
+
     });
 
     $translateProvider.translations('fr',{
@@ -67,6 +85,7 @@ App.config(function($stateProvider,$ionicConfigProvider,$urlRouterProvider,Faceb
         'ADDEVENT.SAVE':'Enregistrer',
         'ADDEVENT.START': "Start",
         'SELEVENT.CREATE':'Créer un évenement',
+        'ADDEVENT.NEEDVALIDATE':"Modération des photos",
         'SELEVENT.WELCOME':'Bonjour, Trouver un événement !',
         'ADDEVENT.PASSWORD': "Mot de passe",
         'ADDEVENT.LABELSONG': "titres",
@@ -100,7 +119,24 @@ App.config(function($stateProvider,$ionicConfigProvider,$urlRouterProvider,Faceb
         'PHOTO.ENTERMESSAGE':"Entrer votre message",
         'PHOTO.SENDED':"Photo envoyée",
         'PHOTO.NOTSENDED':"Photo non envoyée",
-        'ADDEVENT.NEEDLOC':"Vous devez préciser une position pour créer un événement"
+        'ADDEVENT.NEEDLOC':"Vous devez préciser une position pour créer un événement",
+        'SELEVENT.JOIN':"Rejoindre",
+
+
+        //Les tutos
+        'SELEVENT.TUTO':"Sélectionner un événement sur la carte ou fabriquez en un",
+        'ADDEVENT.TUTO':"Pour créer votre événement, donner au moins un titre et une date de début",
+        'ADDEVENT.TUTO_VALIDATE':"Toutes les photos devront être validé par vous avant d'être diffusées",
+        'HOME.TUTO':"Ajouter votre propre musique dans la playlist de l'événement",
+        'HOME.TUTOWITHMUSIC':"Voter pour ou contre les titres de la playlist pour changer l'ordre de passage",
+        'PHOTO.TUTO':"Prenez une photo depuis votre téléphone, ajoutez un commentaire et partagez la avec tous les parcipants",
+        'PHOTO.TUTOADMIN':"Partager vos photos mais surtout validez les photos des participants avant leur diffusion",
+        'INVITE.TUTO':"Vous amis peuvent flasher le code pour rentrer directement dans la soirée. Vous pouvez également envoyer des invitations par directement par mail",
+        'PROFIL.TUTOADMIN':"Contrôler la soirée et lancer les écrans de partage de photo ou le DJ automatique",
+        'PROFIL.TUTO':"Passez en anonyme ne pas divulguer votre identité dans les photos et musique proposée",
+        'SEARCH.TUTO':"Rechercher un artist ou un titre parmis le catalogue de Deezer, YouTube ou votre propres titres",
+        'SELEVENT.TUTOJOIN':"Un événement est sélectionné, vous pouvez en faire partie un cliquant sur 'rejoindre'",
+        'SEARCH.TUTOSEL':"Cliquer sur le titre que vous souhaitez ajouter à la playlist"
     });
 
     $translateProvider.preferredLanguage('en');
@@ -119,7 +155,6 @@ App.config(function($stateProvider,$ionicConfigProvider,$urlRouterProvider,Faceb
             templateUrl: 'Views/selEvent.html',
             controller: 'selEventCtrl'
         })
-
 
         .state('login', {
             url: '/login',
@@ -182,7 +217,6 @@ App.config(function($stateProvider,$ionicConfigProvider,$urlRouterProvider,Faceb
             controller: 'addEventCtrl'
         })
 
-
         .state('tabs.invite', {
             url: '/invite?event&email',
             parent: 'tabs',
@@ -207,7 +241,6 @@ App.config(function($stateProvider,$ionicConfigProvider,$urlRouterProvider,Faceb
 
     $urlRouterProvider.otherwise('/start');
     });
-
 
 
 App.run(function($ionicPlatform,$window){

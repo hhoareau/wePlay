@@ -147,7 +147,7 @@ public class User implements Comparable<User> {
 
 	@Override
 	public int compareTo(User o) {
-		if(o.score>this.score)
+		if(o.scoreEvent>this.scoreEvent)
 			return 1;
 		else
 			return -1;

@@ -262,7 +262,20 @@ function playNextSong() {
                 players[r.new].player.play(idSong, 2, function () {
                     if(song.from!=undefined){
                         var djname=song.from.firstname;
-                        if(djname.length>15)djname=djname.substr(0,15);
+                        if(djname.length>15){
+                            if(djname.indexOf(" ")==-1)
+                                djname=djname.substr(0,15);
+                            else{
+                                var wrds=djname.split(" ");
+                                var initials="";
+                                wrds.forEach(function(wrd){
+                                    initials+=wrd.substr(0,1);
+                                });
+                                djname=initials;
+                            }
+                        }
+
+
                         $("djname").innerHTML="<span style='font-size:large; color: white;'>"+djname+"</span>";
                         var dj_zone=$("dj");
                         $("djname").style.top=dj_zone.offsetTop+130;

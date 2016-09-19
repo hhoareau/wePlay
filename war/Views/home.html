@@ -29,7 +29,7 @@
                 </div>
                 <div class="col col-center item-text-wrap text-left">
                     <span style="font-size: small">{{song.shortTitle}}</span>
-                    <span style="font-size: x-small" ng-hide="song.from.anonymous"> by {{song.from.firstname}}</span>
+                    <span style="font-size: x-small" ng-hide="song.from.anonymous || song.vote==false"> by {{song.from.firstname}}</span>
                     <br><span style="font-size: x-small">{{song.author}}</span>
                 </div>
                 <div class="col col-10 col-center text-right" style="margin-right:3px;font-size:2em;">

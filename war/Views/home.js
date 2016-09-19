@@ -65,9 +65,13 @@ App.controller('HomeCtrl', function ($scope,$interval,$state,$translate,$window,
         initGlobal($translate);
         $scope.event=myevent;
 
-        if(user.connexions.length<2){
-            tuto(user,"help_home",$ionicModal,$scope);
-        }
+        if($scope.songs==undefined || $scope.songs.length==0)
+            tuto(user,"HOME.TUTO",$ionicModal,$scope,$translate);
+        else
+            tuto(user,"home",$ionicModal,$scope,function(){
+                tuto(user,"HOME.TUTOWITHMUSIC",$ionicModal,$scope,$translate);
+            });
+
     });
 
 

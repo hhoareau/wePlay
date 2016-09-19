@@ -38,19 +38,23 @@ function showClassement(idEvent,zone){
 
 
 function start(){
-    var idEvent=getParam()["event"];
     initGlobal();
-    showClassement(idEvent,$("zone"));
+    showClassement(getParam()["event"],$("zone"));
+
+    startFullScreen();
 
     setInterval(function(){
-        showClassement(idEvent,$("zone"));
+        showClassement(getParam()["event"],$("zone"));
     },20000);
 
     setInterval(function(){
-        var delay=myevent.dtEnd-new Date();
-        if(delay<0)location.href="/Views/winners.html?event="+idEvent;
-        var affichage =new Date(delay).toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
-        $("clock").innerHTML=affichage;
+        initGlobal();
+        if(myevent==null)
+            location.href="/Views/winners.html?event="+getParam()["event"];
+        else{
+            var affichage =new Date(delay).toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
+            $("clock").innerHTML=affichage;
+        }
     },1000);
 }
 

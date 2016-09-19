@@ -45,7 +45,10 @@
 <script>
     function razAll(){
         raz(function(){
-            location.href="/index.html";
+            if(navigator.onLine)
+                location.href="/index.html";
+            else
+                connexionDirecte();
         });
     }
 
@@ -58,7 +61,22 @@
 
         adduser(infos,function(user){
             window.localStorage.setItem("user",JSON.stringify(user.result));
-            document.href="main.html#/selEvent";
+
+            evt={};
+            evt.title="evt test";
+            evt.dtStart=new Date().getTime();
+            evt.dtFin=evt.dtStart+500000;
+            evt.owner=user.result;
+            evt.lat=48;
+            evt.lng=2;
+            addevent(user.result.id,evt,10,function(r){
+                window.localStorage.setItem("event",JSON.stringify(r.result));
+                join(r.result.id,user.result.id,"","",function(rep){
+                    window.localStorage.setItem("user", JSON.stringify(rep.result));
+                    window.localStorage.setItem("lastorder",0)
+                    window.open("/main.html#/home");
+                });
+            });
         });
     }
 
@@ -72,11 +90,12 @@
         $("console").style.visibility="visible";
         $("inbox").innerHTML="";
 
-        mailtosend(true,function(resp){
-            resp.result.items.forEach(function(mail){
-                $("inbox").innerHTML+="from:"+mail.from+",to:"+mail.to+"="+mail.body+"<br>";
+        if(navigator.onLine)
+            mailtosend(true,function(resp){
+                resp.result.items.forEach(function(mail){
+                    $("inbox").innerHTML+="from:"+mail.from+",to:"+mail.to+"="+mail.body+"<br>";
+                });
             });
-        });
 
         /*
         geteventsaround({lat:48,lng:2},function(resp){
@@ -91,6 +110,8 @@
         for(var i=0;i<scenarii.length;i++)
             $("scenarios").innerHTML+="<a href='javascript:scenario("+i+")'>"+scenarii[i]+"</a><br>";
     }
+
+    if(!navigator.onLine)start();
 </script>
 
 </body>

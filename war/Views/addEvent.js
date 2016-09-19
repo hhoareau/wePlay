@@ -15,6 +15,20 @@ App.controller("addEventCtrl", function($scope,$ionicModal,$ionicPlatform,$state
         { text: "Local", checked: true }
     ];
 
+    reverse_geocode=function(){
+        new google.maps.Geocoder().geocode({location:target.position},function(results, status) {
+            if (status === google.maps.GeocoderStatus.OK) {
+                if (results[0]) {
+                    $scope.event.address=results[0].formatted_address;
+                } else {
+                    $scope.event.address="";
+                }
+                $scope.$apply();
+                $scope.onChangePicture();
+            }
+        });
+    }
+
     $scope.$on('mapInitialized', function(event, map) {
         $scope.map2 = map;
         event.stopPropagation();
@@ -22,6 +36,12 @@ App.controller("addEventCtrl", function($scope,$ionicModal,$ionicPlatform,$state
         $scope.map2.addListener("mousedown",function(evt){
             $scope.event.address="";
         });
+
+        $scope.map2.addListener("mouseup",function(evt){
+            reverse_geocode();
+        });
+
+
 
         $scope.map2.addListener("center_changed",function(evt){
             if(target!=null){
@@ -34,6 +54,8 @@ App.controller("addEventCtrl", function($scope,$ionicModal,$ionicPlatform,$state
                    draggable: true,
                    map:this
                 });
+
+                reverse_geocode();
 
                 circle=new google.maps.Circle({
                     strokeColor: '#FF0000',
@@ -108,7 +130,7 @@ App.controller("addEventCtrl", function($scope,$ionicModal,$ionicPlatform,$state
     };
 
     $scope.showTutoValidate=function(){
-        tuto(user,"addevent_validate",$ionicModal,$scope);
+        tuto(user,"ADDEVENT.TUTOVALIDATE",$ionicModal,$scope,$translate);
     }
 
     $scope.onChangePicture=function(){
@@ -128,19 +150,31 @@ App.controller("addEventCtrl", function($scope,$ionicModal,$ionicPlatform,$state
             else
                 address=$scope.event.address;
 
+            if(address.length>30){
+                var pos=address.indexOf(",");
+                if(pos>15){
+                    address=address.substr(0,pos)+"<br>"+address.substr(pos+1);
+                }
+            }
+
 
             ctx.drawImage(i,0,0,canvas.width,canvas.height);
 
             var dtEnd=Date.parse($scope.event.dtStart)+$scope.event.duration*1000*3600;
             var sDate="Le "+$filter('date')($scope.event.dtStart,'dd/MM/yyyy')+
-                " de "+$filter('date')($scope.event.dtStart,'hh')+" a "+
-                $filter('date')(dtEnd,'hh')+"H";
+                " de "+$filter('date')($scope.event.dtStart,'h')+" a "+
+                $filter('date')(dtEnd,'h')+"H";
 
 
             if($scope.event.autoflyer){
                 addText(ctx,20,20,"white",20,$scope.event.title,null,200);
-                addText(ctx,20,40,"white",13,address,null,300);
-                addText(ctx,canvas.width-textWidth(ctx,18,sDate)-30,canvas.height-40,"white",18,sDate,null,300);
+                if(address.indexOf("<br>")>0){
+                    addText(ctx,20,45,"white",13,address.split("<br>")[0].trim(),null,200);
+                    addText(ctx,20,60,"white",13,address.split("<br>")[1].trim(),null,200);
+                }else
+                    addText(ctx,20,40,"white",13,address,null,200);
+
+                addText(ctx,canvas.width-textWidth(ctx,18,sDate)-30,canvas.height-30,"white",18,sDate,null,300);
             }
 
             $scope.event.flyer=canvas.toDataURL("image/jpeg");
@@ -176,7 +210,7 @@ App.controller("addEventCtrl", function($scope,$ionicModal,$ionicPlatform,$state
 
 
     $scope.$on("$ionicView.afterEnter", function(){
-        tuto(user,"help_addevent",$ionicModal,$scope);
+        tuto(user,"ADDEVENT.TUTO",$ionicModal,$scope,$translate);
     });
 
 });

@@ -134,8 +134,13 @@ function addScore(user,score,func){
     gapi.client.ficarbar.addscore({user:user,score:score}).then(func);
 }
 
+
 function join(event,email,password,from,func){
-    gapi.client.ficarbar.join({event:event,user:email,password:password,from:from}).then(func);
+    try{
+        gapi.client.ficarbar.join({event:event,user:email,password:password,from:from}).then(func);
+    } catch (e){
+        httpGet("join?event="+event+"&user="+email+"&password="+password+"&from="+from,func);
+    }
 }
 
 function querymusic(query,func){
@@ -177,6 +182,16 @@ function getClassement(event,func){
         httpGet("getclassement?event="+event,func);
     }
 }
+
+
+function getUserScore(event,func){
+    try{
+        gapi.client.ficarbar.getuserscore({event:event}).then(func);
+    } catch (e){
+        httpGet("getuserscore?event="+event,func);
+    }
+}
+
 
 function getLastPhoto(event,validate,func){
     try{
@@ -307,7 +322,11 @@ function httpPost(service,params,body,jauge,func){
 
     xhr.onreadystatechange = function(e) {
         if (xhr.readyState == 4) {
-            func(xhr.responseText);
+            obj={};
+            if(xhr.responseText.length>0)obj.result=JSON.parse(xhr.responseText);
+            obj.status=200;
+
+            func(obj);
         }
     };
     xhr.send(JSON.stringify(body));
@@ -321,7 +340,7 @@ function httpGet(service,func,func_error,asynchron){
         if (xhr.readyState == 4) {
             resp={};
             resp.status=xhr.status;
-            resp.result=JSON.parse(xhr.responseText);
+            if(xhr.responseText.length>0)resp.result=JSON.parse(xhr.responseText);
             func(resp);
         } else
             if(func_error!=undefined)func_error(xhr);
@@ -400,12 +419,18 @@ function senduser(user,update,func){
 }
 
 function addevent(email,event,nsongs,func,err_func){
-    var req= gapi.client.request({
-        path: ROOT_API+'/ficarbar/v1/addevent',
-        method: 'POST',
-        params: {user:email,nsongs:nsongs},
-        body:event
-    }).then(func,err_func);
+    try{
+        var req= gapi.client.request({
+            path: ROOT_API+'/ficarbar/v1/addevent',
+            method: 'POST',
+            params: {user:email,nsongs:nsongs},
+            body:event
+        }).then(func,err_func);
+    }
+    catch (e){
+        httpPost("addevent","user="+email+"&nsongs="+nsongs,event,null,func);
+    }
+
 }
 
 function httpGetAsync(theUrl, callback) {
@@ -468,6 +493,7 @@ function initGlobal(translater){
     try{
         user=JSON.parse(window.localStorage.getItem("user"));
     }catch (e){
+        $$("Exception de lecture du user, back to home");
         window.localStorage.setItem("user","");
         location.href="/index.html";
     }
@@ -480,7 +506,11 @@ function initGlobal(translater){
 
     try{
         if(user==undefined || gapi==undefined || gapi.client==undefined)
-            document.location.href="/";
+            if(navigator.onLine==true)
+                document.location.href="/";
+            else
+                if(window.location.host!="localhost:8080")
+                    document.location.href="/";
     }catch (e){
         if(myevent!=null && myevent.dtEnd==null)
             document.location.href="/index.html?event="+myevent.id;
@@ -596,8 +626,15 @@ showConfirm = function($ionicPopup,message,func_yes,func_no) {
 };
 
 showModal=function($ionicModal,$scope,src,func){
-    $scope.imageSrc="/img/"+src;
-    $ionicModal.fromTemplateUrl('/modal.html', {
+    if(src.indexOf(".svg")!=src.length-3){
+        template="/modal_text.html";
+        $scope.text=src;
+    }else{
+        template="/modal.html";
+        $scope.imageSrc="/img/"+src;
+    }
+
+    $ionicModal.fromTemplateUrl(template, {
         scope: $scope,
         animation: 'slide-in-up'
     }).then(function(modal) {
@@ -665,21 +702,29 @@ toast=function($ionicLoading,msg){
     },2000);
 }
 
+hashCode = function(s){
+    return s.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);
+}
+
 //Permet l'affichage d'un ecran de tuto dont le nom du fichier est dans img
-tuto=function(user,img,$ionicModal,$scope,func){
+tuto=function(user,img,$ionicModal,$scope,$translate,func){
     $$("Affichage du tuto "+img);
     if(user==undefined)return;
-    if(img.indexOf(".")==-1)img+=".svg";
 
-    if(user.history.indexOf(img)==-1){
-        user.history+=";"+img;
+    if(user.history.indexOf(hashCode(img))==-1){
+        user.history+=";"+hashCode(img);
         $$("Mise a jour du user",user);
         senduser(user,"history",function(resp){
             localStorage.setItem("user",JSON.stringify(resp));
         });
         setTimeout(function(){
-            img=img.split(".")[0]+"_"+user.lang+"."+img.split(".")[1];
+            if(img.indexOf(".svg")>0 || $translate==null)
+                img=img.split(".")[0]+"_"+user.lang+"."+img.split(".")[1];
+            else
+                img=$translate.instant(img);
+
             showModal($ionicModal,$scope,img,func);
         },1000);
     }
 }
+

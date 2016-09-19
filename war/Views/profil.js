@@ -62,6 +62,9 @@ App.controller('ProfilCtrl', function ($scope,$state,$translate,$ionicPopup,$win
 
 
     $scope.$on("$ionicView.afterEnter", function () {
-        tuto(user, "help_profil", $ionicModal, $scope);
+        if(myevent.owner.id==user.id)
+            tuto(user, "PROFIL.TUTOADMIN", $ionicModal, $scope,$translate);
+        else
+            tuto(user, "PROFIL.TUTO", $ionicModal, $scope,$translate);
     });
 });

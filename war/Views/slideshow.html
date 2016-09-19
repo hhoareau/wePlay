@@ -2,7 +2,7 @@
 <head>
 <meta charset="ISO-8859-1">
     <link href="https://fonts.googleapis.com/css?family=Architects+Daughter" rel="stylesheet">
-<link rel="stylesheet" type="text/css" href="../Leficarbar.css">
+    <link rel="stylesheet" type="text/css" href="../Leficarbar.css">
     <script src="/js/Tools.js"></script>
     <script src="/js/Main.js"></script>
     <script src="/js/swipe.js"></script>
@@ -66,6 +66,9 @@ function RefreshSlideshow(){
 	div.innerHTML="";
     if(delay==null)delay=10000;
     slideshow(delay,idEvent,function(rep){
+        if(rep.status==204){
+            location.href="/Views/winners.html?event="+getParam()["event"];
+        }
         if(rep.result.items==undefined || rep.result.items.length==0){
             shorturl(DOMAIN+"/index.html?event="+idEvent,function(short){
                 new QRCode(document.getElementById("qrcode"), {

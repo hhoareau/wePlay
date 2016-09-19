@@ -22,7 +22,9 @@
 
         <div class="list">
             <label class="item item-input">
-                <input id="pac-input" type="text" placeholder="{{'ADDEVENT.ADDRESS' | translate }}" ng-model="event.address" my-enter="searchAddress()">
+                <input id="pac-input" type="text" placeholder="{{'ADDEVENT.ADDRESS' | translate }}"
+                       ng-model="event.address" my-enter="searchAddress()"
+                        ng-change="onChangePicture()">
             </label>
 
             <label class="item item-input">

@@ -1,8 +1,10 @@
 <html>
 <head>
 <meta charset="ISO-8859-1">
-
+<!--
     <link href="https://fonts.googleapis.com/css?family=Architects+Daughter" rel="stylesheet">
+-->
+    <link href="/css/fonts.css" rel="stylesheet">
 <title>Pele-Mele</title>
 </head>
 <body style="background-color:black;border-color: black;">
@@ -174,7 +176,7 @@ function start(){
             if(rep.status!=204){
                 photos=rep.result.items;
                 var i=0;
-                date=new Date();
+                date=new Date().getTime();
 
                 function show(index){
                     if(photos[index].dtMessage>date)date=photos[index].dtMessage;
@@ -185,8 +187,11 @@ function start(){
                         });
                     });
                 }
-
-                show(0);
+                if(photos.length>0)show(0);
+            }
+            else{
+                $$("L'evenement doit être clos");
+                location.href="/Views/winners.html?event="+getParam()["event"];
             }
         });
     },5000);

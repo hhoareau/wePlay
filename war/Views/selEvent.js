@@ -80,7 +80,7 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
                     markers[markers.length-1].addListener("mouseover",function(){
                         $scope.preview=this.evt;
                         $scope.$apply();
-                        tuto(user,"joinevent",$ionicModal,$scope);
+                        tuto(user,"SELEVENT.TUTOJOIN",$ionicModal,$scope,$translate);
                     });
 
                     markers[markers.length-1].addListener("dblclick",function(){
@@ -89,6 +89,13 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
                 });
             }
         });
+    };
+
+    clearMap=function(){
+        $$("Sortie de la form, raz des markers");
+        myposition.setMap(null);
+        if(markers.length>0)
+            markers.forEach(function(marker){marker.setMap(null);});
     };
 
     $scope.setEvent=function(evt,password){
@@ -100,6 +107,7 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
                 window.localStorage.setItem("lastorder",0);
 
                 $ionicHistory.clearCache().then(function(){
+                    clearMap();
                     if(evt.owner.id==user.id && user.connexions.length>1)
                         $state.go("tabs.profil",{},{reload:true});
                     else
@@ -229,9 +237,7 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
     };
 
     $scope.$on("$ionicView.beforeLeave",function(event){
-        $$("Sortie de la form, raz des markers");
-        maposition.setMap(null);
-        markers.forEach(function(marker){marker.setMap(null);});
+        clearMap();
     });
 
 
@@ -263,6 +269,6 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
             $scope.$apply();
         });
 
-        tuto(user,"selevent",$ionicModal,$scope);
+        tuto(user,"SELEVENT.TUTO",$ionicModal,$scope,$translate);
     });
 });

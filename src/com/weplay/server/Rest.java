@@ -49,6 +49,19 @@ public class Rest {
         dao.save(e);
     }
 
+
+    @ApiMethod(name = "getflyer", httpMethod = ApiMethod.HttpMethod.GET, path = "getflyer")
+    public Photo getflyer(@Named("event") String id_event) {
+        Event e=dao.findEvent(id_event);
+        if(e!=null && e.dtEnd>System.currentTimeMillis()){
+            Photo p=new Photo(e.getFlyer());
+            return p;
+        }
+        return null;
+    }
+
+
+
     @ApiMethod(name = "delmessage", httpMethod = ApiMethod.HttpMethod.GET, path = "delmessage")
     public void delmessage(@Named("message") String id) {
         Message m=dao.findMessage(id);
@@ -86,7 +99,7 @@ public class Rest {
                 Long delay=System.currentTimeMillis()-e.getLastUpdate().get(id);
                 if(delay>(DELAY_DECONNEXION*1000L*60L)){
                     User u=dao.findUser(id);
-                    e.sendCloseMail(u,dao);
+                    e.sendQuitMail(u,dao);
                     e.delPresents(u);
                 }
             }
@@ -448,7 +461,7 @@ public class Rest {
     @ApiMethod(name = "getmessage", httpMethod = ApiMethod.HttpMethod.GET, path = "getmessage")
     public List<Photo> getmessage(@Named("event") String eventid, @Nullable @Named("date") Long date,@Nullable @Named("from") String from) {
         Event e=dao.findEvent(eventid);
-        if(e==null)return null;
+        if(e==null || e.dtEnd<System.currentTimeMillis())return null;
         if(date==null)date=e.dtStart;
 
         List<Photo> rc = new ArrayList<Photo>();
@@ -536,7 +549,7 @@ public class Rest {
 
         if(u!=null && e!=null) {
             if(e.delPresents(u)){
-                e.sendCloseMail(u,dao);
+                e.sendQuitMail(u,dao);
                 e.addOrder("users");
                 dao.save(e);
                 dao.save(u);
@@ -564,6 +577,9 @@ public class Rest {
 
     @ApiMethod(name = "slideshow", httpMethod = ApiMethod.HttpMethod.GET, path = "slideshow")
     public List<Photo> slideshow(@Nullable @Named("delay") Long delay,@Named("event") String idEvent){
+        Event e=dao.findEvent(idEvent);
+        if (e == null || e.dtEnd<System.currentTimeMillis())return null;
+
         List<Photo> lPhoto=new ArrayList<>();
 
         if(delay!=null){
@@ -571,8 +587,6 @@ public class Rest {
         } else {
             lPhoto=dao.getPhoto(idEvent,0L, System.currentTimeMillis());
         }
-
-
 
         Collections.sort(lPhoto); //Les derniers messages en premier dans la liste
         return lPhoto;
@@ -669,6 +683,22 @@ public class Rest {
         return (lu);
     }
 
+
+    @ApiMethod(name = "getuserscore", httpMethod = ApiMethod.HttpMethod.GET, path = "getuserscore")
+    public List<User> getuserscore(@Named("event") String id) {
+        Event e = dao.findEvent(id);
+        if (e == null) return null;
+
+        List<User> lu = new ArrayList<>();
+        for(String idUser:e.getScores().keySet()){
+            User u=dao.findUser(idUser);
+            lu.add(u);
+        }
+
+        Collections.sort(lu);
+        return (lu);
+    }
+
     @ApiMethod(name = "closeevent", httpMethod = ApiMethod.HttpMethod.GET, path = "closeevent")
     public Event closeevent(@Named("event") String event) {
         Event e=dao.findEvent(event);
@@ -677,7 +707,7 @@ public class Rest {
 
         for(User u:e.getPresents()){
             u=dao.findUser(u);
-            e.sendCloseMail(u,dao);
+            e.sendQuitMail(u,dao);
             u.currentEvent=null;
             dao.save(u);
         }

@@ -44,6 +44,10 @@ App.controller('InviteCtlr', function ($scope,clipboard,$translate){
                     $scope.message=$translate.instant("INVITE.CANCEL");
             });
         });
-
     };
+
+    $scope.$on("$ionicView.afterEnter", function () {
+        tuto(user, "INVITE.TUTO", $ionicModal, $scope,$translate);
+    });
+
 });

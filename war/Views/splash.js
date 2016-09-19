@@ -73,6 +73,15 @@ App.controller("startCtrl", function($scope,$window,cloudendpoint,$state) {
     }
 
     loadScript("js/Tools.js",function(){
+        if(!navigator.onLine){
+            if(window.location.host=="localhost:8080") {
+                if(start!=undefined)start();
+            } else
+                noConnexion();
+        }
+
+
+
         loadScript("https://apis.google.com/js/client.js?onload=init",function(){
             loadScript("https://e-cdns-files.dzcdn.net/js/min/dz.js",function(){
                 loadScript("https://maps.googleapis.com/maps/api/js?key="+GOOGLE_API_KEY,function() {

@@ -18,6 +18,6 @@ App.controller('chartsCtrl', function ($scope,$interval,$translate,$window,$ioni
     $scope.$on("$ionicView.afterEnter", function(){
         refresh_charts(true);
         timerCharts=$interval(refresh_charts,5000);
-        tuto(user,"help_charts",$ionicModal,$scope);
+        tuto(user,"CHARTS.TUTO",$ionicModal,$scope,$translate);
     });
 });

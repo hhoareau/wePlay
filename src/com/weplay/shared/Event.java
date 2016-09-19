@@ -171,8 +171,8 @@ public class Event implements Serializable {
         for(String dest:dests.split(";")){
             if(shorturl==null)shorturl=Tools.DOMAIN+"/index.html?event="+this.getId()+"&from="+from.email;
             if(dest.length()>0)
-                DAO.sendMail(dest, from.lang, Tools.ADMIN_EMAIL, "Invitation for " + this.title,
-                        "#join_mail.html", Arrays.asList(shorturl,"<img src='"+this.flyer+"'>")
+                DAO.sendMail(dest, from.lang, Tools.ADMIN_EMAIL, null,
+                        "#join_mail.html", Arrays.asList(this.title,shorturl,this.flyer)
                 );
         }
     }
@@ -180,15 +180,15 @@ public class Event implements Serializable {
     public void sendCloseMail() {
         DAO.sendMail(this.owner.getEmail(), this.owner.lang,
                 Tools.ADMIN_EMAIL,
-                this.title + " is closed. Retreive all the photos",
-                "#end_mail.html",Arrays.asList(Tools.DOMAIN + "/Views/AllPhotos.html?event=" + this.getId())
+                null,
+                "#end_mail.html",Arrays.asList(this.title,Tools.DOMAIN + "/Views/AllPhotos.html?event=" + this.getId())
         );
     }
 
-    public void sendCloseMail(User u,DAO dao){
+    public void sendQuitMail(User u,DAO dao){
             DAO.sendMail(u.getEmail(),u.lang,Tools.ADMIN_EMAIL,
-                    "You quit the event","#quit_mail.html",
-                    Arrays.asList(this.owner.getFirstname(),this.getHTML(dao)));
+                    null,"#quit_mail.html",
+                    Arrays.asList(this.title,this.owner.getFirstname(),this.getHTML(dao)));
     }
 	
 	
@@ -573,6 +573,7 @@ public class Event implements Serializable {
 
 
     public void close() {
+        this.sendCloseMail();
         this.dtEnd=System.currentTimeMillis();
         this.addOrder("close");
         this.setPresents(new ArrayList<User>());

@@ -116,6 +116,7 @@ App.controller('PhotosCtrl', function ($scope,$ionicPopup,$ionicModal,$ionicLoad
     }
 
     $scope.validatephoto=function(){
+        $scope.lastphoto.validate=true;
         validatemessage($scope.lastphoto.id,refresh_photo);
     }
 
@@ -132,8 +133,8 @@ App.controller('PhotosCtrl', function ($scope,$ionicPopup,$ionicModal,$ionicLoad
         },5000);
 
         if(user.id==myevent.owner.id && myevent.needValidate==true)
-            tuto(user,"photo_admin",$ionicModal,$scope);
+            tuto(user,"PHOTO.TUTOADMIN",$ionicModal,$scope,$translate);
         else
-            tuto(user,"photo",$ionicModal,$scope);
+            tuto(user,"PHOTO.TUTO",$ionicModal,$scope,$translate);
     });
 });

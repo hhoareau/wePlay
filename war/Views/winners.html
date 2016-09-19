@@ -10,8 +10,11 @@
     <title>Classement</title>
     <style>
         .playerCard{
-            width:100px;
+            width:10%;
             text-align: center;
+            border-style: none;
+            position: absolute;
+            z-index: 9;
         }
     </style>
 </head>
@@ -20,31 +23,24 @@
                 border-color: black;
                 color: white;">
 
-<div style="text-align: center;width: 100%">
-    <img src="/img/podium.png" style="max-width: 600px; position: absolute; z-index: 0;">
-    <div class="playerCard" id="zone0"></div>
-    <br>
-    <table style="width:300px">
-        <tr>
-            <td><div class="playerCard" id="zone1"></div></td>
-            <td style="width: 100px;"></td>
-            <td><div class="playerCard" id="zone2"></div></td>
-        </tr>
-    </table>
+<div style="text-align:center;width:100%;">
+    <img src="/img/podium.png" style="width: 90%; position: absolute; top: 10%;left:5%;z-index: 0;">
+    <div class="playerCard" id="zone1" style="left:45%;top:5%;"></div>
+    <div class="playerCard" id="zone3" style="left:70%;top:22%;"></div>
+    <div class="playerCard" id="zone2" style="left:18%;top:15%;"></div>
 </div>
 
 <script>
-
     function showProfil(u,zone){
         zone.innerHTML="<img style='border-color: white;border-style: solid;' src='"+u.picture+"'>"+
                 "<br><span style='font-size: x-large'>"+u.firstname+"</span> ("+u.scoreEvent+" pts)" ;
     }
 
     function start(){
-        getClassement(getParam()["event"],function(rep) {
+        getUserScore(getParam()["event"],function(rep) {
             users = rep.result.items;
-            for (var i = 0; i < 3; i++)
-                showProfil(users[i], $("zone" + i));
+            for (var i = 0; i < Math.min(3,users.length); i++)
+                showProfil(users[i], $("zone" + (i+1)));
         });
     }
 

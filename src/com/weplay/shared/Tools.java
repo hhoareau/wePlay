@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 public class Tools {
 	public static final Logger log = Logger.getLogger(Tools.class.getName());
 
-	public static final String ADMIN_EMAIL = "noreply@shifumix.com";
+	public static final String ADMIN_EMAIL = "shifumixwww@gmail.com";
     public static final String DOMAIN = "https://shifumixweb.appspot.com";
 
     private static String sep_champs=",";
