@@ -199,14 +199,11 @@ function $(id){
 }
 
 function $$(s,obj){
-    if(obj!=undefined){
-        try{
-            s=s+JSON.stringify(obj);
-        }catch(e){
-
-        }
-    }
     console.log(s);
+    if(obj!=undefined){
+        console.log(obj);
+    }
+
 }
 
 

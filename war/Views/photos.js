@@ -128,9 +128,7 @@ App.controller('PhotosCtrl', function ($scope,$ionicPopup,$ionicModal,$ionicLoad
 
     $scope.$on("$ionicView.afterEnter", function(){
         refresh_photo(true);
-        timerPhotos=$interval(function(){
-            refresh_photo(false);
-        },5000);
+        if(timerPhotos==null)timerPhotos=$interval(function(){refresh_photo(false);},5000);
 
         if(user.id==myevent.owner.id && myevent.needValidate==true)
             tuto(user,"PHOTO.TUTOADMIN",$ionicModal,$scope,$translate);

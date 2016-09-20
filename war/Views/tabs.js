@@ -10,13 +10,14 @@ App.controller("tabsCtrl", function($scope,$state,$interval,$ionicHistory) {
             clearInterval(timerHome);
             clearInterval(timerPhotos);
             clearInterval(timerEvent);
+            clearInterval(timerBets);
         }else{
             $interval.cancel(timerCharts);
             $interval.cancel(timerHome);
             $interval.cancel(timerPhotos);
             $interval.cancel(timerEvent);
+            $interval.cancel(timerBets);
         }
-
         $state.go("selEvent", {}, {reload: true})
     }
 
@@ -30,9 +31,10 @@ App.controller("tabsCtrl", function($scope,$state,$interval,$ionicHistory) {
             $$("Analyse de l'event");
 
             if (myevent == null)
-                $interval.cancel(hEvent);
+                $interval.cancel(timerEvent);
             else {
                 var currentView = $ionicHistory.currentView().stateName;
+
                 if (currentView != "tabs.charts" && timerCharts != null) {
                     $interval.cancel(timerCharts);
                     timerCharts = null;
@@ -44,6 +46,11 @@ App.controller("tabsCtrl", function($scope,$state,$interval,$ionicHistory) {
                 if (currentView != "tabs.photos" && timerPhotos != null) {
                     $interval.cancel(timerPhotos);
                     timerPhotos = null;
+                }
+
+                if (currentView != "tabs.bets" && timerBets != null) {
+                    $interval.cancel(timerBets);
+                    timerBets = null;
                 }
 
                 refresh_event(myevent.id,

@@ -2,6 +2,7 @@
 //const DOMAIN="https://weplaywebsite.appspot.com";FACEBOOK_ID="604761063026010";GOOGLE_API_KEY="AIzaSyCl46r3eXdyJlj6siZoCoF2WMifESqZo_0";
 //const DOMAIN="https://shifumixwww.appspot.com";FACEBOOK_ID="901681453271015";GOOGLE_API_KEY="AIzaSyD9ulABAnLWARLXAIajXW5c-3Rj5Wqp-Ss";
 
+
 var ADMIN_PASSWORD="hh4271";
 
 if(window.location.host=="localhost:8080"){
@@ -183,6 +184,15 @@ function getClassement(event,func){
     }
 }
 
+function getBets(event,func){
+    try{
+        gapi.client.ficarbar.getbets({event:event}).then(func);
+
+    } catch (e){
+        httpGet("getbets?event="+event,func);
+    }
+}
+
 
 function getUserScore(event,func){
     try{
@@ -267,13 +277,13 @@ function razlocalfile(event,func){
     gapi.client.ficarbar.razlocalfile({event:event}).then(func);
 }
 
-function setscore(email,event,id,step,func){
-    gapi.client.ficarbar.setscore({user:email,event:event,song:id,step:step}).then(func);
+function sanity(func){
+    gapi.client.ficarbar.sanity({password:ADMIN_PASSWORD}).then(func);
 }
 
 
-function sanity(func){
-    gapi.client.ficarbar.sanity({password:ADMIN_PASSWORD}).then(func);
+function validebet(event,bet,index,func){
+    gapi.client.ficarbar.validebet({event:event,bet:bet,result:index}).then(func);
 }
 
 function geteventsaround(pos,func){
@@ -355,6 +365,26 @@ function sendphoto(event,photo,func_success,func_rejected,func_progress){
         method: 'POST',
         params: {event:event},
         body:photo
+    }).then(func_success,func_rejected,func_progress);
+}
+
+
+function sendvote(idmessage,vote,func_success,func_rejected,func_progress){
+    var req= gapi.client.request({
+        path: ROOT_API+'/ficarbar/v1/sendvote',
+        method: 'POST',
+        params: {message:idmessage},
+        body:vote
+    }).then(func_success,func_rejected,func_progress);
+}
+
+
+function sendbet(event,bet,func_success,func_rejected,func_progress){
+    var req= gapi.client.request({
+        path: ROOT_API+'/ficarbar/v1/sendbet',
+        method: 'POST',
+        params: {event:event},
+        body:bet
     }).then(func_success,func_rejected,func_progress);
 }
 
@@ -706,25 +736,63 @@ hashCode = function(s){
     return s.split("").reduce(function(a,b){a=((a<<5)-a)+b.charCodeAt(0);return a&a},0);
 }
 
+showModalHTML=function(src,func){
+    var dialog=document.createElement("div");
+    dialog.innerHTML="<div style='margin-top:50%;margin-left:10%;width:70%;" +
+                    "color: white;border-color:white;border-style:solid;background-color: grey;font: 16px Architect Daughter;" +
+                    "padding:10px;border-radius: 25px;text-align: center;'>"+src+"</div>";
+
+    dialog.id="mydialog";
+    dialog.style="text-align:center;background-color:black;opacity:0.8;width:100%;height:100%;position:fixed;left:0px;top:0px;z-index:9;";
+    document.body.appendChild(dialog);
+
+    setTimeout(function(){
+        dialog.addEventListener("mousedown",function(){
+            document.body.removeChild(document.getElementById("mydialog"));
+            if(func!=undefined)func();
+        });
+    },1000);
+}
+
+translate=function(lang,lib){
+    for(var i=0;i<libs.length;i++) {
+        var l=libs[i];
+        if(l.lang==lang){
+            var s=l.labels[lib];
+            if(s==undefined)
+                return(lib);
+            else
+                return(s);
+        }
+    };
+};
+
 //Permet l'affichage d'un ecran de tuto dont le nom du fichier est dans img
 tuto=function(user,img,$ionicModal,$scope,$translate,func){
-    $$("Affichage du tuto "+img);
+
     if(user==undefined)return;
 
-    if(user.history.indexOf(hashCode(img))==-1){
+    if(user.history.indexOf(hashCode(img))==-1 || getParam()["playtuto"]=="true"){
+        $$("Affichage du tuto "+img);
+
         user.history+=";"+hashCode(img);
         $$("Mise a jour du user",user);
         senduser(user,"history",function(resp){
             localStorage.setItem("user",JSON.stringify(resp));
         });
         setTimeout(function(){
-            if(img.indexOf(".svg")>0 || $translate==null)
+            if(img.indexOf(".svg")>0)
                 img=img.split(".")[0]+"_"+user.lang+"."+img.split(".")[1];
             else
-                img=$translate.instant(img);
+                if($translate==null)
+                    img=translate(user.lang,img);
+                else
+                    img=$translate.instant(img);
 
-            showModal($ionicModal,$scope,img,func);
+            if($ionicModal!=undefined && $scope!=undefined)
+                showModal($ionicModal,$scope,img,func);
+            else
+                showModalHTML(img,func);
         },1000);
     }
 }
-

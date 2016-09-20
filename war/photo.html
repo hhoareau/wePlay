@@ -195,7 +195,8 @@ function sendMessage(){
  * Modify the score of song by one step (increase or decrease)
  */
 function onSetScore(step,id){
-	setscore(user.email,myEvent.Id,id,step,function(rep){
+	var vote={from:user,event:myEvent.Id,value:step};
+    sendvote(id,vote,function(rep){
 		showPlaylist(rep.result.items);
 	});
 }

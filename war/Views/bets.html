@@ -1,0 +1,51 @@
+<ion-view view-title="Bets" ng-controller="betsCtrl">
+    <ion-content>
+        <ion-item>
+            <input focus-me type="text" ng-model="newbet.title" placeholder="Title of my bet">
+            <input type="text" ng-model="newbet.text_options" placeholder="Options"></ion-item>
+            De {{newbet.dtStart | date: "HH:mm"}} à {{newbet.dtEnd | date: "HH:mm"}}
+            <div class="range">
+                <span class="input-label">Delay</span>
+                <input type="range" ng-model="newbet.delay" value="10" min="0" max="240" step="5" ng-change="getDtEnt()">
+                {{newbet.delay}} minutes
+            </div>
+
+            <button class="button button-assertive" ng-click="addbet()">Send</button>
+        </ion-item>
+        <ion-item>
+            {{user.score}} crédits disponibles
+        </ion-item>
+        <ion-list>
+            <div class="card" ng-repeat="bet in bets_tovalidate">
+                <div class="item item-divider item-button-right">
+                    <span style="font-size: large">{{bet.title}}</span>
+                    <button class="button button-small button-assertive" ng-click="validate(bet)">Validate</button>
+                </div>
+                <div class="item">
+                    <ion-radio ng-repeat="opt in bet.options"
+                                  ng-model="bet.result"
+                                  ng-value="$index">
+                        {{opt.lib}}
+                    </ion-radio>
+                </div>
+            </div>
+
+            <div class="card" ng-repeat="bet in bets">
+                <div class="item item-divider">
+                    <span style="font-size: large">{{bet.title}}</span> by {{bet.from.firstname}}
+                </div>
+
+                <div class="item item-button-left" ng-repeat="opt in bet.options">
+                    {{opt.lib}} Quote: {{opt.quot | number:1 }} contre 1
+                    <button class="button button-icon ion-cash" ng-click="mise(bet,$index)"></button>
+                </div>
+
+                <div class="item item-divider" ng-show="bet.gainMax>0">
+                    Estimation des gains: entre {{bet.gainMax}} et {{bet.gainMin}}
+                </div>
+            </div>
+        </ion-list>
+
+    </ion-content>
+</ion-view>
+

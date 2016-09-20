@@ -19,78 +19,51 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 package com.weplay.shared;
 
 import java.io.Serializable;
-import java.util.logging.Logger;
 
-/**
- * Cette classe permet de stocker le r�sultat du parsing HTML
- * @see 
- * @author Herv� Hoareau
- *
- */
 public class Vote implements Serializable {
 
 	private static final long serialVersionUID = 1440513031923567299L;
 
-	protected static final Logger log = Logger.getLogger(Vote.class.getName());
-	
 	//@Id public String Id; 					//Id interne des Users (adresse email)
-	
-	private String votant;						//Nom du User
-	private String caracteristique;
-	public Integer score;
+
+    public User from;						//Nom du User
 	public Long dtVote=System.currentTimeMillis();
-
-	public Vote(String votant,String cible,String cara,Integer note){
-		//this.Id=votant+cible+cara;
-		this.caracteristique=cara;
-		this.votant=votant;
-		this.score=note;
-	}
-	
-	public Vote(){}
-	
-
-	
-
-	@Override
-	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
-		result = prime * result
-				+ ((caracteristique == null) ? 0 : caracteristique.hashCode());
-		result = prime * result + ((votant == null) ? 0 : votant.hashCode());
-		return result;
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (this == obj)
-			return true;
-		if (obj == null)
-			return false;
-		if (getClass() != obj.getClass())
-			return false;
-		Vote other = (Vote) obj;
-		if (caracteristique == null) {
-			if (other.caracteristique != null)
-				return false;
-		} else if (!caracteristique.equals(other.caracteristique))
-			return false;
-		if (votant == null) {
-			if (other.votant != null)
-				return false;
-		} else if (!votant.equals(other.votant))
-			return false;
-		return true;
-	}
-
-	/**
-	 * Format destin� au debugeur
-	 */
-	public String toString(){
-        return this.caracteristique+":"+ this.score;
-	}
+    public Double value =0.0;
+    public String description="";
 
 
-	
+    public User getFrom() {
+        return from;
+    }
+
+    public void setFrom(User from) {
+        this.from = from;
+    }
+
+    public Vote(){}
+
+
+    public Long getDtVote() {
+        return dtVote;
+    }
+
+    public void setDtVote(Long dtVote) {
+        this.dtVote = dtVote;
+    }
+
+    public Double getValue() {
+        return value;
+    }
+
+    public void setValue(Double value) {
+        this.value = value;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
 }

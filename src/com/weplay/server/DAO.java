@@ -48,7 +48,7 @@ public class DAO  {
             ObjectifyService.register(Photo.class);
             ObjectifyService.register(LocalFile.class);
             ObjectifyService.register(Blob.class);
-            ObjectifyService.register(Sondage.class);
+            ObjectifyService.register(Bet.class);
             ObjectifyService.register(Mail.class);
     }
 
@@ -87,7 +87,7 @@ public class DAO  {
         ofy().delete().keys(ofy().load().type(Event.class).keys().list());
         ofy().delete().keys(ofy().load().type(LocalFile.class).keys().list());
         ofy().delete().keys(ofy().load().type(Blob.class).keys().list());
-        ofy().delete().keys(ofy().load().type(Sondage.class).keys().list());
+        ofy().delete().keys(ofy().load().type(Bet.class).keys().list());
         ofy().delete().keys(ofy().load().type(Mail.class).keys().list());
     }
 	
@@ -346,12 +346,12 @@ public class DAO  {
     }
 
     //@return Song list with email as voter
-    public Collection<Song> getPreferSongs(String email,Integer nSongs) {
+    public Collection<Song> getPreferSongs(User u,Integer nSongs) {
         Collection<Song> songs=new ArrayList<>();
         QueryResultIterator<Song> q=ofy().load().type(Song.class).iterator();
         while(q.hasNext() && songs.size()<nSongs){
             Song s=q.next();
-            if(s.contain(email) || s.from.id.equals(email))
+            if(s.contain(u) || s.from.id.equals(u.id))
                 if(!songs.contains(s))
                     songs.add(s);
         }
@@ -437,5 +437,16 @@ public class DAO  {
 
     public void delete(Message m) {
         ofy().delete().entity(m);
+    }
+
+    public List<Bet> getBets(Event e) {
+        return ofy().load().type(Bet.class)
+                .filter("dtStart <", System.currentTimeMillis())
+                .filter("closed",false)
+                .filter("idEvent",e.getId()).list();
+    }
+
+    public Bet getBet(String id) {
+        return ofy().load().type(Bet.class).id(id).now();
     }
 }

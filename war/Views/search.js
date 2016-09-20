@@ -10,7 +10,7 @@ App.controller('SearchCtrl',function($scope,$state,$ionicModal,$ionicHistory,$tr
             if(s.order<=$scope.songs[i].order)break;
         }
         $scope.songs.splice(i,0,s);
-        if($scope.songs.length>0)tuto(user,"SEARCH.TUTOVAL",$ionicModal,$scope,$translate);
+        //if($scope.songs.length>0)tuto(user,"SEARCH.TUTOVAL",$ionicModal,$scope,$translate);
     }
 
     DZ.init({appId  : '182662',channelUrl : 'https://weplaywebsite.appspot.com/channel.html'});
@@ -129,8 +129,7 @@ App.controller('SearchCtrl',function($scope,$state,$ionicModal,$ionicHistory,$tr
 
     $scope.$on("$ionicView.loaded", function(){
         $scope.search();
-        tuto(user,"SEARCH.TUTO",$ionicModal,$scope,$translate,function(){
-        });
+        //if($scope.songs.length==0)tuto(user,"SEARCH.TUTO",$ionicModal,$scope,$translate);
     });
 
 

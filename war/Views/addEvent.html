@@ -1,26 +1,26 @@
 <ion-view view-title="Choose en event" ng-controller="addEventCtrl" hide-nav-bar="true">
     <ion-content>
-
         {{message}}<br>
+        <div class="item item-input">
+            <!--
+            <span class="input-label">{{ 'ADDEVENT.TITLE' | translate }}</span>
+                -->
+                <input type="text" style="text-align:left;font-size: x-large;"
+                       ng-model="event.title" autofocus
+                       ng-change="onChangePicture()">
 
-            <div class="item item-input">
-                    <span class="input-label">{{ 'ADDEVENT.TITLE' | translate }}</span>
-                    <input type="text" style="text-align:left;font-size: x-large;"
-                           ng-model="event.title" autofocus
-                           ng-change="onChangePicture()">
+            <button class="button icon-left ion-checkmark button-positive"
+                    style="margin-top: 4px;margin-right: 15px;" ng-click="sendEvent()">
+                {{'ADDEVENT.SAVE' | translate}}
+            </button>
+        </div>
 
-                <button class="button icon-left ion-checkmark button-positive"
-                        style="margin-top: 4px;margin-right: 15px;" ng-click="sendEvent()">
-                    {{'ADDEVENT.SAVE' | translate}}
-                </button>
-            </div>
+        <div class="item" style="text-align: center;">
+                <ng-map id="map2" center="[48.0,2.0]" data-tap-disabled="true"></ng-map>
+                <button style="display:block;position:absolute;left:10px;top:10px;" class="button button-icon ion-search" ng-click="search()"></button>
+        </div>
 
-            <div class="item" style="text-align: center;">
-                    <ng-map id="map2" center="[48.0,2.0]" data-tap-disabled="true"></ng-map>
-                    <button style="display:block;position:absolute;left:10px;top:10px;" class="button button-icon ion-search" ng-click="search()"></button>
-            </div>
-
-        <div class="list">
+        <ion-item>
             <label class="item item-input">
                 <input id="pac-input" type="text" placeholder="{{'ADDEVENT.ADDRESS' | translate }}"
                        ng-model="event.address" my-enter="searchAddress()"
@@ -28,20 +28,19 @@
             </label>
 
             <label class="item item-input">
-                <span class="input-label">{{'ADDEVENT.START' | translate }}&nbsp;</span>
-                <input type="date" ng-model="event.dtStart" ng-change="onChangePicture()"><br>
+                <span class="input-label">{{'ADDEVENT.START' | translate }}</span>
+                <input type="date" ng-model="event.dtStart" ng-change="onChangePicture()">
             </label>
 
-
-            <label class="item item-input">
+            <div class="item range">
                 <span class="input-label">{{'ADDEVENT.APARTIRDE' | translate}}</span>
-                <input type="number" max="24" min="0" ng-model="event.hour" ng-change="onChangePicture()">
-            </label>
+                <input type="range" max="24" min="0" step="1" ng-model="event.hour">
+                &nbsp;{{event.hour}}H
+            </div>
 
             <label class="item item-input">
-                <input placeholder="{{'ADDEVENT.DESCRIPTION' | translate}}" ng-model="event.description" type="text">
+                <input type="text" placeholder="{{'ADDEVENT.DESCRIPTION' | translate}}" ng-model="event.description" ng-focus="onChangePicture()">
             </label>
-
 
             <label class="item item-input">
                 <input placeholder="{{'ADDEVENT.PASSWORD' | translate}}" ng-model="event.password" type="text">
@@ -50,29 +49,47 @@
             <ion-checkbox ng-model="event.needValidate" ng-click="showTutoValidate()">
                 {{'ADDEVENT.NEEDVALIDATE' | translate}}
             </ion-checkbox>
+        </ion-item>
 
-
-            <div class="card">
-                <div class="item item-divider">
-                    <span class="text text-left">Flyer</span>
-                    <div style="display: inline;text-align: right;">
-                        <imgfiles on-select="getFlyer(photo)"></imgfiles>
-                    </div>
-                </div>
-                <div class="item" ng-show="event.flyer.length>0">
-                    <img style="margin-top:10px;max-width: 300px;max-height: 300px;" ng-src="{{event.flyer}}"></img>
-                </div>
-                <div class="item item-image" style="text-align: center">
-                    <ion-checkbox class="text-left"
-                                  ng-model="event.autoflyer"
-                                  ng-change="onChangePicture()">Auto</ion-checkbox>
-                </div>
+        <div class="card">
+            <div class="item item-divider">
+                Flyer
+                <imgfiles on-select="getFlyer(photo)"></imgfiles>
             </div>
 
+            <div class="item" ng-show="event.flyer.length>0">
+                <table><tr>
+                    <td>
+                        <img style="display:inline-block;max-width: 200px;max-height: 200px;" ng-src="{{event.flyer}}">
+                    </td>
+                    <td>
+                        <div style="text-align: center;display: inline-block;">
+                            <ion-checkbox class="text-left"
+                                          ng-model="event.flyer_address"
+                                          ng-change="onChangePicture()">Address</ion-checkbox>
 
+                            <ion-checkbox class="text-left"
+                                          ng-model="event.flyer_teaser"
+                                          ng-change="onChangePicture()">Teaser</ion-checkbox>
 
+                            <ion-checkbox class="text-left"
+                                          ng-model="event.flyer_black"
+                                          ng-change="onChangePicture()">Black</ion-checkbox>
 
-            <ion-item>
+                            <ion-checkbox class="text-left"
+                                          ng-model="event.flyer_horaire"
+                                          ng-change="onChangePicture()">Horaire</ion-checkbox>
+
+                        </div>
+                    </td>
+
+                </tr></table>
+
+            </div>
+
+        </div>
+
+        <ion-item>
                 <ion-title>Advanced</ion-title>
 
                 <label class="item item-input">
@@ -82,13 +99,12 @@
                 <div class="item range">
                     <span class="input-label">{{ 'ADDEVENT.SONGSBYDEFAULT' | translate }}</span>
                     <input type="range" min="0" max="30" step="1" ng-model="nsongs">&nbsp;{{nsongs}}
-                    <span class="input-label">&nbsp;{{ 'ADDEVENT.LABELSONG' | translate }}</span>
+                    &nbsp;{{ 'ADDEVENT.LABELSONG' | translate }}
                 </div>
 
                 <div class="item range">
                     <span class="input-label">{{ 'ADDEVENT.DURATION' | translate }}</span>
                     <input type="range" min="0" max="24" step="1" name="volume" ng-model="event.duration" ng-change="onChangePicture()">&nbsp;{{event.duration}}
-                    <span class="input-label">&nbsp;hours</span>
                 </div>
 
                 <div class="item range">
@@ -102,8 +118,6 @@
                 </div>
             </ion-item>
 
-
-
             <ion-item>
                 <ion-title>Sources</ion-title>
                 <ion-checkbox ng-repeat="item in srcList"
@@ -112,13 +126,13 @@
                     {{ item.text }}
                 </ion-checkbox>
             </ion-item>
-            <br>
+        </div>
 
+        <div style="width: 100%;text-align: center">
             <button class="button icon-left ion-checkmark button-positive"
                     style="margin-top: 4px;" ng-click="sendEvent()">
                 {{'ADDEVENT.SAVE' | translate}}
             </button>
-
         </div>
 
 

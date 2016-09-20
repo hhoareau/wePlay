@@ -114,8 +114,11 @@ App.controller("addEventCtrl", function($scope,$ionicModal,$ionicPlatform,$state
             evt.flyer="";
 
         addevent(user.id,evt,parseInt($scope.nsongs),function(resp){
+            user.freeEvents--;
+            localStorage.setItem("user",JSON.stringify(user));
+
             if(resp.status==200){
-                $state.go("selEvent",{},{reload: true});
+                $state.go("selEvent",{message:'eventcreated'},{reload: true});
             }
             else
                 $$("Add Event error"+JSON.stringify(resp));
@@ -126,6 +129,7 @@ App.controller("addEventCtrl", function($scope,$ionicModal,$ionicPlatform,$state
         photoPromise.then(function (theFile) {
             $scope.theFile=theFile;
             $scope.onChangePicture();
+            $scope.$apply();
         });
     };
 
@@ -166,15 +170,26 @@ App.controller("addEventCtrl", function($scope,$ionicModal,$ionicPlatform,$state
                 $filter('date')(dtEnd,'h')+"H";
 
 
-            if($scope.event.autoflyer){
-                addText(ctx,20,20,"white",20,$scope.event.title,null,200);
-                if(address.indexOf("<br>")>0){
-                    addText(ctx,20,45,"white",13,address.split("<br>")[0].trim(),null,200);
-                    addText(ctx,20,60,"white",13,address.split("<br>")[1].trim(),null,200);
-                }else
-                    addText(ctx,20,40,"white",13,address,null,200);
+            if($scope.event.flyer.length>0){
+                var color="white";
+                if($scope.event.flyer_black)color="black";
 
-                addText(ctx,canvas.width-textWidth(ctx,18,sDate)-30,canvas.height-30,"white",18,sDate,null,300);
+                addText(ctx,20,20,color,20,$scope.event.title,null,200);
+
+                if($scope.event.flyer_address){
+                    if(address.indexOf("<br>")>0){
+                        addText(ctx,20,45,color,13,address.split("<br>")[0].trim(),null,200);
+                        addText(ctx,20,60,color,13,address.split("<br>")[1].trim(),null,200);
+                    }else
+                        addText(ctx,20,40,color,13,address,null,200);
+                }
+
+                if($scope.event.flyer_horaire)
+                    addText(ctx,canvas.width-textWidth(ctx,18,sDate)-30,canvas.height-30,color,18,sDate,null,300);
+
+                if($scope.event.flyer_teaser && $scope.event.description!=undefined)
+                    addText(ctx,canvas.width*0.2,canvas.height/2,color,14,$scope.event.description,null,canvas.width*0.8);
+
             }
 
             $scope.event.flyer=canvas.toDataURL("image/jpeg");
@@ -184,7 +199,12 @@ App.controller("addEventCtrl", function($scope,$ionicModal,$ionicPlatform,$state
 
     $scope.event={};
     $scope.nsongs=10;
-    $scope.event.autoflyer=false;
+    $scope.event.flyer="";
+    $scope.event.flyer_address=true;
+    $scope.event.flyer_black=false;
+    $scope.event.flyer_teaser=true;
+    $scope.event.flyer_horaire=true;
+
     $scope.event.duration=8;
     $scope.event.maxonline=100;
     $scope.event.minDistance=10000;

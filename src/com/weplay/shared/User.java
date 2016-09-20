@@ -37,7 +37,8 @@ import java.util.logging.Logger;
 @Cache
 public class User implements Comparable<User> {
 	protected static final Logger log = Logger.getLogger(User.class.getName());
-    private static final Integer NEW_USER_SCORE = 10;
+    private static final Double NEW_USER_SCORE = 10.0;
+    private static final Integer FREE_VENTS = 25;
 
     @Id public String id; 					//Id interne des Users (adresse email)
 
@@ -53,8 +54,11 @@ public class User implements Comparable<User> {
     public Boolean anonymous=false;
     public List<Long> connexions=new ArrayList<>();
 	public String message="";
+    public Integer freeEvents=FREE_VENTS;
 
-	public String currentEvent="";
+    //public ArrayList<Vote> votes=new ArrayList<Vote>();
+
+    public String currentEvent="";
 
     //Position du user
 	public Double lng=null;
@@ -64,10 +68,10 @@ public class User implements Comparable<User> {
     public Double lat=null;
     public Double precision=1000000.0; //Precision de la position
 
-    private ArrayList<Vote> votes=new ArrayList<Vote>();
+    //private ArrayList<Vote> votes=new ArrayList<Vote>();
 
-	public Integer score=NEW_USER_SCORE;
-    public Integer scoreEvent=0;
+	public Double score=NEW_USER_SCORE;
+    public double scoreEvent=0;
 
 	private Long dtLastPosition;
     private Long dtLastConnexion=null;
@@ -155,14 +159,16 @@ public class User implements Comparable<User> {
 
 
 
-	public boolean addScore(Vote v) {
+    /*
+    public boolean addScore(Vote v) {
 		if(!this.votes.contains(v)){
-			this.score+=v.score;		
+			this.score+=v.score;
 			this.votes.add(v);
 			return true;
 		}
 		return false;
 	}
+	*/
 
 	
 
@@ -247,19 +253,11 @@ public class User implements Comparable<User> {
         this.lat = lat;
     }
 
-    public ArrayList<Vote> getVotes() {
-        return votes;
-    }
-
-    public void setVotes(ArrayList<Vote> votes) {
-        this.votes = votes;
-    }
-
-    public Integer getScore() {
+    public Double getScore() {
         return score;
     }
 
-    public void setScore(Integer score) {
+    public void setScore(Double score) {
         this.score = score;
     }
 
@@ -361,11 +359,11 @@ public class User implements Comparable<User> {
         this.email = email;
     }
 
-    public Integer getScoreEvent() {
+    public double getScoreEvent() {
         return scoreEvent;
     }
 
-    public void setScoreEvent(Integer scoreEvent) {
+    public void setScoreEvent(double scoreEvent) {
         this.scoreEvent = scoreEvent;
     }
 
@@ -404,6 +402,14 @@ public class User implements Comparable<User> {
         if (!id.equals(user.id)) return false;
 
         return true;
+    }
+
+    public Integer getFreeEvents() {
+        return freeEvents;
+    }
+
+    public void setFreeEvents(Integer freeEvents) {
+        this.freeEvents = freeEvents;
     }
 
     @Override

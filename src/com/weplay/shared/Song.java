@@ -6,7 +6,6 @@ import com.googlecode.objectify.annotation.Index;
 import com.googlecode.objectify.annotation.Subclass;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.Collection;
 
 @Subclass(index=true)
@@ -24,8 +23,6 @@ public class Song extends Message implements Serializable,Comparable<Song> {
     private Integer duration=0;
     private String firstname="";
     public String shortTitle="";
-
-    public ArrayList<String> votants=new ArrayList<String>();
 
 	public Integer score=0;
     private Integer origin=TORRENT;
@@ -78,7 +75,7 @@ public class Song extends Message implements Serializable,Comparable<Song> {
     public Song(Song p){
         super(p);
         this.dtPlay=p.dtPlay;
-        this.votants=p.votants;
+        this.votes=p.votes;
         this.shortTitle=p.shortTitle;
         this.firstname=p.firstname;
         this.duration=p.duration;
@@ -104,14 +101,6 @@ public class Song extends Message implements Serializable,Comparable<Song> {
 
     public String getTitle() {
         return title;
-    }
-
-    public ArrayList<String> getVotants() {
-        return votants;
-    }
-
-    public void setVotants(ArrayList<String> votants) {
-        this.votants = votants;
     }
 
     public Integer getScore() {
@@ -155,23 +144,6 @@ public class Song extends Message implements Serializable,Comparable<Song> {
     }
 
 
-    public boolean contain(String email){
-        for(String votant:this.votants)
-            if(votant.indexOf(email)==0)return true;
-        return false;
-    }
-
-
-    public boolean addVote(String email, Integer step) {
-        if(this.contain(email))return false;
-        this.score+=step;
-        String signe="";
-        if(step>0)signe="+";
-        this.votants.add(email+signe+step);
-        return true;
-    }
-
-
     public String getShortTitle() {
         return shortTitle;
     }
@@ -182,7 +154,6 @@ public class Song extends Message implements Serializable,Comparable<Song> {
 
     public void razuse() {
         this.dtPlay=null;
-        this.votants=new ArrayList<String>();
         this.idEvent=null;
     }
 

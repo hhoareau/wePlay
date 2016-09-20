@@ -5,6 +5,7 @@
 
     <script src="/js/Tools.js"></script>
     <script src="/js/Main.js"></script>
+    <script src="/js/labels.js" charset="UTF-8"></script>
     <script src="https://apis.google.com/js/client.js?onload=init"></script>
 
     <title>Classement</title>
@@ -13,13 +14,12 @@
 <body style="background-color:black;border-color: black;color: white;">
 
 <div style="text-align: center;width: 100%">
-    <div id="clock" style="font-size: xx-large"></div>
+    <div id="title" style="font-size: x-large;"></div><br>
+    <div id="clock" style="font-size: xx-large;"></div>
     <div id="zone"></div>
 </div>
 
 <script>
-
-
 function showClassement(idEvent,zone){
     getClassement(idEvent,function(rep){
         if(rep.result.items.length>0){
@@ -36,7 +36,6 @@ function showClassement(idEvent,zone){
     });
 }
 
-
 function start(){
     initGlobal();
     showClassement(getParam()["event"],$("zone"));
@@ -52,12 +51,15 @@ function start(){
         if(myevent==null)
             location.href="/Views/winners.html?event="+getParam()["event"];
         else{
+            var delay=myevent.dtEnd-new Date().getTime();
             var affichage =new Date(delay).toTimeString().replace(/.*(\d{2}:\d{2}:\d{2}).*/, "$1");
             $("clock").innerHTML=affichage;
+            $("title").innerHTML=myevent.title;
         }
     },1000);
-}
 
+    tuto(user,"PUBLICCHART.TUTO");
+}
 </script>
 
 </body>

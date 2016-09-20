@@ -8,7 +8,8 @@ App.controller('HomeCtrl', function ($scope,$interval,$state,$translate,$window,
     }
 
     $scope.onSetScore=function(step,index){
-        setscore(user.id,myevent.id,$scope.songs[index].id,step,function(rep){
+        var vote={event:myevent.id,from:user,value:step,description:""};
+        sendvote($scope.songs[index].id,vote,function(rep){
             $scope.songs[index].vote=true;
             $scope.songs[index].score=$scope.songs[index].score+step;
             $scope.$apply();
@@ -42,7 +43,7 @@ App.controller('HomeCtrl', function ($scope,$interval,$state,$translate,$window,
 
     $scope.$on("$ionicView.afterEnter",function() {
         refresh_playlist(true,function(){
-            timerHome=$interval(refresh_playlist,5000);
+            if(timerHome==null)timerHome=$interval(refresh_playlist,5000);
             if(user.connexions.length<2 && $scope.songs.length>0 &&
                 user.id==myevent.owner.id && myevent.musicPlayer==null) {
                     tuto(user,"help_player",$ionicModal,$scope,function(){
@@ -68,11 +69,8 @@ App.controller('HomeCtrl', function ($scope,$interval,$state,$translate,$window,
         if($scope.songs==undefined || $scope.songs.length==0)
             tuto(user,"HOME.TUTO",$ionicModal,$scope,$translate);
         else
-            tuto(user,"home",$ionicModal,$scope,function(){
+            if($scope.songs.length>1)
                 tuto(user,"HOME.TUTOWITHMUSIC",$ionicModal,$scope,$translate);
-            });
-
     });
-
 
 });

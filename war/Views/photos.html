@@ -12,7 +12,7 @@
         <ion-toggle name="withMessage"
                     ng-model="withMessage.checked"
                     ng-click="updateWithMessage()"
-                    toggle-class="toggle-calm">Photos with message</ion-toggle>
+                    toggle-class="toggle-calm">{{'PHOTO.WITHMESSAGE' | translate}}</ion-toggle>
         <br>
 
         <div ng-show="tovalidate==true && lastphoto.photo.length>0 && lastphoto.validate==false">

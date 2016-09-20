@@ -5,6 +5,7 @@
     <link rel="stylesheet" type="text/css" href="../Leficarbar.css">
     <script src="/js/Tools.js"></script>
     <script src="/js/Main.js"></script>
+    <script src="/js/labels.js" charset="UTF-8"></script>
     <script src="/js/swipe.js"></script>
     <script src="/js/qrcode.js"></script>
     <script src="https://apis.google.com/js/client.js?onload=init"></script>
@@ -113,12 +114,15 @@ function RefreshSlideshow(){
  * 
  */
 function start(){
-	RefreshSlideshow();
+	initGlobal();
+    RefreshSlideshow();
 	setInterval(function(){
 		window.location.reload();
 	},60000);
 	
- startFullScreen();
+    startFullScreen();
+    tuto(user,"SLIDESHOW.TUTO");
+
 }
 </script>
 

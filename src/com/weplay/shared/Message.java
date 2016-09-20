@@ -23,9 +23,11 @@ import com.googlecode.objectify.annotation.Cache;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 import com.googlecode.objectify.annotation.Index;
-import com.weplay.server.Rest;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 
 /**
@@ -39,7 +41,7 @@ import java.io.Serializable;
  */
 @Entity
 @Cache
-public class Message implements Serializable,Cloneable {
+public class Message implements Serializable {
 
 	String text="";
 	public User from=null;
@@ -52,7 +54,9 @@ public class Message implements Serializable,Cloneable {
     public Long dtBackup=null; //Indique if there is a backup
 
     @Index
-    Long type= Rest.TYPE_DEMANDE;
+    Long type=null;
+
+    public List<Vote> votes=new ArrayList<Vote>();
 
     @Index
     public String idEvent="";
@@ -199,6 +203,29 @@ public class Message implements Serializable,Cloneable {
 
     public void setValidate(Boolean validate) {
         this.validate = validate;
+    }
+
+    public Collection<Vote> getVotes() {
+        return votes;
+    }
+
+    public void setVotes(List<Vote> votes) {
+        this.votes = votes;
+    }
+
+
+    public boolean addVote(Vote v) {
+        for(Vote tp:this.votes)
+            if(tp.from==v.from)return false;
+
+        this.votes.add(v);
+        return true;
+    }
+
+    public boolean contain(User u) {
+        for(Vote v:this.votes)
+            if(v.getFrom()==u)return true;
+        return false;
     }
 }
 

@@ -19,8 +19,15 @@
             </div>
             <div class="item item-avatar item-button-right">
                 <img ng-src="{{user.picture}}" ng-click="openfacebook()">
-                <span style="font-size: large;">{{user.firstname}}&nbsp;</span><br>
-                <span style="font-size: small">{{user.score}}&nbsp;pts</span>
+                <span style="font-size: large;">{{user.firstname}}&nbsp;</span><span style="font-size: small">{{user.score}}&nbsp;pts</span><br>
+                <span style="font-size: small">{{user.freeEvents}}&nbsp;{{'SELEVENT.FREEEVENTS' | translate}}
+                    <i class="ion-card"
+                       style="margin-top: 10px;"
+                       ng-show="user.freeEvents<20"
+                       ng-click="buyEvent()">
+                    </i>
+                </span>
+
                 <button class="button icon-left ion-hammer button-positive"
                         style="margin-top: 10px;"
                         ng-click="addEvent()">

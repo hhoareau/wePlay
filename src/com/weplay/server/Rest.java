@@ -24,7 +24,8 @@ public class Rest {
     public static final Long TYPE_MESSAGE = 0L;
     public static final Long TYPE_VIDEO = 2L;
     public static final Long TYPE_SONG = 3L;
-    public static final Long TYPE_DEMANDE = 4L;
+    public static final Long TYPE_BET = 4L;
+
     private static final int MAX_QUOTA = 1000000;
     private static final String PASSWORD_MAIL = "hh4271";
     private static final Long DELAY_DECONNEXION = 3L; //en minute
@@ -198,9 +199,10 @@ public class Rest {
     public Event addEvent(@Named("user") String user,@Named("nsongs") Integer nsongs,Event e) {
         User u = dao.findUser(user);
         if(u==null)return null;
+        if(u.freeEvents==0)return null;
 
         List<Song> songs=new ArrayList<>();
-        for(Song s:dao.getPreferSongs(user,nsongs))
+        for(Song s:dao.getPreferSongs(u,nsongs))
             if(!s.isIn(songs))songs.add(s);
 
         if(songs.size()<nsongs){
@@ -220,11 +222,14 @@ public class Rest {
 
         e.addOrder("playlist");
         dao.save(e);
+        u.setFreeEvents(u.getFreeEvents()-1);
+        dao.save(u);
+
         return(e);
     }
 
     @ApiMethod(name = "addscore", httpMethod = ApiMethod.HttpMethod.GET, path = "addscore")
-    public User addscore(@Named("user") String user,@Named("score") Integer score) {
+    public User addscore(@Named("user") String user,@Named("score") Double score) {
         User u=dao.findUser(user);
         if(u!=null){
             u.score+=score;
@@ -428,7 +433,47 @@ public class Rest {
         return s;
     }
 
+    @ApiMethod(name = "sendvote", httpMethod = ApiMethod.HttpMethod.POST, path = "sendvote")
+    public Event sendvote(@Named("message") String id,Vote v) {
+        Message m=dao.findMessage(id);
 
+        Event e=dao.findEvent(m.idEvent);
+        if(e==null)return null;
+
+        User prop=dao.findUser(m.from.id);
+        User user=dao.findUser(v.getFrom());
+
+        if(!prop.id.equals(id)){ //On ne vote pas pour ses propres titres
+            if(!m.addVote(v))
+                return null;
+            else{
+                if(m.getType()==Rest.TYPE_SONG){
+                    Song s=(Song) m;
+                    user.score+=e.getScoreVotantlikeSong()*v.getValue().intValue(); //Voter modifie le score de celui qui vote
+                    prop.score+=e.getScoreLikeSong()*v.getValue().intValue();      //Voter modifie le score de celui qui a proposé le titre
+                    s.score+=v.getValue().intValue();
+                    dao.save(user);
+                    dao.save(prop);
+                    e.addOrder("playlist");                     //demande la mise a jour de la playlist
+                }
+
+                if(m.getType()==Rest.TYPE_BET) {
+                    user.score-=v.getValue().intValue();
+                    prop.score+=e.getScoreMiseBet();
+                    Bet b=(Bet) m;
+                    e.addOrder("bets");
+                }
+
+                e.addOrder("users");                        //demande la mise a jour du chart
+                dao.save(e);
+                dao.save(m);
+            }
+        }
+
+        return(e);
+    }
+
+    /*
     @ApiMethod(name = "setscore", httpMethod = ApiMethod.HttpMethod.GET, path = "setscore")
     public Song setScore(@Named("song") String idsong, @Named("event") String event, @Named("user") String id,@Named("step") Integer step){
         Song s=dao.getSong(idsong);
@@ -439,7 +484,8 @@ public class Rest {
             User prop=dao.findUser(s.from.id);
 
             if(!prop.id.equals(id)){ //On ne vote pas pour ses propres titres
-                if(!s.addVote(id,step))
+                Vote v=new Vote(step,user);
+                if(!s.addVote(v))
                     return null;
                 else{
                     user.score+=e.getScoreVotantlikeSong()*step; //Voter modifie le score de celui qui vote
@@ -456,6 +502,7 @@ public class Rest {
         }
         return null;
     }
+    */
 
 
     @ApiMethod(name = "getmessage", httpMethod = ApiMethod.HttpMethod.GET, path = "getmessage")
@@ -529,6 +576,24 @@ public class Rest {
         dao.save(e);
         return(e);
     }
+
+
+    @ApiMethod(name = "sendbet", httpMethod = ApiMethod.HttpMethod.POST, path = "sendbet")
+    public Event sendbet(@Named("event") String id,Bet b) {
+        Event e=dao.findEvent(id);
+        if(e==null)return null;
+
+        if(!e.needValidate)b.setValidate(true);
+        b.setIdEvent(id);
+        dao.save(b);
+
+        e.addOrder("bets");
+        dao.save(e);
+        return(e);
+    }
+
+
+
 
     @ApiMethod(name = "getplaylist", httpMethod = ApiMethod.HttpMethod.GET, path = "getplaylist")
     public List<Song> getplaylist(@Named("event") String id) {
@@ -682,6 +747,39 @@ public class Rest {
         Collections.sort(lu);
         return (lu);
     }
+
+
+    @ApiMethod(name = "getbets", httpMethod = ApiMethod.HttpMethod.GET, path = "getbets")
+     public List<Bet> getbets(@Named("event") String id) {
+        Event e = dao.findEvent(id);
+        if (e == null) return null;
+        List<Bet> rc=dao.getBets(e);
+        return (rc);
+    }
+
+    @ApiMethod(name = "validebet", httpMethod = ApiMethod.HttpMethod.GET, path = "validebet")
+    public Event validebet(@Named("event") String idevent,@Named("bet") String id,@Named("result") Integer index) {
+        Event e = dao.findEvent(idevent);
+        if (e == null) return null;
+
+        Bet b=dao.getBet(id);
+
+        if(b.getDtEnd()<System.currentTimeMillis() && !b.getClosed()){
+            b.setClosed(true);
+            e.addOrder("bets");
+            for(Vote v:b.votes)
+                if(Integer.parseInt(v.description)==index){
+                    User u=dao.findUser(v.from);
+                    u.score+=b.getScore(index,v);
+                    dao.save(u);
+                }
+            dao.save(b);
+            dao.save(e);
+        }
+
+        return e;
+    }
+
 
 
     @ApiMethod(name = "getuserscore", httpMethod = ApiMethod.HttpMethod.GET, path = "getuserscore")

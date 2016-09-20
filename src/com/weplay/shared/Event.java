@@ -63,7 +63,7 @@ public class Event implements Serializable {
 	private Integer maxOnline=50;
 	private String flyer="";
 
-    private Map<String,Integer> scores=new Hashtable<String,Integer>();
+    private Map<String, Double> scores=new Hashtable<>();
     private Map<String,Long> lastUpdate=new Hashtable<String,Long>();
 
 	private List<String> playlist=new ArrayList<String>();
@@ -84,13 +84,14 @@ public class Event implements Serializable {
     public Double lat=0.0;
     public Double lng=0.0;
 
-    public Integer scoreInvite=5;
+    public Double scoreInvite=5.0;
     private Integer scoreLikeSong=1;
     private Integer scoreVotantlikeSong=1;
-    public Integer scorePostSong=-1;
-    public Integer scoreStart=0;
+    public Double scorePostSong=-1.0;
+    public Double scoreStart=0.0;
+    public Double scoreMiseBet=1.0;
     public Integer minScore=-20;
-    public Integer scorePlaySong=2;
+    public Double scorePlaySong=2.0;
     private Integer playlistLimits=20;
     public Integer minDistance=1000;
     private String order="";
@@ -409,11 +410,11 @@ public class Event implements Serializable {
         this.lng = lng;
     }
 
-    public Integer getScoreInvite() {
+    public Double getScoreInvite() {
         return scoreInvite;
     }
 
-    public void setScoreInvite(Integer scoreInvite) {
+    public void setScoreInvite(Double scoreInvite) {
         this.scoreInvite = scoreInvite;
     }
 
@@ -425,19 +426,19 @@ public class Event implements Serializable {
         this.scoreLikeSong = scoreLikeSong;
     }
 
-    public Integer getScorePostSong() {
+    public Double getScorePostSong() {
         return scorePostSong;
     }
 
-    public void setScorePostSong(Integer scorePostSong) {
+    public void setScorePostSong(Double scorePostSong) {
         this.scorePostSong = scorePostSong;
     }
 
-    public Integer getScoreStart() {
+    public Double getScoreStart() {
         return scoreStart;
     }
 
-    public void setScoreStart(Integer scoreStart) {
+    public void setScoreStart(Double scoreStart) {
         this.scoreStart = scoreStart;
     }
 
@@ -449,11 +450,11 @@ public class Event implements Serializable {
         this.minScore = minScore;
     }
 
-    public Integer getScorePlaySong() {
+    public Double getScorePlaySong() {
         return scorePlaySong;
     }
 
-    public void setScorePlaySong(Integer scorePlaySong) {
+    public void setScorePlaySong(Double scorePlaySong) {
         this.scorePlaySong = scorePlaySong;
     }
 
@@ -530,9 +531,16 @@ public class Event implements Serializable {
     public void setWebsite(String website) {
         this.website = website;
     }
-
     public List<Integer> getSources() {
         return sources;
+    }
+
+    public Double getScoreMiseBet() {
+        return scoreMiseBet;
+    }
+
+    public void setScoreMiseBet(Double scoreMiseBet) {
+        this.scoreMiseBet = scoreMiseBet;
     }
 
     public void setSources(List<Integer> sources) {
@@ -555,11 +563,11 @@ public class Event implements Serializable {
         this.playerHasFocus = playerHasFocus;
     }
 
-    public Map<String, Integer> getScores() {
+    public Map<String, Double> getScores() {
         return scores;
     }
 
-    public void setScores(Map<String, Integer> scores) {
+    public void setScores(Map<String, Double> scores) {
         this.scores = scores;
     }
 

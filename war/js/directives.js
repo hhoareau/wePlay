@@ -394,10 +394,7 @@ App.directive('imgfiles', function ($q, $ionicLoading,ExifRestorer) {
             memImg = null;
             imgCanvas = null;
             imgContext = null;
-
-
         };
-
 
         $ionicLoading.show({template:'Loading flyer image'});
 
@@ -412,7 +409,6 @@ App.directive('imgfiles', function ($q, $ionicLoading,ExifRestorer) {
         memImg.src = URL.createObjectURL(files[0]);
         binaryReader.readAsDataURL(files[0]);
 
-
         $q.all([memImgDefer.promise, binaryReaderDefer.promise]).then(function (images) {
             var sourceImage = images[0];
             var targetImage = images[1];
@@ -425,15 +421,11 @@ App.directive('imgfiles', function ($q, $ionicLoading,ExifRestorer) {
         return deferredImgSrc.promise;
     };
 
-
-    /**
-     * Directive definition
-     */
     return {
         restrict: 'E',
         template: '<input type="file" accept="image/*" id="camera" style="visibility: hidden;" />' +
         '<img>' +
-        '<img style="display:inline-block;max-width:40px;padding: 0px;margin: 0px;" src="img/camera.png" ng-click="takePhoto()">',
+        '<img style="max-width:40px;margin-right: 5px;margin-bottom: 0px;" src="/img/camera.png" ng-click="takePhoto()">',
         scope: {
             onSelect: '&'
         },

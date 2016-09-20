@@ -379,8 +379,10 @@ function createPlayers(zone,lst,h,w,pauseImage){
     }
 }
 
+
 function start() {
     informe("Players loading",true);
+    initGlobal();
 
     refresh_event(getParam()["event"],function(){
         if(myevent.musicPlayer!=null){
@@ -401,22 +403,12 @@ function start() {
 
         informe("waiting players",true);
 
-        //chkCompatibility();
-        //getInvite(getParam()["event"],150);
-
-        //Utiliser un torrent : WebTorrent
-        //var WebTorrent = require('webtorrent');
-        /*
-
-         var magnetURI = 'magnet:?xt=urn:btih:F6B163EC5643A37E4A44D38FE9B538D261D020A9&dn=single+yo+gotti+rihanna+feat+young+thug+hip+hop+rap+single+2015+itunes+plus+m4a+aac+exclusive+june+2015+uj+rip&tr=udp%3A%2F%2Ftracker.publicbt.com%2Fannounce&tr=udp%3A%2F%2Fglotorrents.pw%3A6969%2Fannounce&tr=udp%3A%2F%2Ftracker.openbittorrent.com%3A80%2Fannounce&tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce';
-
-         */
-        //document.getElementById("fileselector").value=getCookie("pathfile");
-        //torrentload();
-
         setTimeout(playNextSong, 5000);
     },function(){
         informe("This event not exist");
         setTimeout(function(){window.close()},2000);
     });
+
+    tuto(user,"MUSICPLAYER.TUTO");
+
 }
