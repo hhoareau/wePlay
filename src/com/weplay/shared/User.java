@@ -18,7 +18,7 @@ with this program; if not, write to the Free Software Foundation, Inc.,
 
 package com.weplay.shared;
 
-import com.google.appengine.labs.repackaged.com.google.common.io.BaseEncoding;
+import com.google.common.io.BaseEncoding;
 import com.googlecode.objectify.annotation.Cache;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
