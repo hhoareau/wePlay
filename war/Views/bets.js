@@ -1,36 +1,20 @@
 var timerBets=null;
 
-App.controller('betsCtrl', function ($scope,$interval,$translate,$window,$ionicModal,$ionicPopup){
+App.controller('betsCtrl', function ($scope,$interval,$translate,$window,$ionicModal,$ionicPopup,$state){
     $$("Ouverture des bets");
     initGlobal($translate);
     $scope.bets=[];
-    $scope.newbet={};
-    $scope.newbet.title="";
-    $scope.newbet.options=[];
-    $scope.newbet.delay=30;
     $scope.user=user;
-    $scope.newbet.dtStart=new Date().getTime();
 
-    $scope.getDtEnt=function(){
-        $scope.newbet.dtEnd=$scope.newbet.dtStart+$scope.newbet.delay*1000*60;
-    }
+   $scope.newbet=function(){
+       $state.go("addbets",{},{reload:true});
+   }
 
-    $scope.addbet=function(){
-        $scope.newbet.from=user;
-
-        $scope.newbet.options=[];
-        $scope.newbet.text_options.split(",").forEach(function(s){
-            var obj={};
-            obj.lib=s;
-            obj.total=0.0;
-            obj.quot=0.0;
-           $scope.newbet.options.push(obj);
-        });
-
-        sendbet(myevent.id,$scope.newbet,function(){
-            $scope.newbet.title="";
-            $scope.newbet.options="";
-            refresh_bets(true);
+    $scope.remove=function(bet){
+        validebet(myevent.id,bet.id,-1,function(resp){
+            user=resp.result;
+            $scope.user=user;
+            $scope.message=$translate.instant("BETS.DELETE");
         });
     }
 
@@ -43,7 +27,6 @@ App.controller('betsCtrl', function ($scope,$interval,$translate,$window,$ionicM
                     if(tot[index]==undefined)tot[index]=0;
                     tot[index]+= v.value*bet.options[index].quot;
                 }
-
             });
         return tot.splice(0,bet.options.length);
     }
@@ -53,11 +36,11 @@ App.controller('betsCtrl', function ($scope,$interval,$translate,$window,$ionicM
         var v={from:user,value:0,description:index};
         showPopup($scope,$ionicPopup,$translate.instant("BETS.MESSAGEMISE"),"value",function (res) {
             if (res != undefined)v.value= res;
-            if(v.value<$scope.user.score){
+            if(v.value<$scope.user.credits){
                 sendvote(b.id,v);
-                $scope.user.score -= v.value;
+                $scope.user.credits -= v.value;
                 refresh_bets(true);
-            } else
+            }else
                 $scope.message=$translate.instant('BETS.NOT_ENOUGH_MONEY');
         });
     };
@@ -68,7 +51,7 @@ App.controller('betsCtrl', function ($scope,$interval,$translate,$window,$ionicM
         validebet(myevent.id, b.id, b.result,function(){
             refresh_bets(true);
         });
-    }
+    };
 
     refresh_bets=function(force){
         if(isPresent("bets") || force===true)
@@ -82,17 +65,14 @@ App.controller('betsCtrl', function ($scope,$interval,$translate,$window,$ionicM
                         b.gainMax=Math.max.apply(null,tot);
                         b.gainMin=Math.min.apply(null,tot);
                         $scope.bets.push(b);
-                    } else{
+                    }else{
                         b.result=-1;
-                        //b.options.forEach(function(o){o.checked=false;});
                         $scope.bets_tovalidate.push(b);
                     }
-
-
                 }
                 $scope.$apply();
             });
-    }
+    };
 
     $scope.$on("$ionicView.afterEnter", function(event){
         event.stopPropagation();

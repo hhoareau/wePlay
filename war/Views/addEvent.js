@@ -138,6 +138,8 @@ App.controller("addEventCtrl", function($scope,$ionicModal,$ionicPlatform,$state
     }
 
     $scope.onChangePicture=function(){
+        if($scope.theFile==undefined)return;
+
         var i=new Image();
         i.src=$scope.theFile;
         i.onload=function(){

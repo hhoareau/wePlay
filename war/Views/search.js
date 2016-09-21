@@ -66,7 +66,6 @@ App.controller('SearchCtrl',function($scope,$state,$ionicModal,$ionicHistory,$tr
                     $scope.searching=false;
                     resp.result.items.forEach(function(song){
                         song.order=0;
-
                         addResult(song);
                     });
                 }

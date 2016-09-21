@@ -54,7 +54,7 @@ public class Bet extends Message {
     }
 
     public Long getDtEnd() {
-        return dtEnd;
+        return this.dtEnd;
     }
 
     public void setDtEnd(Long dtEnd) {
@@ -110,7 +110,7 @@ public class Bet extends Message {
         this.closed = closed;
     }
 
-    public Double getScore(Integer index, Vote v) {
+    public Double getCredits(Integer index, Vote v) {
         if(index==Integer.parseInt(v.getDescription()))
             return v.getValue()*this.options.get(index).getQuot();
         else

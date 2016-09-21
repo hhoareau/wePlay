@@ -39,10 +39,13 @@ public class User implements Comparable<User> {
 	protected static final Logger log = Logger.getLogger(User.class.getName());
     private static final Double NEW_USER_SCORE = 10.0;
     private static final Integer FREE_VENTS = 25;
+    private static final Double CREDIT_FORUSER = 10.0;
 
     @Id public String id; 					//Id interne des Users (adresse email)
 
     public String email ="";
+
+    public Double credits=CREDIT_FORUSER;
 
     public String name="";						//Nom du User
 	private String facebookid=null;
@@ -365,6 +368,14 @@ public class User implements Comparable<User> {
 
     public void setScoreEvent(double scoreEvent) {
         this.scoreEvent = scoreEvent;
+    }
+
+    public Double getCredits() {
+        return credits;
+    }
+
+    public void setCredits(Double credits) {
+        this.credits = credits;
     }
 
     public String getHistory() {

@@ -458,10 +458,11 @@ public class Rest {
                 }
 
                 if(m.getType()==Rest.TYPE_BET) {
-                    user.score-=v.getValue().intValue();
+                    user.credits-=v.getValue();
                     prop.score+=e.getScoreMiseBet();
                     Bet b=(Bet) m;
                     e.addOrder("bets");
+                    dao.save(user);
                 }
 
                 e.addOrder("users");                        //demande la mise a jour du chart
@@ -748,7 +749,6 @@ public class Rest {
         return (lu);
     }
 
-
     @ApiMethod(name = "getbets", httpMethod = ApiMethod.HttpMethod.GET, path = "getbets")
      public List<Bet> getbets(@Named("event") String id) {
         Event e = dao.findEvent(id);
@@ -758,29 +758,40 @@ public class Rest {
     }
 
     @ApiMethod(name = "validebet", httpMethod = ApiMethod.HttpMethod.GET, path = "validebet")
-    public Event validebet(@Named("event") String idevent,@Named("bet") String id,@Named("result") Integer index) {
+    public User validebet(@Named("event") String idevent,@Named("bet") String id,@Named("result") Integer index) {
         Event e = dao.findEvent(idevent);
         if (e == null) return null;
 
         Bet b=dao.getBet(id);
 
-        if(b.getDtEnd()<System.currentTimeMillis() && !b.getClosed()){
+        if(!b.getClosed()){
             b.setClosed(true);
             e.addOrder("bets");
-            for(Vote v:b.votes)
-                if(Integer.parseInt(v.description)==index){
+
+            if(b.getDtEnd()!=null && b.getDtEnd()<System.currentTimeMillis() && index!=-1){
+                for(Vote v:b.votes)
+                    if(Integer.parseInt(v.description)==index){
+                        User u=dao.findUser(v.from);
+                        u.credits+=b.getCredits(index,v);
+                        dao.save(u);
+                    }
+            }
+
+            if((b.getDtEnd()==null || b.getDtEnd()>System.currentTimeMillis()) && index==-1){
+                for(Vote v:b.votes){
                     User u=dao.findUser(v.from);
-                    u.score+=b.getScore(index,v);
+                    u.credits+=v.getValue();
                     dao.save(u);
                 }
+            }
+
             dao.save(b);
             dao.save(e);
         }
 
-        return e;
+        User rc=dao.findUser(b.from);
+        return rc;
     }
-
-
 
     @ApiMethod(name = "getuserscore", httpMethod = ApiMethod.HttpMethod.GET, path = "getuserscore")
     public List<User> getuserscore(@Named("event") String id) {
@@ -821,5 +832,4 @@ public class Rest {
         if(!password.equalsIgnoreCase(PASSWORD_MAIL))return null;
         return dao.getMailToSend(readOnly);
     }
-
 }

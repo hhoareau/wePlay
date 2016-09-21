@@ -84,6 +84,12 @@ App.config(function($stateProvider,$ionicConfigProvider,$urlRouterProvider,Faceb
             controller: 'SearchCtrl'
         })
 
+        .state('addbets', {
+            url: '/addbets',
+            templateUrl: 'Views/addbets.html',
+            controller: 'addbetsCtrl'
+        })
+
         .state('addEvent', {
             url: '/addevent',
             params: {facebook_event:null},
