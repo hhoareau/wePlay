@@ -8,9 +8,9 @@
         </element>
         <element id="directory" name="lib">
           <element id="library" level="project" name="com.googlecode.objectify:objectify:5.1.13" />
-          <element id="library" level="application" name="com.google.guava:guava:19.0" />
-          <element id="library" level="project" name="com.google.appengine:appengine-endpoints:1.9.42" />
-          <element id="library" level="application" name="com.google.appengine:appengine-api-labs:1.9.42" />
+          <element id="library" level="project" name="com.google.appengine:appengine-api-1.0-sdk:1.9.42" />
+          <element id="library" level="project" name="com.google.appengine:appengine-api-labs:1.9.42" />
+          <element id="library" level="project" name="com.google.appengine:appengine-local-endpoints:1.9.42" />
         </element>
       </element>
       <element id="javaee-facet-resources" facet="wePlay/web/Web2" />
