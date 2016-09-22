@@ -53,6 +53,15 @@ libs.push({
         'PHOTO.NOTSENDED':"Photo not sended",
         'ADDEVENT.NEEDLOC':"You must set a position for the event",
         'ADDEVENT.NEEDVALIDATE':"validation needed to publish",
+        'ADDEVENT.ACT_MUSIC':"Social playlist",
+        'ADDEVENT.ACT_PHOTO':"Photo sharing",
+        'ADDEVENT.ACT_BETS': "Bets",
+        'ADDEVENT.ACT_SONDAGE':"Instant survey",
+        'ADDBETS.OPTIONSLIST':"Choose list",
+        'ADDBETS.BET':"Photo sharing",
+        'ADDBETS.SURVEY': "Survey",
+
+
         'SELEVENT.JOIN':"Join the event",
         'SELEVENT.FREEEVENTS':"Available events",
         "SELEVENT.GEOLOCFAILED":"Shifumix required geolocalisation to show you the event closed to you. Your position will not communicate to an other service.",
@@ -74,7 +83,10 @@ libs.push({
         'CHARTS.TUTO':"Retrouver la liste des participants, avec leur score général et leur score de l'événement",
         'SELEVENT.TUTOPAY':"Pour rester sans pub, le fonctionnement de Shifumix implique une modeste contribution de votre part pour pouvoir continuer de créer des centaines d'événements",
         "PUBLICCHART.TUTO":"Affiche le classement des personnes connectées dans l'événement",
-        'MUSICPLAYER.TUTO':"Vous êtes chez le DJ automatique, vous devez être raccordé à un système audio"
+        'MUSICPLAYER.TUTO':"Vous êtes chez le DJ automatique, vous devez être raccordé à un système audio",
+        'BETS.TUTO':"Participez au sondage et paris disponibles et créez les vôtres directement",
+        'ADDBETS.TUTO':"Saisissez simplement un intitulé et les différents choix possibles pour créer instantannément un sondage ou un pari."
+
     }
 });
 
@@ -110,6 +122,15 @@ libs.push({
         'SELEVENT.LOGOUT':"Changer de profil",
         'ADDEVENT.DESCRIPTION':"Teaser de l'événement",
         'ADDEVENT.WEBSITE':"Site web de l'événement",
+        'ADDEVENT.ACT_MUSIC':"Playlist communautaire",
+        'ADDEVENT.ACT_PHOTO':"Partager des photos",
+        'ADDEVENT.ACT_BETS': "Faire des paris",
+        'ADDEVENT.ACT_SONDAGE':"Proposer des sondages",
+        'ADDBETS.OPTIONSLIST':"Liste des choix",
+        'ADDBETS.BET':"Paris",
+        'ADDBETS.SURVEY': "Sondage",
+
+
         'INVITE.COPY':"Copier le lien",
         'INVITE.SEND':"Envoyer",
         'PHOTO.DOWNLOAD':"Télécharger mes photos",
@@ -147,7 +168,9 @@ libs.push({
         'SEARCH.TUTOSEL':"Cliquer sur le titre que vous souhaitez ajouter à la playlist",
         'SELEVENT.TUTOPAY':"Pour rester sans pub, le fonctionnement de Shifumix implique une modeste contribution de votre part pour pouvoir continuer de créer des centaines d'événements",
         'PUBLICCHART.TUTO':"Affiche le classement de l'événement",
-        'MUSICPLAYER.TUTO':"Vous êtes chez le DJ automatique, vous devez être raccordé à un système audio"
+        'MUSICPLAYER.TUTO':"Vous êtes chez le DJ automatique, vous devez être raccordé à un système audio",
+        'BETS.TUTO':"Participez au sondage et paris disponibles et créez les vôtres directement",
+        'ADDBETS.TUTO':"Saisissez simplement un intitulé et les différents choix possibles pour créer instantannément un sondage ou un pari."
 
     }
 });

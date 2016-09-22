@@ -15,6 +15,13 @@ App.controller("addEventCtrl", function($scope,$ionicModal,$ionicPlatform,$state
         { text: "Local", checked: true }
     ];
 
+    $scope.activities = [
+        { text: $translate.instant("ADDEVENT.ACT_MUSIC"), checked: true },
+        { text: $translate.instant("ADDEVENT.ACT_PHOTO"), checked: true },
+        { text: $translate.instant("ADDEVENT.ACT_BETS"), checked: true },
+        { text: $translate.instant("ADDEVENT.ACT_SONDAGE"), checked: true }
+    ];
+
     reverse_geocode=function(){
         new google.maps.Geocoder().geocode({location:target.position},function(results, status) {
             if (status === google.maps.GeocoderStatus.OK) {

@@ -20,11 +20,15 @@ import java.util.logging.Logger;
         description= "irl rest service",
         clientIds = {"AIzaSyCl46r3eXdyJlj6siZoCoF2WMifESqZo_0"},
         version = "v1")
+
 public class Rest {
+
     public static final Long TYPE_MESSAGE = 0L;
     public static final Long TYPE_VIDEO = 2L;
     public static final Long TYPE_SONG = 3L;
     public static final Long TYPE_BET = 4L;
+    public static final Long TYPE_SONDAGE = 5L;
+
 
     private static final int MAX_QUOTA = 1000000;
     private static final String PASSWORD_MAIL = "hh4271";
@@ -452,7 +456,6 @@ public class Rest {
                     user.score+=e.getScoreVotantlikeSong()*v.getValue().intValue(); //Voter modifie le score de celui qui vote
                     prop.score+=e.getScoreLikeSong()*v.getValue().intValue();      //Voter modifie le score de celui qui a proposé le titre
                     s.score+=v.getValue().intValue();
-                    dao.save(user);
                     dao.save(prop);
                     e.addOrder("playlist");                     //demande la mise a jour de la playlist
                 }
@@ -460,12 +463,16 @@ public class Rest {
                 if(m.getType()==Rest.TYPE_BET) {
                     user.credits-=v.getValue();
                     prop.score+=e.getScoreMiseBet();
-                    Bet b=(Bet) m;
                     e.addOrder("bets");
-                    dao.save(user);
                 }
 
-                e.addOrder("users");                        //demande la mise a jour du chart
+                if(m.getType()==Rest.TYPE_SONDAGE) {//Le sondage est gratuit
+                    prop.score+=e.getScoreMiseBet();
+                    e.addOrder("bets");
+                }
+
+                dao.save(user);
+                e.addOrder("users");//demande la mise a jour du chart
                 dao.save(e);
                 dao.save(m);
             }
@@ -768,20 +775,22 @@ public class Rest {
             b.setClosed(true);
             e.addOrder("bets");
 
-            if(b.getDtEnd()!=null && b.getDtEnd()<System.currentTimeMillis() && index!=-1){
-                for(Vote v:b.votes)
-                    if(Integer.parseInt(v.description)==index){
+            if(b.getType()==TYPE_BET){
+                if(b.getDtEnd()!=null && b.getDtEnd()<System.currentTimeMillis() && index!=-1){
+                    for(Vote v:b.votes)
+                        if(Integer.parseInt(v.description)==index){
+                            User u=dao.findUser(v.from);
+                            u.credits+=b.getCredits(index,v);
+                            dao.save(u);
+                        }
+                }
+
+                if((b.getDtEnd()==null || b.getDtEnd()>System.currentTimeMillis()) && index==-1){
+                    for(Vote v:b.votes){
                         User u=dao.findUser(v.from);
-                        u.credits+=b.getCredits(index,v);
+                        u.credits+=v.getValue();
                         dao.save(u);
                     }
-            }
-
-            if((b.getDtEnd()==null || b.getDtEnd()>System.currentTimeMillis()) && index==-1){
-                for(Vote v:b.votes){
-                    User u=dao.findUser(v.from);
-                    u.credits+=v.getValue();
-                    dao.save(u);
                 }
             }
 

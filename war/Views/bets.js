@@ -33,16 +33,24 @@ App.controller('betsCtrl', function ($scope,$interval,$translate,$window,$ionicM
 
 
     $scope.mise=function(b,index){
-        var v={from:user,value:0,description:index};
-        showPopup($scope,$ionicPopup,$translate.instant("BETS.MESSAGEMISE"),"value",function (res) {
-            if (res != undefined)v.value= res;
-            if(v.value<$scope.user.credits){
-                sendvote(b.id,v);
-                $scope.user.credits -= v.value;
+        var v={from:user,value:1,description:index};
+
+        if(b.type==TYPE_BET)
+            showPopup($scope,$ionicPopup,$translate.instant("BETS.MESSAGEMISE"),"value",function (res) {
+                if (res != undefined)v.value= res;
+                if(v.value<$scope.user.credits){
+                    sendvote(b.id,v,function(){
+                        refresh_bets(true);
+                        $scope.user.credits -= v.value;
+                    });
+                }else
+                    $scope.message=$translate.instant('BETS.NOT_ENOUGH_MONEY');
+            });
+        else
+            sendvote(b.id,v,function(){
                 refresh_bets(true);
-            }else
-                $scope.message=$translate.instant('BETS.NOT_ENOUGH_MONEY');
-        });
+            });
+
     };
 
     $scope.validate=function(b){
@@ -58,17 +66,37 @@ App.controller('betsCtrl', function ($scope,$interval,$translate,$window,$ionicM
             getBets(myevent.id,function(resp){
                 $scope.bets=[];
                 $scope.bets_tovalidate=[];
+
                 for(var i=0;i<resp.result.items.length;i++){
                     var b=resp.result.items[i];
-                    if(b.dtEnd>new Date().getTime()){
-                        var tot=getTotals(b);
-                        b.gainMax=Math.max.apply(null,tot);
-                        b.gainMin=Math.min.apply(null,tot);
-                        $scope.bets.push(b);
-                    }else{
-                        b.result=-1;
-                        $scope.bets_tovalidate.push(b);
+
+                    if(b.type==TYPE_SONDAGE){
+                        if(b.dtEnd>new Date().getTime()) {
+                            b.canVote = true;
+                            b.priority = 0;
+                            if (b.hasOwnProperty("votes"))
+                                b.votes.forEach(function (v) {
+                                    if (v.from.id == user.id) {
+                                        b.canVote = false;
+                                        b.priority = 1;
+                                    }
+                                });
+                            $scope.bets.push(b);
+                        }
                     }
+
+                    if(b.type==TYPE_BET){
+                        if(b.dtEnd>new Date().getTime()){
+                            var tot=getTotals(b);
+                            b.gainMax=Math.max.apply(null,tot);
+                            b.gainMin=Math.min.apply(null,tot);
+                            $scope.bets.push(b);
+                        }else{
+                            b.result=-1;
+                            $scope.bets_tovalidate.push(b);
+                        }
+                    }
+
                 }
                 $scope.$apply();
             });

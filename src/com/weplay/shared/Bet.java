@@ -87,7 +87,6 @@ public class Bet extends Message {
                 o.calc(this.total);
                 return true;
             }
-
         return false;
     }
 

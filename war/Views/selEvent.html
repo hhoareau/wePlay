@@ -64,9 +64,19 @@
                 <div class="item item-divider">
                     {{preview.title}}
                 </div>
-                <div class="item item-button-right" style="text-align: center">
-                    <img style="max-width: 150px;" ng-src="{{preview.flyer}}" ng-show="preview.flyer.length>0"><br>
-                    {{preview.description}}
+                <div class="item item-button-right">
+
+                    <div class="row">
+                        <div class="col">
+                            <img style="max-width: 150px;" ng-src="{{preview.flyer}}" ng-show="preview.flyer.length>0">
+                        </div>
+                        <div class="col col-top text-left">
+                            {{preview.description}}<br>
+                            {{preview.teaser}}<br><br>
+                            <span ng-show="preview.Presents.length>3">Presents: {{preview.Presents.length}}<br></span>
+                        </div>
+                    </div>
+
                     <button class="button button-small button-positive"
                             ng-show="preview.title!=null"
                             ng-click="joinEvent(preview)">
@@ -79,7 +89,6 @@
                 <div class="item item-divider">
                     {{'SELEVENT.MYEVENTS' | translate}}
                 </div>
-
                 <ion-list>
                     <ion-item ng-repeat="evt in myevents">
                         <ion-delete-button

@@ -1,4 +1,5 @@
 var markers;
+var circles;
 var lastPos;
 var myposition;
 
@@ -82,6 +83,19 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
                         max_size:new google.maps.Size(30,30)
                     }));
 
+                    if(evt.minDistance<1000)
+                        circles.push(new google.maps.Circle({
+                            center: {lat:evt.lat,lng:evt.lng},
+                            map: $scope.map,
+                            strokeColor: '#FF0000',
+                            strokeOpacity: 0.8,
+                            strokeWeight: 2,
+                            fillColor: '#FF0000',
+                            fillOpacity: 0.35,
+                            radius: evt.minDistance
+                        }));
+
+
                     markers[markers.length-1].addListener("mouseover",function(){
                         $scope.preview=this.evt;
                         $scope.$apply();
@@ -99,8 +113,11 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
     clearMap=function(){
         $$("Sortie de la form, raz des markers");
         myposition.setMap(null);
-        if(markers.length>0)
+        if(markers.length>0){
             markers.forEach(function(marker){marker.setMap(null);});
+            circles.forEach(function(circle){circle.setMap(null);});
+        }
+
     };
 
     $scope.setEvent=function(evt,password){
@@ -220,6 +237,7 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
         initGlobal($translate);
 
         markers=[];
+        circles=[];
 
         $scope.events=[];
         $scope.preview={};
