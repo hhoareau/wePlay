@@ -18,7 +18,7 @@ App.controller('addbetsCtrl', function ($scope,$interval,$translate,$window,$ion
            $scope.newbet.options.push(obj);
         });
 
-        if($scope.type=="bet")
+        if($scope.type=="Bet")
             $scope.newbet.type=TYPE_BET;
         else
             $scope.newbet.type=TYPE_SONDAGE;
