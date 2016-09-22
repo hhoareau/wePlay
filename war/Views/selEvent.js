@@ -51,11 +51,13 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
 
         var center=$scope.map.getCenter();
 
-        markers.forEach(function(marker){marker.setMap(null);});
-        markers=[];
+        clearMap();
 
         $$("recherche des evenements autour de "+JSON.stringify(center));
-        geteventsaround({lat:center.lat(),lng:center.lng()},function(resp){
+
+        var sq=$scope.map.getBounds();
+
+        geteventsinsquare(sq,function(resp){
             if(resp.hasOwnProperty("length")){
                 $$(resp.length+" evenements identifiés");
 
@@ -96,13 +98,14 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
                         }));
 
 
-                    markers[markers.length-1].addListener("mouseover",function(){
+                    markers[markers.length-1].addListener("mouseover",function(evt){
+                        evt.stopPropagation();
                         $scope.preview=this.evt;
                         $scope.$apply();
                         tuto(user,"SELEVENT.TUTOJOIN",$ionicModal,$scope,$translate);
                     });
 
-                    markers[markers.length-1].addListener("dblclick",function(){
+                    markers[markers.length-1].addListener("dblclick",function(evt){
                         $scope.joinEvent(this.evt);
                     });
                 });
@@ -142,6 +145,7 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
 
 
     $scope.addEvent=function(){
+        clearMap();
         $state.go("addEvent",{},{reload:true});
     };
 
@@ -159,7 +163,6 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
                 if(func_success!=undefined)func_success();
             },function(){
                 if(func_abort!=undefined)func_abort();
-
             },{
                 enableHighAccuracy: true,
             });
@@ -180,11 +183,15 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
             clickableIcons:false
         });
 
+
         $scope.map.addListener("mouseup",function(event){
             $$("map change");
-            var pos=$scope.map.getCenter();
-            showEventsOnMap();
+            if(lastPos!=$scope.map.getCenter()){
+                lastPos=$scope.map.getCenter();
+                showEventsOnMap();
+            }
         });
+
 
         myposition=new google.maps.Marker({
             position: {lat:user.lat,lng:user.lng},

@@ -40,10 +40,15 @@ public class Rest {
     public static Logger log = Logger.getLogger(String.valueOf(Rest.class));
 
     @ApiMethod(name = "geteventsaround", httpMethod = ApiMethod.HttpMethod.GET, path = "geteventsaround")
-    public List<Event> geteventsaround(@Named("lat") Double lat,@Named("lng") Double lng) {
-        return dao.findEvents(System.currentTimeMillis(),lat,lng);
+    public List<Event> geteventsaround(@Named("lat") Double lat,@Named("lng") Double lng,@Named("distance") Double distance) {
+        return dao.findEvents(System.currentTimeMillis(),lat,lng,distance);
     }
 
+    @ApiMethod(name = "geteventsinsquare", httpMethod = ApiMethod.HttpMethod.GET, path = "geteventsinsquare")
+    public List<Event> geteventsinsquare(@Named("latmin") Double latmin,@Named("lngmin") Double lngmin,
+                                         @Named("latmax") Double latmax,@Named("lngmax") Double lngmax) {
+            return dao.findEvents(System.currentTimeMillis(),latmin,lngmin,latmax,lngmax);
+    }
 
     @ApiMethod(name = "validatemessage", httpMethod = ApiMethod.HttpMethod.GET, path = "validatemessage")
     public void validatemessage(@Named("message") String id) {
@@ -262,6 +267,11 @@ public class Rest {
         if(u!=null && e!=null) {
             if (e.password != null && e.password.length() > 0 && !e.password.equalsIgnoreCase(password)) {
                 return null;
+            }
+
+            if(e.distanceFrom(u)>e.getMinDistance()){
+                u.message="SELEVENT.TOOFAR";
+                return u;
             }
 
             if(e.dtStart>System.currentTimeMillis()){

@@ -216,7 +216,7 @@ App.controller("addEventCtrl", function($scope,$ionicModal,$ionicPlatform,$state
 
     $scope.event.duration=8;
     $scope.event.maxonline=100;
-    $scope.event.minDistance=10000;
+    $scope.event.minDistance=1000;
     $scope.event.password="";
 
     if($state.params.facebook_event!=undefined){

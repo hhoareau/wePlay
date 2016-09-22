@@ -15,6 +15,7 @@ libs.push({
         'ADDEVENT.PASSWORD': "Password to enter (optional)",
         'ADDEVENT.START': "Start",
         'SELEVENT.NOPOSITION': "You must authorize geolocalisation to select an event",
+        'SELEVENT.TOOFAR': "You are too far for this event",
         'SELEVENT.USELASTPOSITION': "No geolocalisation, Last position used",
         'PROFIL.PLAYER':"To play the playlist on your audio system",
         'PROFIL.GALLERY':"Connect this computer to a public display",

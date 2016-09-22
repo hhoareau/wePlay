@@ -1,7 +1,7 @@
 (function (root, factory) {
     /* istanbul ignore next */
     if (typeof define === 'function' && define.amd) {
-        define(['angular'], factory);
+        define([''], factory);
     } else if (typeof module === 'object' && module.exports) {
         module.exports = factory(require('angular'));
     } else {

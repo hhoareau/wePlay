@@ -288,16 +288,31 @@ function validebet(event,bet,index,func){
     gapi.client.ficarbar.validebet({event:event,bet:bet,result:index}).then(func);
 }
 
-function geteventsaround(pos,func){
+function geteventsaround(pos,distance,func){
     try{
-        gapi.client.ficarbar.geteventsaround({lat:pos.lat,lng:pos.lng}).then(function(resp){
+        gapi.client.ficarbar.geteventsaround({lat:pos.lat,lng:pos.lng,distance:distance}).then(function(resp){
             if(resp.status==200)func(resp.result.items);
         });
     } catch(e) {
         httpGet("geteventsaround?lat=48&lng=2", func);
     }
+}
+
+function geteventsinsquare(sq,func){
+    try{
+        gapi.client.ficarbar.geteventsinsquare({
+            latmin:sq.getSouthWest().lat(),
+            latmax:sq.getNorthEast().lat(),
+            lngmin:sq.getSouthWest().lng(),
+            lngmax:sq.getNorthEast().lng()}).then(function(resp){
+            if(resp.status==200)func(resp.result.items);
+        });
+    } catch(e) {
+        httpGet("geteventsinsquare?latmin=48&lngmin=2&latmax=49&lngmax=3", func);
+    }
 
 }
+
 
 function shorturl(url,func){
     gapi.client.setApiKey(GOOGLE_API_KEY);

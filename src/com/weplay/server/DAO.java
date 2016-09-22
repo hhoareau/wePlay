@@ -220,19 +220,34 @@ public class DAO  {
 	 * @param dt
 	 * @return event actif at dt date
 	 */
-	public List<Event> findEvents(Long dt,Double lat,Double lng) {
+	public List<Event> findEvents(Long dt,Double lat,Double lng,Double distance) {
 		List<Event> le=new ArrayList<Event>();
 		if(lng==null || lat==null)return le;
         for(Event e:ofy().load().type(Event.class).filter("dtEnd >", dt).list()){
             Double d=Tools.distance(lat,lng,e.lat,e.lng,'K')*1000;
-            if(e.dtEnd!=null && e.minDistance!=null && e.dtEnd>dt && d<500)le.add(e);
+            if(e.dtEnd!=null && e.minDistance!=null && e.dtEnd>dt && d<distance)le.add(e);
         }
 		return le;
 	}
 
 
 
-	/**
+    /**
+     * @param dt
+     * @return event actif at dt date
+     */
+    public List<Event> findEvents(Long dt,Double latmin,Double lngmin,Double latmax,Double lngmax) {
+        List<Event> le=new ArrayList<Event>();
+        for(Event e:ofy().load().type(Event.class).filter("dtEnd >", dt).list()){
+            if(e.dtEnd!=null && e.minDistance!=null && e.dtEnd>dt
+                    && (e.lat>latmin && e.lat<latmax && e.lng>lngmin && e.lng<lngmax))
+                le.add(e);
+        }
+        return le;
+    }
+
+
+    /**
 	 * Retourne les evenemnts actuellement actifs
 	 * @return All actif events
 	 */
