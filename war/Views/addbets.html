@@ -12,11 +12,17 @@
                 <span style="font-size: large">{{"ADDBETS.OPTIONSLIST" | translate }}</span>
                 <ion-list ng-repeat="opt in options" show-delete="true">
                     <ion-item>
-                        <ion-delete-button class="ion-minus-circled"></ion-delete-button>
+                        <ion-delete-button class="ion-minus-circled" ng-click="options.splice($index,1)"></ion-delete-button>
                         {{opt}}
                     </ion-item>
                 </ion-list>
             </div>
+
+            <ion-item>
+                <ion-radio ng-model="type" ng-value="Son">{{"ADDBETS.SURVEY" | translate }}</ion-radio>
+                <ion-radio ng-model="type" ng-value="Bet">{{"ADDBETS.BET" | translate }}</ion-radio>
+            </ion-item>
+
             <div class="item">
                 De {{newbet.dtStart | date: "HH:mm"}} à {{newbet.dtEnd | date: "HH:mm"}}
                 <div class="range">

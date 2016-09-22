@@ -8,15 +8,15 @@
         </ion-item>
         {{message}}
         <ion-list>
-            <div class="card" ng-repeat="bet in bets_tovalidate">
+            <div class="card" ng-repeat="bet in bets_tovalidate  | orderBy : 'priority'">
                 <div class="item item-divider item-button-right">
                     <span style="font-size: large">{{bet.title}}</span>
                     <button class="button button-small button-assertive" ng-click="validate(bet)">Validate</button>
                 </div>
                 <div class="item">
                     <ion-radio ng-repeat="opt in bet.options"
-                                  ng-model="bet.result"
-                                  ng-value="$index">
+                               ng-model="bet.result"
+                               ng-value="$index">
                         {{opt.lib}}
                     </ion-radio>
                 </div>
@@ -29,12 +29,26 @@
                     <button class="button button-icon ion-android-delete" ng-show="user.id==bet.from.id" ng-click="remove(bet)"></button>
                 </div>
 
-                <div class="item item-button-left" ng-repeat="opt in bet.options">
-                    {{opt.lib}} <span style="font-size: xx-small">Quote: {{opt.quot | number:1 }} contre 1</span>
-                    <button class="button button-icon ion-cash" ng-click="mise(bet,$index)"></button>
-                </div>
+                <ion-list>
+                    <div class="item item-button-left" ng-repeat="opt in bet.options | orderBy : 'priority'">
+                        <div style="display: inline-block;width:60%">{{opt.lib}}</div>
 
-                <div class="item item-divider" ng-show="bet.gainMax>0">
+                        <div style="display: inline-block;text-align: right;width:40%;">
+                            <span ng-show="opt.quot>0 && bet.type==4" style="font-size: xx-small">Quote: {{opt.quot | number:1 }} contre 1&nbsp;</span>
+                            <span ng-show="opt.total>0 && bet.type==4" style="font-size: small">Total: {{opt.total | number:0 }} credits</span>
+                            <div ng-show="bet.type==5">
+                                <span style="font-size: xx-large">{{opt.total | number:0 }}</span>
+                                <span style="font-size: xx-small">votes</span>
+                            </div>
+
+                        </div>
+
+                        <button ng-show="bet.from.id!=user.id && bet.type==4" class="button button-positive" ng-click="mise(bet,$index)">$</button>
+                        <button ng-show="bet.type==5 && bet.canVote" class="button button-positive" ng-click="mise(bet,$index)">+</button>
+                    </div>
+                </ion-list>
+
+                <div class="item item-divider" ng-show="bet.gainMax>0 && bet.type==4">
                     Estimation des gains: entre {{bet.gainMax}} et {{bet.gainMin}}
                 </div>
             </div>

@@ -8,8 +8,9 @@ import java.io.Serializable;
 
 public class Option implements Serializable {
     String lib ="";
-    Double total=0.0;
+    Double total=0.0; //Mise totale
     Double quot=0.0;
+
     public Option() {}
     public String getLib() {
         return lib;

@@ -225,7 +225,7 @@ public class DAO  {
 		if(lng==null || lat==null)return le;
         for(Event e:ofy().load().type(Event.class).filter("dtEnd >", dt).list()){
             Double d=Tools.distance(lat,lng,e.lat,e.lng,'K')*1000;
-            if(e.dtEnd!=null && e.minDistance!=null && e.dtEnd>dt && d<e.minDistance)le.add(e);
+            if(e.dtEnd!=null && e.minDistance!=null && e.dtEnd>dt && d<500)le.add(e);
         }
 		return le;
 	}

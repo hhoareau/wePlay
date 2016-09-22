@@ -118,7 +118,17 @@
                 </div>
             </ion-item>
 
-            <ion-item>
+        <ion-item>
+            <ion-title>Activities</ion-title>
+            <ion-checkbox ng-repeat="act in activities"
+                          ng-model="act.checked"
+                          ng-checked="act.checked">
+                {{ act.text }}
+            </ion-checkbox>
+        </ion-item>
+
+
+        <ion-item>
                 <ion-title>Sources</ion-title>
                 <ion-checkbox ng-repeat="item in srcList"
                               ng-model="item.checked"

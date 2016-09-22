@@ -40,6 +40,12 @@ const SPOTIFY = 2;
 const LOCAL= 3;
 const YOUTUBE=4;
 
+const TYPE_MESSAGE = 0;
+const TYPE_VIDEO = 2;
+const TYPE_SONG = 3;
+const TYPE_BET = 4;
+const TYPE_SONDAGE = 5;
+
 var email=null;
 var user=null;
 var from=null;
@@ -202,7 +208,6 @@ function getUserScore(event,func){
     }
 }
 
-
 function getLastPhoto(event,validate,func){
     try{
         gapi.client.ficarbar.lastphoto({validate:validate,event:event}).then(func);
@@ -210,7 +215,6 @@ function getLastPhoto(event,validate,func){
         httpGet("lastphoto?event="+event,func);
     }
 }
-
 
 function getplaylist(event,func){
     gapi.client.ficarbar.getplaylist({event:event}).then(func);
@@ -270,7 +274,6 @@ function raz(func){
     } catch (e){
         httpGet("raz",func);
     }
-
 }
 
 function razlocalfile(event,func){
@@ -280,7 +283,6 @@ function razlocalfile(event,func){
 function sanity(func){
     gapi.client.ficarbar.sanity({password:ADMIN_PASSWORD}).then(func);
 }
-
 
 function validebet(event,bet,index,func){
     gapi.client.ficarbar.validebet({event:event,bet:bet,result:index}).then(func);
