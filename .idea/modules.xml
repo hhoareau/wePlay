@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/wePlay.iml" filepath="$PROJECT_DIR$/wePlay.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../shifumix/shifumix.iml" filepath="$PROJECT_DIR$/../shifumix/shifumix.iml" />
     </modules>
   </component>
 </project>

@@ -45,16 +45,12 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
     };
 
     showEventsOnMap=function(){
-        $$("recherche des evenements autour du centre de la carte");
-
         if($scope.map==undefined)return;
 
         var center=$scope.map.getCenter();
-
-        clearMap();
-
         $$("recherche des evenements autour de "+JSON.stringify(center));
 
+        clearMap();
         var sq=$scope.map.getBounds();
 
         geteventsinsquare(sq,function(resp){
@@ -99,7 +95,6 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
 
 
                     markers[markers.length-1].addListener("mouseover",function(evt){
-                        evt.stopPropagation();
                         $scope.preview=this.evt;
                         $scope.$apply();
                         tuto(user,"SELEVENT.TUTOJOIN",$ionicModal,$scope,$translate);
@@ -115,7 +110,6 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
 
     clearMap=function(){
         $$("Sortie de la form, raz des markers");
-        myposition.setMap(null);
         if(markers.length>0){
             markers.forEach(function(marker){marker.setMap(null);});
             circles.forEach(function(circle){circle.setMap(null);});
@@ -134,7 +128,7 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
                 $ionicHistory.clearCache().then(function(){
                     clearMap();
                     if(evt.owner.id==user.id && user.connexions.length>1)
-                        $state.go("tabs.profil",{},{reload:true});
+                        $state.go("tabs.invite",{},{reload:true});
                     else
                         $state.go("tabs.home",{},{reload:true});
                 });
@@ -146,6 +140,7 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
 
     $scope.addEvent=function(){
         clearMap();
+        myposition.setMap(null);
         $state.go("addEvent",{},{reload:true});
     };
 
@@ -192,7 +187,6 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
             }
         });
 
-
         myposition=new google.maps.Marker({
             position: {lat:user.lat,lng:user.lng},
             title : user.firstname,
@@ -231,10 +225,6 @@ App.controller("selEventCtrl", function($scope,$state,Facebook,$ionicModal,$inte
             });
         }
     };
-
-    $scope.$on("$ionicView.beforeLeave",function(event){
-        clearMap();
-    });
 
 
     $scope.$on("$ionicView.loaded",function(event){

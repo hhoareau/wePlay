@@ -62,6 +62,7 @@ App.controller('betsCtrl', function ($scope,$interval,$translate,$window,$ionicM
     };
 
     refresh_bets=function(force){
+        $scope.now=new Date().getTime();
         if(isPresent("bets") || force===true)
             getBets(myevent.id,function(resp){
                 $scope.bets=[];
@@ -105,7 +106,7 @@ App.controller('betsCtrl', function ($scope,$interval,$translate,$window,$ionicM
     $scope.$on("$ionicView.afterEnter", function(event){
         event.stopPropagation();
         refresh_bets(true);
-        if(timerBets==null)timerBets=$interval(refresh_bets,5000);
+        if(timerBets==null)timerBets=$interval(refresh_bets,1000);
         tuto(user,"BETS.TUTO",$ionicModal,$scope,$translate);
     });
 });

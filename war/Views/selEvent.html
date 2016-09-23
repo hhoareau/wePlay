@@ -22,7 +22,7 @@
                 <span style="font-size: large;">{{user.firstname}}&nbsp;</span>
                 <br>
                 <span style="font-size: small">
-                    {{user.score}}&nbsp;pts&nbsp;{{user.credits}}&nbsp;credits
+                    {{user.score}}&nbsp;pts&nbsp;-&nbsp;{{user.credits}}&nbsp;credits
                 </span>
                 <span style="font-size: small">&nbsp;
                     <!-- {{'SELEVENT.FREEEVENTS' | translate}} -->
@@ -33,10 +33,12 @@
                     </i>
                 </span>
 
-                <button class="button icon-left ion-hammer button-positive"
+                <button class="button button-small icon-left ion-hammer button-positive"
                         style="margin-top: 10px;"
                         ng-click="addEvent()">
-                    {{'SELEVENT.CREATE' | translate}}&nbsp;({{user.freeEvents}})
+                    <span style="font-size: small">
+                        {{'SELEVENT.CREATE' | translate}}&nbsp;({{user.freeEvents}})
+                    </span>
                 </button>
             </div>
         </div>

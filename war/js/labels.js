@@ -59,9 +59,9 @@ libs.push({
         'ADDEVENT.ACT_BETS': "Bets",
         'ADDEVENT.ACT_SONDAGE':"Instant survey",
         'ADDBETS.OPTIONSLIST':"Choose list",
-        'ADDBETS.BET':"Photo sharing",
+        'ADDBETS.BET':"Bet",
         'ADDBETS.SURVEY': "Survey",
-
+        'BETS.ADDBUTTON':"Make your bet / survey",
 
         'SELEVENT.JOIN':"Join the event",
         'SELEVENT.FREEEVENTS':"Available events",
@@ -86,8 +86,8 @@ libs.push({
         "PUBLICCHART.TUTO":"Affiche le classement des personnes connectées dans l'événement",
         'MUSICPLAYER.TUTO':"Vous êtes chez le DJ automatique, vous devez être raccordé à un système audio",
         'BETS.TUTO':"Participez au sondage et paris disponibles et créez les vôtres directement",
-        'ADDBETS.TUTO':"Saisissez simplement un intitulé et les différents choix possibles pour créer instantannément un sondage ou un pari."
-
+        'ADDBETS.TUTO':"Saisissez simplement un intitulé et les différents choix possibles pour créer instantannément un sondage ou un pari.",
+        'ADDBETS.TUTO_VALIDE':"Votre pari est enregistré, en revanche en tant que créateur du pari, vous n'avez pas le droit d'y participer."
     }
 });
 
@@ -130,6 +130,7 @@ libs.push({
         'ADDBETS.OPTIONSLIST':"Liste des choix",
         'ADDBETS.BET':"Paris",
         'ADDBETS.SURVEY': "Sondage",
+        'BETS.ADDBUTTON':"Creer un Pari / Sondage",
 
 
         'INVITE.COPY':"Copier le lien",
@@ -171,7 +172,8 @@ libs.push({
         'PUBLICCHART.TUTO':"Affiche le classement de l'événement",
         'MUSICPLAYER.TUTO':"Vous êtes chez le DJ automatique, vous devez être raccordé à un système audio",
         'BETS.TUTO':"Participez au sondage et paris disponibles et créez les vôtres directement",
-        'ADDBETS.TUTO':"Saisissez simplement un intitulé et les différents choix possibles pour créer instantannément un sondage ou un pari."
+        'ADDBETS.TUTO':"Saisissez simplement un intitulé et les différents choix possibles pour créer instantannément un sondage ou un pari.",
+        'ADDBETS.TUTO_VALIDE':"Votre pari est enregistré, en revanche en tant que créateur du pari, vous n'avez pas le droit d'y participer."
 
     }
 });

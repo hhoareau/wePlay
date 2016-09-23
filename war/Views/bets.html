@@ -1,7 +1,9 @@
 <ion-view view-title="Bets" ng-controller="betsCtrl">
     <ion-content>
-        <ion-item>
-            <button class="button button-assertive" ng-click="newbet()">Add bets</button>
+        <ion-item class="text-center">
+            <button class="button button-assertive" ng-click="newbet()">
+                {{"BETS.ADDBUTTON" | translate}}
+            </button>
         </ion-item>
         <ion-item>
             {{user.credits}} crédits disponibles
@@ -25,7 +27,10 @@
             <div class="card" ng-repeat="bet in bets">
                 <div class="item item-divider item-button-right">
                     <span style="font-size: x-large">{{bet.title}}</span>
-                    <span style="font-size: x-small">by {{bet.from.firstname}}</span>
+                    <span style="font-size: x-small">by {{bet.from.firstname}}</span>&nbsp;&nbsp;
+                    <span style="font-size: large">{{(bet.dtEnd-now)/(1000*60) | number : 0}}</span>:
+                    <span style="font-size: large">{{(bet.dtEnd-now)%(1000*60) | number : 0}}</span>
+
                     <button class="button button-icon ion-android-delete" ng-show="user.id==bet.from.id" ng-click="remove(bet)"></button>
                 </div>
 

@@ -7,8 +7,10 @@
 
         <div class="item text-left item-button-right">
             {{url}}
-            <button class="button icon-left ion-ios-copy button-positive" style="margin-bottom: 6px;" ng-click="copy(true)">
-                    {{'INVITE.COPY' | translate}}
+            <button class="button button-small ion-ios-copy button-positive" style="margin-bottom: 6px;" ng-click="copy(true)">
+                    <span style="font-size: small">
+                        &nbsp;{{'INVITE.COPY' | translate}}
+                    </span>
             </button>
         </div>
 
@@ -22,9 +24,11 @@
                            placeholder="{{'INVITE.DEST' | translate}}"
                            my-enter="sendInvitations()"/>
 
-                    <button style="margin-bottom: 5px;" class="button icon-left ion-android-send button-positive"
+                    <button style="margin-bottom: 6px;" class="button button-small ion-android-send button-positive"
                             ng-click="sendInvitations()">
-                                {{'INVITE.SEND' | translate}}
+                        <span style="font-size: small">
+                        &nbsp;{{'INVITE.SEND' | translate}}
+                            </span>
                     </button>
             </div>
             <div class="item">

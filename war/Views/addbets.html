@@ -2,11 +2,12 @@
     <ion-content>
         <ion-item>
             <div class="item item-input">
-                <input focus-me style="font-size: xx-large" type="text" ng-model="newbet.title" placeholder="Title of my bet">
+                <input focus-me style="font-size: x-large" type="text" ng-model="newbet.title" placeholder="Title of my bet">
             </div>
 
-            <div class="item item-input">
+            <div class="item item-input item-button-right">
                 <input type="text" ng-model="newbet.text_option" placeholder="Options" my-enter="addOption()">
+                <button class="button button-icon ion-android-add" ng-click="addOption()"></button>
             </div>
             <div class="item">
                 <span style="font-size: large">{{"ADDBETS.OPTIONSLIST" | translate }}</span>

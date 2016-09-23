@@ -24,6 +24,9 @@ App.controller('addbetsCtrl', function ($scope,$interval,$translate,$window,$ion
             $scope.newbet.type=TYPE_SONDAGE;
 
         sendbet(myevent.id,$scope.newbet,function(){
+            if($scope.newbet.type=TYPE_BET)
+                tuto(user,"ADDBETS.TUTO_VALIDE",$ionicModal,$scope,$translate);
+
             $scope.newbet={};
             $state.go("tabs.bets",{},{reload:true});
         });
@@ -46,6 +49,7 @@ App.controller('addbetsCtrl', function ($scope,$interval,$translate,$window,$ion
         $scope.newbet.delay=30;
         $scope.newbet.from=user;
         $scope.user=user;
+        $scope.type="Bet";
         $scope.newbet.dtStart=new Date().getTime();
         $scope.newbet.dtEnd=new Date().getTime()+$scope.newbet.delay*1000*60;
 
